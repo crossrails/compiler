@@ -1,0 +1,1 @@
+var booleanConst=false;var numberConst=6;var stringConst="stringConstLiteral";var numberArrayConst=[1,2,3];var anyConst="anyConstLiteral";var booleanVar=true;var numberVar=0;var stringVar=null;var numberArrayVar;var anyVar;
