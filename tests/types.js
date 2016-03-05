@@ -6,7 +6,7 @@ const booleanConst = false;
 /**
  * @type {!number}
  */
-const numberConst = 6;
+const numberConst = Number.NaN;
 /**
  * @type {!string}
  */
@@ -16,28 +16,81 @@ const stringConst = 'stringConstLiteral';
  */
 const numberArrayConst = [1, 2, 3];
 /**
- * @type {?}
+ * @type {!Array<Array<string>>}
  */
-var anyConst = 'anyConstLiteral';
+const stringArrayArrayConst = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
+/**
+ * @type {!Object}
+ */
+const anyConst = 'anyConstLiteral';
 
-//variables
+
+//nullable constants
 /**
- * @type {boolean}
+ * @type {?boolean}
  */
-var booleanVar = true;
+const optionalBooleanConst = null
 /**
- * @type {number}
+ * @type {?number}
  */
-var numberVar = 0;
+const optionalNumberConst = null
 /**
  * @type {?string}
  */
-var stringVar = null;
+const optionalStringConst = null
 /**
- * @type {Array<number>}
+ * @type {?Array<number>}
+ */
+const optionalNumberArrayConst = null
+/**
+ * @type {?Object}
+ */
+const optionalAnyConst = null
+
+
+
+//variables
+/**
+ * @type {!boolean}
+ */
+var booleanVar = true
+/**
+ * @type {!number}
+ */
+var numberVar = 0
+/**
+ * @type {!string}
+ */
+var stringVar = "stringVarLiteral"
+/**
+ * @type {!Array<number>}
  */
 var numberArrayVar;
 /**
- * @type {?}
+ * @type {!Object}
  */
-var anyVar;
+var anyVar = "anyVarLiteral"
+
+
+
+//nullable variables
+/**
+ * @type {?boolean}
+ */
+var optionalBooleanVar
+/**
+ * @type {?number}
+ */
+var optionalNumberVar
+/**
+ * @type {?string}
+ */
+var optionalStringVar
+/**
+ * @type {?Array<number>}
+ */
+var optionalNumberArrayVar
+/**
+ * @type {?Object}
+ */
+var optionalAnyVar

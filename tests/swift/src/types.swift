@@ -12,38 +12,81 @@ import JS
 
 //constants
 
-public let booleanConst :Bool = this[.booleanConst]
+public let booleanConst :Bool = this.get(.booleanConst)
 
-public let numberConst :Double = this[.numberConst]
+public let numberConst :Double = this.get(.numberConst)
 
-public let stringConst :String = this[.stringConst]
+public let stringConst :String = this.get(.stringConst)
+
+public let numberArrayConst :[Double] = this.get(.numberArrayConst)
+
+//nullable constants
+
+public let optionalBooleanConst :Bool? = this.get(.optionalBooleanConst)
+
+public let optionalNumberConst :Double? = this.get(.optionalNumberConst)
+
+public let optionalStringConst :String? = this.get(.optionalStringConst)
+
+public let optionalNumberArrayConst :[Double]? = this.get(.optionalNumberArrayConst)
+
 
 //variables
 
 public var booleanVar :Bool {
     get {
-        return this[.booleanVar]
+        return this.get(.booleanVar)
     }
     set {
-        this[.booleanVar] = newValue
+        this.set(.booleanVar, newValue: newValue)
     }
 }
 
 public var numberVar :Double {
     get {
-        return this[.numberVar]
+        return this.get(.numberVar)
     }
     set {
-        this[.numberVar] = newValue
+        this.set(.numberVar, newValue: newValue)
     }
 }
 
 
-public var stringVar :String? {
+public var stringVar :String {
     get {
-        return this[.stringVar]
+        return this.get(.stringVar)
     }
     set {
-        this[.stringVar] = newValue
+        this.set(.stringVar, newValue: newValue)
+    }
+}
+
+//nullable variables
+
+public var optionalBooleanVar :Bool? {
+    get {
+        return this.get(.optionalBooleanVar)
+    }
+    set {
+        this.set(.optionalBooleanVar, newValue: newValue)
+    }
+}
+
+public var optionalNumberVar :Double? {
+    get {
+        return this.get(.optionalNumberVar)
+    }
+    set {
+        this.set(.optionalNumberVar, newValue: newValue)
+    }
+}
+
+
+public var optionalStringVar :String? {
+    get {
+        return this.get(.optionalStringVar)
+    }
+    set {
+        this.set(.optionalStringVar, newValue: newValue)
     }
 }

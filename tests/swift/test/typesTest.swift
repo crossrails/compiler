@@ -20,21 +20,45 @@ class test: XCTestCase {
     }
     
     func testTypes() {
-//        XCTAssertEqual(booleanConst, false)
-//        
-//        XCTAssertEqual(numberConst, 6)
-//        
-//        XCTAssertEqual(stringConst, "stringConstLiteral")
-//                
-//        XCTAssertEqual(booleanVar, true)
-//        booleanVar = booleanConst
-//        XCTAssertEqual(booleanVar, booleanConst)
+        XCTAssertFalse(booleanConst)
+        XCTAssert(numberConst.isNaN)
+        XCTAssertEqual(stringConst, "stringConstLiteral")
+        XCTAssertEqual(numberArrayConst, [1, 2, 3])
         
-        XCTAssertEqual(stringVar, nil)
+        XCTAssertNil(optionalBooleanConst)
+        XCTAssertNil(optionalNumberConst)
+        XCTAssertNil(optionalStringConst)
+        XCTAssertNil(optionalNumberArrayConst)
+        
+        XCTAssertTrue(booleanVar)
+        booleanVar = booleanConst
+        XCTAssertEqual(booleanVar, booleanConst)
+        
+        XCTAssertEqual(numberVar, 0)
+        numberVar = numberConst
+        XCTAssert(numberVar.isNaN)
+        
+        XCTAssertEqual(stringVar, "stringVarLiteral")
         stringVar = stringConst
         XCTAssertEqual(stringVar, stringConst)
-        stringVar = nil
-        //XCTAssertEqual(stringVar, nil)
+        
+        XCTAssertNil(optionalBooleanVar)
+        optionalBooleanVar = false
+        XCTAssertEqual(optionalBooleanVar, booleanConst)
+        optionalBooleanVar = nil
+        XCTAssertNil(optionalBooleanVar)
+        
+        XCTAssertNil(optionalNumberVar)
+        optionalNumberVar = 4000
+        XCTAssertEqual(optionalNumberVar, 4000)
+        optionalNumberVar = nil
+        XCTAssertNil(optionalNumberVar)
+        
+        XCTAssertNil(optionalStringVar)
+        optionalStringVar = "stringConstLiteral"
+        XCTAssertEqual(optionalStringVar, stringConst)
+        optionalStringVar = nil
+        XCTAssertNil(optionalStringVar)
         
     }
 }

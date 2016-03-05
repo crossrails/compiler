@@ -13,11 +13,19 @@ extension Property {
     static let booleanConst : Property = "booleanConst"
     static let numberConst : Property = "numberConst"
     static let stringConst : Property = "stringConst"
-    static let anyConst : Property = "anyConst"
+    static let numberArrayConst : Property = "numberArrayConst"
+//    static let anyConst : Property = "anyConst"
+    static let optionalBooleanConst : Property = "optionalBooleanConst"
+    static let optionalNumberConst : Property = "optionalNumberConst"
+    static let optionalStringConst : Property = "optionalStringConst"
+    static let optionalNumberArrayConst : Property = "optionalNumberArrayConst"
     static let booleanVar : Property = "booleanVar"
     static let numberVar : Property = "numberVar"
     static let stringVar : Property = "stringVar"
-    static let anyVar : Property = "anyVar"
+//    static let anyVar : Property = "anyVar"
+    static let optionalBooleanVar : Property = "optionalBooleanVar"
+    static let optionalNumberVar : Property = "optionalNumberVar"
+    static let optionalStringVar : Property = "optionalStringVar"
 }
 
 private let context : Context = {
@@ -26,5 +34,5 @@ private let context : Context = {
     return context
 }()
 
-var this = Proxy(globalObjectOfContext: context)
+var this = Reference(globalObjectOfContext: context)
 
