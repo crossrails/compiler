@@ -9,10 +9,19 @@ class SimpleObject {
 
     constructor(v) {
         this.value = v ? v : 7
+        this.methodToOverrideCalled = false
     }
 
     numberSingleObjectArgMethod(a) {
         return a.value * this.value;
+    }
+
+    callOverriddenMethod() {
+        this.methodToOverride()
+    }
+
+    methodToOverride() {
+        this.methodToOverrideCalled = true
     }
 
     /**
@@ -24,6 +33,30 @@ class SimpleObject {
 }
 
 /**
- * @type {!SimpleClass}
+ * @type {!SimpleObject}
  */
 const simpleObjectInstance = new SimpleObject;
+
+/**
+* @type {!Object}
+*/
+const anyObjectInstance = simpleObjectInstance;
+
+
+var simpleInterfaceInstanceCalled = false
+
+/**
+ * @type {!}
+ */
+const simpleInterfaceInstance = {
+    voidNoArgMethod() {
+        simpleInterfaceInstanceCalled = true
+    }
+};
+
+/**
+ * @param a
+ */
+function acceptSimpleInterface(simpleInterface) {
+    simpleInterface.voidNoArgMethod();
+}
