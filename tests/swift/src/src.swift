@@ -14,6 +14,7 @@ extension Property {
     static let numberConst : Property = "numberConst"
     static let stringConst : Property = "stringConst"
     static let numberArrayConst : Property = "numberArrayConst"
+    static let stringArrayArrayConst : Property = "stringArrayArrayConst"
 //    static let anyConst : Property = "anyConst"
     static let optionalBooleanConst : Property = "optionalBooleanConst"
     static let optionalNumberConst : Property = "optionalNumberConst"

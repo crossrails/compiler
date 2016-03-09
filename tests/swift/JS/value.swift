@@ -87,12 +87,12 @@ protocol ValueContainer {
     init(_ value :JSValueRef, context :Context, type :ValueType)
 }
 
-extension Optional : ValueContainer {
-    typealias ValueType = Wrapped
-    init(_ value :JSValueRef, context :Context, type :ValueType) {
-        self = JSValueIsNull(context.ref, value) || JSValueIsUndefined(context.ref, value) ? .None : Wrapped(value, context: context)
-    }
-}
+//extension Optional : ValueContainer {
+//    typealias ValueType = Wrapped
+//    init(_ value :JSValueRef, context :Context, type :ValueType) {
+//        self = JSValueIsNull(context.ref, value) || JSValueIsUndefined(context.ref, value) ? .None : Wrapped(value, context: context)
+//    }
+//}
 
 extension Optional where Wrapped: Value {
     public init(_ value :JSValueRef, context :Context) {

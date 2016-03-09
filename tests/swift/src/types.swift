@@ -20,6 +20,8 @@ public let stringConst :String = this.get(.stringConst)
 
 public let numberArrayConst :[Double] = this.get(.numberArrayConst)
 
+public let stringArrayArrayConst :[[String]] = this.get(.stringArrayArrayConst)
+
 //nullable constants
 
 public let optionalBooleanConst :Bool? = this.get(.optionalBooleanConst)
