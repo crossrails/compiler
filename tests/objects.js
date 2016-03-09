@@ -48,7 +48,7 @@ var simpleInterfaceInstanceCalled = false
 /**
  * @type {!}
  */
-const simpleInterfaceInstance = {
+var simpleInterfaceInstance = {
     voidNoArgMethod() {
         simpleInterfaceInstanceCalled = true
     }
@@ -58,5 +58,6 @@ const simpleInterfaceInstance = {
  * @param a
  */
 function acceptSimpleInterface(simpleInterface) {
+    simpleInterfaceInstance = simpleInterface;
     simpleInterface.voidNoArgMethod();
 }

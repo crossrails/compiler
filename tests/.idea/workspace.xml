@@ -2,22 +2,42 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="688d81ee-2b74-45c2-ac3c-cbc824299a6b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/java/src/io/xrails/JS.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/../untitled/untitled.iml" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/Proxy$Array.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/Proxy.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/java/src/io/xrails/Proxy.java" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/swift/src/js.swift" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$SimpleInterface.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$SimpleInterfaceMirror.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/SimpleObject$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/java/src/io/xrails/JS$SimpleInterface.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/java/src/io/xrails/JS$SimpleInterfaceMirror.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$AbstractMirror$1.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$AbstractMirror$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$AbstractMirror.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$AbstractMirror.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$Array.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$Array.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$Object.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS$Object.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/JS.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/SimpleObject.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/SimpleObject.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/production/java/io/xrails/Src.class" afterPath="$PROJECT_DIR$/java/out/production/java/io/xrails/Src.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$1.class" afterPath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$2.class" afterPath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$2.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$3.class" afterPath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$3.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$4.class" afterPath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest$4.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest.class" afterPath="$PROJECT_DIR$/java/out/test/java/io/xrails/SrcTest.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/swift.xcodeproj/project.xcworkspace/xcuserdata/nbransby.xcuserdatad/UserInterfaceState.xcuserstate" afterPath="$PROJECT_DIR$/swift/swift.xcodeproj/project.xcworkspace/xcuserdata/nbransby.xcuserdatad/UserInterfaceState.xcuserstate" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functions.js" afterPath="$PROJECT_DIR$/functions.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/.idea/workspace.xml" afterPath="$PROJECT_DIR$/java/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/io/xrails/JS.java" afterPath="$PROJECT_DIR$/java/src/io/xrails/JS.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/io/xrails/SimpleInterface.java" afterPath="$PROJECT_DIR$/java/src/io/xrails/SimpleInterface.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/io/xrails/SimpleObject.java" afterPath="$PROJECT_DIR$/java/src/io/xrails/SimpleObject.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/src/io/xrails/Src.java" afterPath="$PROJECT_DIR$/java/src/io/xrails/Src.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/java/test/io/xrails/SrcTest.java" afterPath="$PROJECT_DIR$/java/test/io/xrails/SrcTest.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/objects.js" afterPath="$PROJECT_DIR$/objects.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src.js" afterPath="$PROJECT_DIR$/src.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/JS/reference.swift" afterPath="$PROJECT_DIR$/swift/JS/reference.swift" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/JS/value.swift" afterPath="$PROJECT_DIR$/swift/JS/value.swift" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/src/src.swift" afterPath="$PROJECT_DIR$/swift/src/src.swift" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/src/types.swift" afterPath="$PROJECT_DIR$/swift/src/types.swift" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/swift.xcodeproj/project.pbxproj" afterPath="$PROJECT_DIR$/swift/swift.xcodeproj/project.pbxproj" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/swift/swift.xcodeproj/xcuserdata/nbransby.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" afterPath="$PROJECT_DIR$/swift/swift.xcodeproj/xcuserdata/nbransby.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/types.js" afterPath="$PROJECT_DIR$/types.js" />
     </list>
     <ignored path="tests.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -41,8 +61,8 @@
       <file leaf-file-name="types.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/types.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-480">
-              <caret line="24" column="33" selection-start-line="24" selection-start-column="18" selection-end-line="24" selection-end-column="33" />
+            <state relative-caret-position="165">
+              <caret line="71" column="28" selection-start-line="71" selection-start-column="28" selection-end-line="71" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -51,8 +71,8 @@
       <file leaf-file-name="functions.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/functions.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="12" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+            <state relative-caret-position="555">
+              <caret line="37" column="18" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -61,8 +81,8 @@
       <file leaf-file-name="objects.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/objects.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="45" column="33" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="33" />
+            <state relative-caret-position="90">
+              <caret line="10" column="16" selection-start-line="10" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
               <folding>
                 <element signature="n#!!doc;n#SimpleObject#0" expanded="false" />
               </folding>
@@ -89,9 +109,9 @@
         <option value="$PROJECT_DIR$/index.js" />
         <option value="$PROJECT_DIR$/methods.js" />
         <option value="frontend.laundrapp-dev.ws/" />
+        <option value="$PROJECT_DIR$/src.js" />
         <option value="$PROJECT_DIR$/functions.js" />
         <option value="$PROJECT_DIR$/types.js" />
-        <option value="$PROJECT_DIR$/src.js" />
         <option value="$PROJECT_DIR$/objects.js" />
       </list>
     </option>
@@ -516,14 +536,6 @@
         <state />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/types.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-480">
-          <caret line="24" column="33" selection-start-line="24" selection-start-column="18" selection-end-line="24" selection-end-column="33" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -534,16 +546,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/functions.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="12" selection-start-line="0" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        <state relative-caret-position="555">
+          <caret line="37" column="18" selection-start-line="37" selection-start-column="18" selection-end-line="37" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/types.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="71" column="28" selection-start-line="71" selection-start-column="28" selection-end-line="71" selection-end-column="28" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/objects.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="45" column="33" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="33" />
+        <state relative-caret-position="90">
+          <caret line="10" column="16" selection-start-line="10" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
           <folding>
             <element signature="n#!!doc;n#SimpleObject#0" expanded="false" />
           </folding>

@@ -21,6 +21,26 @@ public class SrcTest {
     }
 
     @Test
+    public void testSimpleException() throws Exception {
+        try {
+            throwSimpleError();
+            fail();
+        } catch (Exception e) {
+            assertEquals("Error: Simple error message", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testSpecialException() throws Exception {
+        try {
+            throwSpecialError();
+            fail();
+        } catch (SpecialException e) {
+            assertEquals("Special error message", e.getMessage());
+        }
+    }
+
+    @Test
     public void testObjects() throws Exception {
         SimpleObject.staticVoidNoArgMethod();
 
@@ -86,6 +106,9 @@ public class SrcTest {
             }
         });
         assertTrue(testInterfaceMethodCalled);
+        testInterfaceMethodCalled = false;
+        getSimpleInterfaceInstance().voidNoArgMethod();
+        assertTrue(testInterfaceMethodCalled);
     }
 
     @Test
@@ -100,7 +123,11 @@ public class SrcTest {
 
         assertEquals("stringNoArgLambdaReturnValue", getStringNoArgLambda().get());
         assertEquals(getStringNoArgLambda().get(), getStringNoArgLambda().get());
+
+        setStringNoArgLambda(() -> "expectedReturnValue");
+        assertEquals("expectedReturnValue", getStringNoArgLambda().get());
     }
+
     @Test
     public void testConstTypes() throws Exception {
         assertFalse(getBooleanConst());
