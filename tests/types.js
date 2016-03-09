@@ -70,6 +70,11 @@ var numberArrayVar;
  * @type {!Object}
  */
 var anyVar = "anyVarLiteral"
+/**
+ * @type {!Array<Array<string>>}
+ */
+var stringArrayArrayVar;
+
 
 
 
