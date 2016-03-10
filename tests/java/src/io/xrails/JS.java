@@ -18,9 +18,19 @@ import java.util.function.Function;
  */
 class JS {
 
-    public static final Map<java.lang.Object, java.lang.Object> heap = new WeakHashMap<>();
-
     private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine();
+    private static final ScriptObjectMirror wrapper;
+
+    static {
+        try {
+            wrapper = (ScriptObjectMirror)engine.eval(
+                    "function(name, obj) { var Type = Java.type(name); return new Type(obj); }");
+        } catch (ScriptException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    static final Map<java.lang.Object, java.lang.Object> heap = new WeakHashMap<>();
 
     static ScriptObjectMirror eval(String filename) {
         try {
@@ -31,19 +41,224 @@ class JS {
         }
     }
 
-    static class Array<E> extends AbstractList<E> {
+    static <T> T wrap(java.lang.Object object, Class type) {
+        return wrap(object, mirror -> (T)wrapper.call(null, type.getName(), mirror));
+    }
 
-        private final ScriptObjectMirror mirror;
-        private final Function<java.lang.Object, E> e;
+    static <T> T wrap(java.lang.Object object, Function<ScriptObjectMirror, T> constructor) {
+        if(object instanceof ScriptObjectMirror) {
+            object = constructor.apply((ScriptObjectMirror)object);
+        }
+        return (T)object;
+    }
 
-        Array(ScriptObjectMirror mirror) {
+    static class Error extends Exception {
+
+        private final JSObject mirror;
+
+        Error(JSObject mirror) {
+            super(mirror.getMember("message").toString());
             this.mirror = mirror;
-            this.e = e -> (E)e;
         }
 
-        Array(ScriptObjectMirror mirror, Function<ScriptObjectMirror, E> e) {
+        @Override
+        public String toString() {
+            return mirror.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return mirror.hashCode();
+        }
+
+        @Override
+        public boolean equals(java.lang.Object obj) {
+            return mirror.equals(JS.heap.getOrDefault(obj, obj));
+        }
+    }
+
+    static class ArrayMirror<E> extends AbstractJSObject implements List<E> {
+
+        private final List<E> list;
+        private final Function<E, ?> cast;
+
+        ArrayMirror(List<E> list) {
+            this.list = list;
+            this.cast = e -> e;
+        }
+
+        ArrayMirror(List<E> list, Function<E, ?> cast) {
+            this.list = list;
+            this.cast = cast;
+        }
+
+        @Override
+        public boolean hasMember(String name) {
+            return name.equals("length");
+        }
+
+        @Override
+        public boolean hasSlot(int slot) {
+            return slot < list.size();
+        }
+
+        @Override
+        public java.lang.Object getSlot(int index) {
+            return cast.apply(list.get(index));
+        }
+
+        @Override
+        public java.lang.Object getMember(String name) {
+            return hasMember(name) ? list.size() : null;
+        }
+
+        @Override
+        public boolean isArray() {
+            return true;
+        }
+
+        @Override
+        public int size() {
+            return list.size();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return list.isEmpty();
+        }
+
+        @Override
+        public boolean contains(java.lang.Object o) {
+            return list.contains(o);
+        }
+
+        @Override
+        public Iterator<E> iterator() {
+            return list.iterator();
+        }
+
+        @Override
+        public java.lang.Object[] toArray() {
+            return list.toArray();
+        }
+
+        @Override
+        public <T> T[] toArray(T[] a) {
+            return list.toArray(a);
+        }
+
+        @Override
+        public boolean add(E e) {
+            return list.add(e);
+        }
+
+        @Override
+        public boolean remove(java.lang.Object o) {
+            return list.remove(o);
+        }
+
+        @Override
+        public boolean containsAll(Collection<?> c) {
+            return list.containsAll(c);
+        }
+
+        @Override
+        public boolean addAll(Collection<? extends E> c) {
+            return list.addAll(c);
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<? extends E> c) {
+            return list.addAll(index, c);
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            return list.removeAll(c);
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            return list.retainAll(c);
+        }
+
+        @Override
+        public void clear() {
+            list.clear();
+        }
+
+        @Override
+        public E get(int index) {
+            return list.get(index);
+        }
+
+        @Override
+        public E set(int index, E element) {
+            return list.set(index, element);
+        }
+
+        @Override
+        public void add(int index, E element) {
+            list.add(index, element);
+        }
+
+        @Override
+        public E remove(int index) {
+            return list.remove(index);
+        }
+
+        @Override
+        public int indexOf(java.lang.Object o) {
+            return list.indexOf(o);
+        }
+
+        @Override
+        public int lastIndexOf(java.lang.Object o) {
+            return list.lastIndexOf(o);
+        }
+
+        @Override
+        public ListIterator<E> listIterator() {
+            return list.listIterator();
+        }
+
+        @Override
+        public ListIterator<E> listIterator(int index) {
+            return list.listIterator(index);
+        }
+
+        @Override
+        public List<E> subList(int fromIndex, int toIndex) {
+            return list.subList(fromIndex, toIndex);
+        }
+
+        @Override
+        public boolean equals(java.lang.Object obj) {
+            return list.equals(obj);
+        }
+
+        @Override
+        public int hashCode() {
+            return list.hashCode();
+        }
+
+    }
+
+    static class Array<E> extends AbstractList<E> {
+
+        private final JSObject mirror;
+        private final Function<java.lang.Object, E> e;
+
+        Array(JSObject mirror) {
+            this.mirror = mirror;
+            this.e = e -> (E)e;
+            JS.heap.put(this, mirror);
+        }
+
+        Array(JSObject mirror, Function<ScriptObjectMirror, E> e) {
             this.mirror = mirror;
             this.e = o -> e.apply((ScriptObjectMirror)o);
+            JS.heap.put(this, mirror);
         }
 
         @Override
@@ -55,13 +270,28 @@ class JS {
         public int size() {
             return ((Number)mirror.getMember("length")).intValue();
         }
+
+        @Override
+        public String toString() {
+            return mirror.toString();
+        }
+
+        @Override
+        public int hashCode() {
+            return mirror.hashCode();
+        }
+
+        @Override
+        public boolean equals(java.lang.Object obj) {
+            return mirror.equals(JS.heap.getOrDefault(obj, obj));
+        }
     }
 
     static class Object {
 
-        private final ScriptObjectMirror mirror;
+        private final JSObject mirror;
 
-        Object(ScriptObjectMirror mirror) {
+        Object(JSObject mirror) {
             this.mirror = mirror;
             JS.heap.put(this, mirror);
         }
@@ -84,14 +314,14 @@ class JS {
 
     static abstract class AbstractMirror extends AbstractJSObject {
 
-        private final ScriptObjectMirror prototype;
+        private final JSObject prototype;
         private final Map<String, JSObject> methods = new HashMap<>();
 
         AbstractMirror() {
             this(null);
         }
 
-        AbstractMirror(ScriptObjectMirror prototype) {
+        AbstractMirror(JSObject prototype) {
             this.prototype = prototype;
             build((name, invocation) -> methods.put(name, new AbstractJSObject() {
                 @Override

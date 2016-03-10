@@ -5,6 +5,8 @@ import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 import static io.xrails.Src.*;
@@ -164,6 +166,20 @@ public class SrcTest {
         assertEquals("anyVarLiteral", getAnyVar());
         setAnyVar(getAnyConst());
         assertEquals(getAnyConst(), getAnyVar());
+
+        assertEquals(Collections.emptyList(), getNumberArrayVar());
+        setNumberArrayVar(getNumberArrayConst());
+        assertEquals(getNumberArrayConst(), getNumberArrayVar());
+
+        assertEquals(Collections.emptyList(), getStringArrayArrayVar());
+        setStringArrayArrayVar(getStringArrayArrayConst());
+        assertEquals(getStringArrayArrayConst(), getStringArrayArrayVar());
+
+        setNumberArrayVar(Collections.singletonList(5));
+        assertEquals(Collections.singletonList(5), getNumberArrayVar());
+
+        setStringArrayArrayVar(Collections.singletonList(Collections.singletonList("yo")));
+        assertEquals(Collections.singletonList(Collections.singletonList("yo")), getStringArrayArrayVar());
     }
 
     @Test
@@ -208,19 +224,7 @@ public class SrcTest {
     }
 
     @Test
-    public void testHeapDeallocation() throws Exception {
-        System.gc();
-        System.runFinalization();
-        assertEquals(0, JS.heap.size());
-        getAnyObjectInstance();
-        assertEquals(1, JS.heap.size());
-        System.gc();
-        System.runFinalization();
-        assertEquals(0, JS.heap.size());
-    }
-
-    @Test
-    public void testUnknownTypeDeallocation() throws Exception {
+    public void testUnknownObjectDeallocation() throws Exception {
         Object o = new Object();
         WeakReference ref = new WeakReference<>(o);
         assertNotNull(ref.get());
@@ -236,12 +240,51 @@ public class SrcTest {
     }
 
     @Test
-    public void testKnownTypeDeallocation() throws Exception {
-        Object so = new SimpleObject(1);
+    public void testKnownObjectDeallocation() throws Exception {
+        Object o = new SimpleObject(1);
+        WeakReference ref = new WeakReference<>(o);
+        assertNotNull(ref.get());
+        setAnyVar(o);
+        o = null;
+        System.gc();
+        System.runFinalization();
+        assertNotNull(ref.get());
+        setAnyVar(null);
+        System.gc();
+        System.runFinalization();
+        assertNull(ref.get());
+    }
+
+    @Test
+    public void testNativeSideInterfaceDeallocation() throws Exception {
+        SimpleInterface o = new SimpleInterface() {
+            @Override
+            public void voidNoArgMethod() {
+            }
+        };
+        WeakReference ref = new WeakReference<>(o);
+        assertNotNull(ref.get());
+        setAnyVar(o);
+        o = null;
+        System.gc();
+        System.runFinalization();
+        assertNotNull(ref.get());
+        setAnyVar(null);
+        System.gc();
+        System.runFinalization();
+        assertNull(ref.get());
+    }
+
+    @Test
+    public void testJSSideInterfaceDeallocation() throws Exception {
+        SimpleInterface so = getSimpleInterfaceInstance();
         WeakReference ref2 = new WeakReference<>(so);
-        assertNotNull(ref2.get());
         setAnyVar(so);
         so = null;
+        System.gc();
+        System.runFinalization();
+        assertNotNull(ref2.get());
+        setAnyVar(null);
         System.gc();
         System.runFinalization();
         assertNull(ref2.get());

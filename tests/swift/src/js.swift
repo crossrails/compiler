@@ -8,15 +8,18 @@
 
 import Foundation
 
-struct JS {
-    struct Array<T> : MutableCollectionType {
-        var startIndex: Int { fatalError() }
-        
-        var endIndex: Int { fatalError() }
-        
-        subscript(position: Int) -> Test {
-            get { fatalError() }
-            mutating set { fatalError() }
-        }
+struct JSArray<T> : MutableCollectionType {
+    
+    var startIndex: Int {
+        return 0
+    }
+    
+    var endIndex: Int {
+        return
+    }
+    
+    subscript(position: Int) -> T {
+        get { fatalError() }
+        mutating set { fatalError() }
     }
 }

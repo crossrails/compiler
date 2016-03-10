@@ -65,7 +65,7 @@ var stringVar = "stringVarLiteral"
 /**
  * @type {!Array<number>}
  */
-var numberArrayVar;
+var numberArrayVar = [];
 /**
  * @type {!Object}
  */
@@ -73,7 +73,7 @@ var anyVar = "anyVarLiteral"
 /**
  * @type {!Array<Array<string>>}
  */
-var stringArrayArrayVar;
+var stringArrayArrayVar = [];
 
 
 

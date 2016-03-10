@@ -1,6 +1,8 @@
 package io.xrails;
 
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import jdk.nashorn.api.scripting.*;
+import jdk.nashorn.internal.runtime.ECMAException;
+import jdk.nashorn.internal.runtime.ScriptObject;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,12 +18,11 @@ public class Src {
 //objects
 
     public static SimpleObject getSimpleObjectInstance() {
-        Object value = global.get("simpleObjectInstance");
-        return isNull(value) ? null : new SimpleObject((ScriptObjectMirror)value);
+        return JS.wrap(global.get("simpleObjectInstance"), SimpleObject::new);
     }
 
     public static Object getAnyObjectInstance() {
-        return new JS.Object((ScriptObjectMirror)global.get("anyObjectInstance"));
+        return JS.wrap(global.get("anyObjectInstance"), JS.Object::new);
     }
 
     public static Boolean getSimpleInterfaceInstanceCalled() {
@@ -29,12 +30,11 @@ public class Src {
     }
 
     public static SimpleInterface getSimpleInterfaceInstance() {
-        Object value = global.get("simpleInterfaceInstance");
-        return isNull(value) ? null : new JS$SimpleInterface((ScriptObjectMirror)value);
+        return JS.wrap(global.get("simpleInterfaceInstance"), SimpleInterface.class);
     }
 
     public static void acceptSimpleInterface(SimpleInterface simpleInterface) {
-        global.callMember("acceptSimpleInterface", new JS$SimpleInterfaceMirror(simpleInterface));
+        global.callMember("acceptSimpleInterface", simpleInterface);
     }
 
 //functions
@@ -56,8 +56,11 @@ public class Src {
     }
 
     public static Supplier<String> getStringNoArgLambda() {
-        ScriptObjectMirror mirror = (ScriptObjectMirror)global.get("stringNoArgLambda");
-        return () -> (String)mirror.call(global);
+        return JS.wrap(global.get("stringNoArgLambda"), Supplier.class);
+    }
+
+    public static void setStringNoArgLambda(Supplier<String> cb) {
+        global.setMember("stringNoArgLambda", cb);
     }
 
     public static void throwSimpleError() throws Exception {
@@ -157,12 +160,27 @@ public class Src {
     }
 
     public static void setAnyVar(Object value) {
-        global.setMember("anyVar", JS.heap.getOrDefault(value, value));
+        global.setMember("anyVar", value);
     }
 
     public static Object getAnyVar() {
-        Object value = global.get("anyVar");
-        return value instanceof ScriptObjectMirror ? new JS.Object((ScriptObjectMirror)value) : value;
+        return JS.wrap(global.get("anyVar"), JS.Object::new);
+    }
+
+    public static List<Number> getNumberArrayVar() {
+        return JS.wrap(global.get("numberArrayVar"), JS.Array::new);
+    }
+
+    public static void setNumberArrayVar(List<Number> value) {
+        global.setMember("numberArrayVar", JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(value)));
+    }
+
+    public static List<List<String>> getStringArrayArrayVar() {
+        return JS.wrap(global.get("stringArrayArrayVar"), o -> new JS.Array<>(o, JS.Array::new));
+    }
+
+    public static void setStringArrayArrayVar(List<List<String>> value) {
+        global.setMember("stringArrayArrayVar", JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(value, JS.ArrayMirror::new)));
     }
 
     ////nullable variables
@@ -192,8 +210,7 @@ public class Src {
     }
 
     public static Optional<Object> getOptionalAnyVar() {
-        Object value = global.get("optionalAnyVar");
-        return Optional.ofNullable(value instanceof ScriptObjectMirror ? new JS.Object((ScriptObjectMirror)value) : value);
+        return Optional.ofNullable(JS.wrap(global.get("optionalAnyVar"), JS.Object::new));
     }
 
     public static void setOptionalAnyVar(Object value) {

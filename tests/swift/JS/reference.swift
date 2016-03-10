@@ -85,19 +85,19 @@ public struct Reference : CustomStringConvertible {
         }
     }
 
-    //TODO deprecate once swift supports generic subscripts
-    public func get<V : Value>(property: Property) -> Array<V>? {
-        let value = context.invoke {
-            JSObjectGetProperty(self.context.ref, self.object, property.ref, &$0)
-        }
-        return Optional(value, context: context)
-    }
-    //TODO deprecate once swift supports generic subscripts
-    public func set<V : Value>(property: Property, newValue: Array<V>?) {
-        context.invoke {
-            JSObjectSetProperty(self.context.ref, self.object, property.ref, newValue.evaluate(self.context), UInt32(kJSPropertyAttributeNone), &$0)
-        }
-    }
+//    //TODO deprecate once swift supports generic subscripts
+//    public func get<V : Value>(property: Property) -> Array<V>? {
+//        let value = context.invoke {
+//            JSObjectGetProperty(self.context.ref, self.object, property.ref, &$0)
+//        }
+//        return Optional(value, context: context)
+//    }
+//    //TODO deprecate once swift supports generic subscripts
+//    public func set<V : Value>(property: Property, newValue: Array<V>?) {
+//        context.invoke {
+//            JSObjectSetProperty(self.context.ref, self.object, property.ref, newValue.evaluate(self.context), UInt32(kJSPropertyAttributeNone), &$0)
+//        }
+//    }
     
     //TODO deprecate once swift supports generic subscripts
     public func get<O: Object>(property: Property) -> O {
