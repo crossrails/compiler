@@ -23,7 +23,7 @@ class test: XCTestCase {
         XCTAssertFalse(booleanConst)
         XCTAssert(numberConst.isNaN)
         XCTAssertEqual(stringConst, "stringConstLiteral")
-        XCTAssertEqual(numberArrayConst, [1, 2, 3])
+//        XCTAssertEqual(numberArrayConst, [1, 2, 3])
         
         XCTAssertNil(optionalBooleanConst)
         XCTAssertNil(optionalNumberConst)
