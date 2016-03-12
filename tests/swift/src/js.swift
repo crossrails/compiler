@@ -14,8 +14,15 @@ struct JS {
         
         let ref :JSContextRef
         
-        init(_ path :String) throws {
-            ref = JSGlobalContextCreate(nil)
+        init() {
+            self.ref = JSGlobalContextCreate(nil)
+        }
+        
+        private init(_ ref :JSContextRef) {
+            self.ref = ref
+        }
+        
+        func eval(path :String) throws -> Object {
             let string = JSStringCreateWithCFString(try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding) as String)
             let url = JSStringCreateWithCFString(path)
             defer {
@@ -31,6 +38,7 @@ struct JS {
             if exception != nil {
                 preconditionFailure("Exception thrown: \(String(convert: exception, context: self))")
             }
+            return JS.Object(JSContextGetGlobalObject(self.ref), context: self)
         }
         
         func invoke<T>(f: (inout exception :JSValueRef ) -> T) -> T {
@@ -80,10 +88,19 @@ struct JS {
             self.context = context
         }
         
+        init(_ value: JS.Value) {
+            self.ref = value.ref
+            self.context = value.context
+        }
+        
         var description: String {
             return String(convert: ref, context: context)
         }
         
+        func eval(context: JS.Context) -> JS.Value {
+            return Value(ref, context: context)
+        }
+
         subscript(property: Property) -> Value {
             get {
                 let value = context.invoke {
@@ -123,10 +140,47 @@ struct JS {
             self.context = context
         }
         
+        init(infer value :Any?, context :Context) {
+            switch value {
+                case let boolean as Bool:
+                    self = boolean.eval(context)
+                case let number as Double:
+                    self = number.eval(context)
+                case let string as String:
+                    self = string.eval(context)
+                case nil:
+                    self = value.eval(context)
+                default:
+                    fatalError()
+            }
+        }
+        
         var description: String {
             return String(convert: ref, context: context)
         }
         
+        func infer() -> Any {
+            return self.infer()!
+        }
+        
+        func infer() -> Any? {
+            switch JSValueGetType(context.ref, ref) {
+                case kJSTypeNull:
+                    return nil
+                case kJSTypeNumber:
+                    return Double(self)
+                case kJSTypeObject:
+                    return Object(self)
+                case kJSTypeString:
+                    return String(self)
+                case kJSTypeBoolean:
+                    return Bool(self)
+                case kJSTypeUndefined:
+                    return nil
+                default:
+                    fatalError("Unknown type encounted")
+            }
+        }
     }
 }
 
@@ -195,6 +249,20 @@ extension String {
     }
 }
 
+extension Optional {
+    init(_ value: JS.Value, wrapped:(JS.Value) -> Wrapped) {
+        self = JSValueIsNull(value.context.ref, value.ref) || JSValueIsUndefined(value.context.ref, value.ref) ? .None : wrapped(value)
+    }
+    
+    func eval(context: JS.Context) -> JS.Value {
+        return JS.Value(JSValueMakeNull(context.ref), context: context)
+    }
+    
+    func eval(context: JS.Context, wrapped:(Wrapped) -> JS.Value) -> JS.Value {
+        return self == nil ? self.eval(context) : wrapped(self!)
+    }
+}
+
 let length : JS.Property = "length"
 
 extension Array {
@@ -202,26 +270,16 @@ extension Array {
         assert(JSValueIsArray(value.context.ref, value.ref), "Array expected but got \(JSValueGetType(value.context.ref, value.ref)): \(String(convert: value.ref, context: value.context))")
         let array = JS.Object(value.ref, context: value.context)
         self = [Element]()
-        for index in 0...UInt32(array[length])-1 {
+        for index in 0..<UInt32(array[length]) {
             self.append(element(array[index]))
         }
     }
     
     func eval(context: JS.Context, element:(Element) -> JS.Value) -> JS.Value {
         let value : JSValueRef = context.invoke {
-            var v = element(self[0]).ref
-            return JSObjectMakeArray(context.ref, 1, &v, &$0)
+            var values = self.map({ element($0).ref })
+            return JSObjectMakeArray(context.ref, self.count, &values, &$0)
         }
         return JS.Value(value, context: context)
-    }
-}
-
-extension Optional {
-    init(_ value: JS.Value, wrapped:(JS.Value) -> Wrapped) {
-        self = JSValueIsNull(value.context.ref, value.ref) || JSValueIsUndefined(value.context.ref, value.ref) ? .None : wrapped(value)
-    }
-    
-    func eval(context: JS.Context, wrapped:(Wrapped) -> JS.Value) -> JS.Value {
-        return self == nil ? JS.Value(JSValueMakeNull(context.ref), context: context) : wrapped(self!)
     }
 }

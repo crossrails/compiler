@@ -19,19 +19,22 @@ extension JS.Property {
     static let optionalNumberConst : JS.Property = "optionalNumberConst"
     static let optionalStringConst : JS.Property = "optionalStringConst"
     static let optionalNumberArrayConst : JS.Property = "optionalNumberArrayConst"
+    static let optionalAnyConst : JS.Property = "optionalAnyConst"
     static let booleanVar : JS.Property = "booleanVar"
     static let numberVar : JS.Property = "numberVar"
     static let stringVar : JS.Property = "stringVar"
     static let numberArrayVar : JS.Property = "numberArrayVar"
+    static let stringArrayArrayVar : JS.Property = "stringArrayArrayVar"
     static let anyVar : JS.Property = "anyVar"
     static let optionalBooleanVar : JS.Property = "optionalBooleanVar"
     static let optionalNumberVar : JS.Property = "optionalNumberVar"
     static let optionalStringVar : JS.Property = "optionalStringVar"
+    static let optionalAnyVar : JS.Property = "optionalAnyVar"
+    
+    
 }
 
-private let context : JS.Context = try! JS.Context(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
-
-var this = context.globalObject
+var this = try! JS.Context().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
 
 ///constants
 
@@ -45,6 +48,9 @@ public let numberArrayConst = [Double](this[.numberArrayConst], element: Double.
 
 public let stringArrayArrayConst = [[String]](this[.stringArrayArrayConst], element: { [String]($0, element: String.init) })
 
+public let anyConst : Any = this[.anyConst].infer()
+
+
 //nullable constants
 
 public let optionalBooleanConst = Bool?(this[.optionalBooleanConst], wrapped: Bool.init)
@@ -54,6 +60,8 @@ public let optionalNumberConst = Double?(this[.optionalNumberConst], wrapped: Do
 public let optionalStringConst = String?(this[.optionalStringConst], wrapped: String.init)
 
 public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberConst], wrapped: { [Double]($0, element: Double.init) })
+
+public let optionalAnyConst : Any? = this[.optionalAnyConst].infer()
 
 
 //variables
@@ -76,7 +84,6 @@ public var numberVar :Double {
     }
 }
 
-
 public var stringVar :String {
     get {
         return String(this[.stringVar])
@@ -86,12 +93,30 @@ public var stringVar :String {
     }
 }
 
+public var anyVar :Any {
+    get {
+        return this[.anyVar].infer()
+    }
+    set {
+        this[.anyVar] = JS.Value(infer: newValue, context:this.context)
+    }
+}
+
 public var numberArrayVar :[Double] {
     get {
-        return [Double](this[.numberArrayConst], element: Double.init)
+        return [Double](this[.numberArrayVar], element: Double.init)
     }
     set {
         this[.numberArrayVar] = newValue.eval(this.context, element: { $0.eval(this.context) })
+    }
+}
+
+public var stringArrayArrayVar :[[String]] {
+    get {
+        return [[String]](this[.stringArrayArrayVar], element: { [String]($0, element: String.init) })
+    }
+    set {
+        this[.stringArrayArrayVar] = newValue.eval(this.context, element: { $0.eval(this.context, element: { $0.eval(this.context)})})
     }
 }
 
@@ -115,12 +140,20 @@ public var optionalNumberVar :Double? {
     }
 }
 
-
 public var optionalStringVar :String? {
     get {
         return String?(this[.optionalStringVar], wrapped: String.init)
     }
     set {
         this[.optionalStringVar] = newValue.eval(this.context, wrapped: { $0.eval(this.context) })
+    }
+}
+
+public var optionalAnyVar :Any? {
+    get {
+        return this[.optionalAnyVar].infer()
+    }
+    set {
+        this[.optionalAnyVar] = JS.Value(infer: newValue, context:this.context)
     }
 }

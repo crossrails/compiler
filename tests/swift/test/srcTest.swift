@@ -16,20 +16,27 @@ class test: XCTestCase {
     }
     
     override func tearDown() {
-        super.tearDown()
+        try! this.context.eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
     }
     
-    func testTypes() {
+    func testConstTypes() {
         XCTAssertFalse(booleanConst)
         XCTAssert(numberConst.isNaN)
         XCTAssertEqual(stringConst, "stringConstLiteral")
-//        XCTAssertEqual(numberArrayConst, [1, 2, 3])
-        
+        XCTAssertEqual(numberArrayConst, [1, 2, 3])
+        XCTAssertEqual(stringArrayArrayConst, [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]])
+        XCTAssertEqual(anyConst as? String, "anyConstLiteral")
+    }
+    
+    func testOptionalConstTypes() {
         XCTAssertNil(optionalBooleanConst)
         XCTAssertNil(optionalNumberConst)
         XCTAssertNil(optionalStringConst)
         XCTAssertNil(optionalNumberArrayConst)
-        
+        XCTAssertNil(optionalAnyConst);
+    }
+    
+    func testVarTypes() {
         XCTAssertTrue(booleanVar)
         booleanVar = booleanConst
         XCTAssertEqual(booleanVar, booleanConst)
@@ -42,6 +49,27 @@ class test: XCTestCase {
         stringVar = stringConst
         XCTAssertEqual(stringVar, stringConst)
         
+        XCTAssertEqual(anyVar as? String, "anyVarLiteral")
+        anyVar = anyConst
+        XCTAssertEqual(anyVar as? String, anyConst as? String)
+        
+        XCTAssertEqual(numberArrayVar, [])
+        numberArrayVar = numberArrayConst
+        XCTAssertEqual(numberArrayVar, numberArrayConst)
+
+        XCTAssertEqual(stringArrayArrayVar, [])
+        stringArrayArrayVar = stringArrayArrayConst
+        XCTAssertEqual(stringArrayArrayVar, stringArrayArrayConst)
+        
+        numberArrayVar = [5]
+        XCTAssertEqual(numberArrayVar, [5])
+        
+        stringArrayArrayVar = [["yo"]]
+        XCTAssertEqual(stringArrayArrayVar, [["yo"]])
+    }
+    
+    
+    func testOptionalVarTypes() {
         XCTAssertNil(optionalBooleanVar)
         optionalBooleanVar = false
         XCTAssertEqual(optionalBooleanVar, booleanConst)
@@ -60,5 +88,21 @@ class test: XCTestCase {
         optionalStringVar = nil
         XCTAssertNil(optionalStringVar)
         
+        XCTAssertNil(optionalAnyVar)
+        optionalAnyVar = "anyConstLiteral"
+        XCTAssertEqual(optionalAnyVar as? String, anyConst as? String)
+        optionalAnyVar = nil
+        XCTAssertNil(optionalAnyVar)
     }
+
+    func testNoErasureForBasicTypes() {
+        anyVar = booleanConst;
+        XCTAssertEqual(anyVar as? Bool, booleanConst);
+    }
+    
+    func testErasureForNonBasicTypes() {
+        anyVar = booleanConst;
+        XCTAssertEqual(anyVar as? Bool, booleanConst);
+    }
+    
 }
