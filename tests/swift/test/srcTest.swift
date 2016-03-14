@@ -16,7 +16,86 @@ class test: XCTestCase {
     }
     
     override func tearDown() {
-        try! this.context.eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
+        try! this.context.eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!) as Void
+    }
+    
+    static var testInterfaceMethodCalled = false;
+    
+    class SimpleInterfaceImpl : SimpleInterface {
+        func voidNoArgMethod() {
+            testInterfaceMethodCalled = true;
+        }
+    }
+
+    func testInterface() {
+        XCTAssertFalse(simpleInterfaceInstanceCalled);
+        simpleInterfaceInstance.voidNoArgMethod();
+        XCTAssert(simpleInterfaceInstanceCalled);
+        acceptSimpleInterface(SimpleInterfaceImpl());
+        XCTAssert(test.testInterfaceMethodCalled);
+        test.testInterfaceMethodCalled = false;
+        simpleInterfaceInstance.voidNoArgMethod();
+        XCTAssert(test.testInterfaceMethodCalled);
+    }
+    
+    static var testInheritanceMethodCalled = false;
+    
+    class SimpleObjectOverride : SimpleObject {
+        override func methodToOverride() {
+            testInheritanceMethodCalled = true;
+        }
+    }
+    
+    class SimpleObjectOverrideCallSuper : SimpleObject {
+        override func methodToOverride() {
+            super.methodToOverride()
+        }
+    }
+    
+    func testInheritance() {
+        var o = SimpleObject(5);
+        o.callOverriddenMethod();
+        XCTAssert(o.methodToOverrideCalled);
+        
+        o = SimpleObjectOverride(5)
+        o.callOverriddenMethod();
+        XCTAssert(test.testInheritanceMethodCalled);
+        XCTAssertFalse(o.methodToOverrideCalled);
+        
+        o = SimpleObjectOverrideCallSuper(5)
+        o.methodToOverride();
+        XCTAssert(o.methodToOverrideCalled);
+    }
+    
+    func testObjects() {
+        SimpleObject.staticVoidNoArgMethod();
+        
+        XCTAssertNotNil(simpleObjectInstance);
+        
+        XCTAssertEqual(49.0, simpleObjectInstance.numberSingleObjectArgMethod(simpleObjectInstance));
+        
+        XCTAssertEqual(14.0, simpleObjectInstance.numberSingleObjectArgMethod(SimpleObject(2)));
+        
+        XCTAssertEqual(simpleObjectInstance, simpleObjectInstance);
+        XCTAssert(simpleObjectInstance == simpleObjectInstance.upcastThisToObject());
+        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance);
+        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance.upcastThisToObject());
+    }
+    
+    func testFunctions() {
+        voidNoArgFunction();
+        XCTAssert(voidNoArgFunctionCalled);
+    
+        XCTAssertEqual("stringNoArgFunctionReturnValue", stringNoArgFunction());
+        
+        XCTAssertEqual(25.0, numberMultipleArgFunction(5, b: 5));
+        XCTAssertEqual(-3.0, numberMultipleArgFunction(-2, b: 1.5));
+        
+        XCTAssertEqual("stringNoArgLambdaReturnValue", stringNoArgLambda());
+        XCTAssertEqual(stringNoArgLambda(), stringNoArgLambda());
+        
+        stringNoArgLambda = { "expectedReturnValue" };
+        XCTAssertEqual("expectedReturnValue", stringNoArgLambda());
     }
     
     func testConstTypes() {
@@ -101,8 +180,10 @@ class test: XCTestCase {
     }
     
     func testErasureForNonBasicTypes() {
-        anyVar = booleanConst;
-        XCTAssertEqual(anyVar as? Bool, booleanConst);
+        XCTAssert(anyObjectInstance as? AnyObject === anyObjectInstance as? AnyObject);
+        anyVar = anyObjectInstance;
+        XCTAssert(anyVar == anyObjectInstance);
+        XCTAssertFalse(anyVar as? AnyObject === anyObjectInstance as? AnyObject);
     }
     
 }

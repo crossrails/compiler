@@ -83,15 +83,6 @@ public class SrcTest {
         };
         o.methodToOverride();
         assertTrue(o.getMethodToOverrideCalled());
-
-        o = new SimpleObject(5) {
-            @Override
-            public void methodToOverride() {
-                super.methodToOverride();
-            }
-        };
-        o.callOverriddenMethod();
-        assertTrue(o.getMethodToOverrideCalled());
     }
 
     private boolean testInterfaceMethodCalled = false;
