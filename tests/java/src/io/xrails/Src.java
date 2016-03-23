@@ -214,6 +214,6 @@ public class Src {
     }
 
     public static void setOptionalAnyVar(Object value) {
-        global.setMember("optionalAnyVar", JS.heap.getOrDefault(value, value));
+        global.setMember("optionalAnyVar", value);
     }
 }

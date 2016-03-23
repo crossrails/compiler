@@ -38,10 +38,14 @@ class SimpleObject {
 const simpleObjectInstance = new SimpleObject;
 
 /**
-* @type {!Object}
-*/
+ * @type {!Object}
+ */
 const anyObjectInstance = simpleObjectInstance;
 
+/**
+ * @type {?Object}
+ */
+var optionalAnyObjectInstance = new SimpleObject;
 
 var simpleInterfaceInstanceCalled = false
 

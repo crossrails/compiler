@@ -32,8 +32,12 @@ class JS_SimpleInterface : SimpleInterface {
         this.bind(self)
     }
     
+    deinit {
+        this.unbind(self)
+    }
+    
     func voidNoArgMethod() {
-        this[.voidNoArgMethod]();
+        try! this[.voidNoArgMethod]();
     }
     
 }

@@ -7,6 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <JavaScriptCore/JavaScriptCore.h>
 
 //! Project version number for src.
 FOUNDATION_EXPORT double srcVersionNumber;
@@ -17,3 +18,4 @@ FOUNDATION_EXPORT const unsigned char srcVersionString[];
 // In this header, you should import all the public headers of your framework using statements like #import <src/PublicHeader.h>
 
 
+JS_EXPORT void JSSynchronousGarbageCollectForDebugging(JSContextRef ctx);

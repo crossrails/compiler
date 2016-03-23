@@ -14,7 +14,16 @@ var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src
 
 public let simpleObjectInstance = SimpleObject(this[.simpleObjectInstance])
 
-public let anyObjectInstance :Any = this[.anyObjectInstance] as JSValue
+public let anyObjectInstance :Any = this[.anyObjectInstance].infer()
+
+public var optionalAnyObjectInstance :Any? {
+    get {
+        return Any?(this[.optionalAnyObjectInstance], wrapped: { $0.infer() })
+    }
+    set {
+        this[.anyObjectInstance] =  this.valueOf(newValue, wrapped: this.valueOf)
+    }
+}
 
 public var simpleInterfaceInstanceCalled :Bool {
     get {
@@ -29,7 +38,7 @@ public var simpleInterfaceInstance :SimpleInterface {
 }
 
 public func acceptSimpleInterface(simpleInterface :SimpleInterface) {
-    this[.acceptSimpleInterface](this.valueOf(simpleInterface, with:simpleInterface.eval))
+    try! this[.acceptSimpleInterface](this.valueOf(simpleInterface, with:simpleInterface.eval))
 }
 
 //functions
@@ -41,38 +50,38 @@ public var voidNoArgFunctionCalled :Bool {
 }
 
 func voidNoArgFunction() {
-    this[.voidNoArgFunction]()
+    try! this[.voidNoArgFunction]()
 }
 
 func stringNoArgFunction() -> String {
-    return String(this[.stringNoArgFunction]())
+    return String(try! this[.stringNoArgFunction]())
 }
 
 func numberMultipleArgFunction(a :Double, b :Double) -> Double {
-    return Double(this[.numberMultipleArgFunction](this.valueOf(a), this.valueOf(b)))
+    return Double(try! this[.numberMultipleArgFunction](this.valueOf(a), this.valueOf(b)))
 }
 
 public var stringNoArgLambda :() -> (String) {
     get {
         let function :JSFunction = this[.stringNoArgLambda]
-        return { () in return String(function.call(this)) }
+        return { () in return String(try! function.call(this)) }
     }
     set {
-        this[.stringNoArgLambda] = JSObject(this.context, callback: { args in return this.valueOf(newValue()) })
+        this[.stringNoArgLambda] =  JSObject(this.context, callback: { args in return this.valueOf(newValue()) })
     }
 }
 
-//func throwSimpleError() throws {
-//    global.callMember("throwSimpleError");
-//}
-//
-//func throwSpecialError() throws {
-//    try {
-//        global.callMember("throwSpecialError");
-//    } catch (NashornException e) {
-//        throw new SpecialException((ScriptObjectMirror)e.getEcmaError());
-//    }
-//}
+func throwSimpleError() throws {
+    try this[.throwSimpleError]();
+}
+
+func throwSpecialError() throws {
+    do {
+        try this[.throwSpecialError]();
+    } catch let error as Error {
+        throw SpecialException(error.exception)
+    }
+}
 
 ///constants
 
@@ -99,7 +108,7 @@ public let optionalStringConst = String?(this[.optionalStringConst], wrapped: St
 
 public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberConst], wrapped: { [Double]($0, element: Double.init) })
 
-public let optionalAnyConst : Any? = this[.optionalAnyConst].infer()
+public let optionalAnyConst =  Any?(this[.optionalAnyConst], wrapped: JSValue.infer)
 
 
 //variables
@@ -109,7 +118,7 @@ public var booleanVar :Bool {
         return Bool(this[.booleanVar])
     }
     set {
-        this[.booleanVar] = this.valueOf(newValue)
+        this[.booleanVar] =  this.valueOf(newValue)
     }
 }
 
@@ -118,7 +127,7 @@ public var numberVar :Double {
         return Double(this[.numberVar])
     }
     set {
-        this[.numberVar] = this.valueOf(newValue)
+        this[.numberVar] =  this.valueOf(newValue)
     }
 }
 
@@ -127,7 +136,7 @@ public var stringVar :String {
         return String(this[.stringVar])
     }
     set {
-        this[.stringVar] = this.valueOf(newValue)
+        this[.stringVar] =  this.valueOf(newValue)
     }
 }
 
@@ -136,7 +145,7 @@ public var anyVar :Any {
         return this[.anyVar].infer()
     }
     set {
-        this[.anyVar] = this.valueOf(newValue)
+        this[.anyVar] =  this.valueOf(newValue)
     }
 }
 
@@ -145,7 +154,7 @@ public var numberArrayVar :[Double] {
         return [Double](this[.numberArrayVar], element: Double.init)
     }
     set {
-        this[.numberArrayVar] = this.valueOf(newValue, element: { this.valueOf($0) })
+        this[.numberArrayVar] =  this.valueOf(newValue, element: this.valueOf)
     }
 }
 
@@ -154,7 +163,7 @@ public var stringArrayArrayVar :[[String]] {
         return [[String]](this[.stringArrayArrayVar], element: { [String]($0, element: String.init) })
     }
     set {
-        this[.stringArrayArrayVar] = this.valueOf(newValue, element: { this.valueOf($0, element: { this.valueOf($0)})})
+        this[.stringArrayArrayVar] =  this.valueOf(newValue, element: { this.valueOf($0, element: this.valueOf)})
     }
 }
 
@@ -165,7 +174,7 @@ public var optionalBooleanVar :Bool? {
         return Bool?(this[.optionalBooleanVar], wrapped: Bool.init)
     }
     set {
-        this[.optionalBooleanVar] = this.valueOf(newValue, wrapped: { this.valueOf($0) })
+        this[.optionalBooleanVar] =  this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
 
@@ -174,7 +183,7 @@ public var optionalNumberVar :Double? {
         return Double?(this[.optionalNumberVar], wrapped: Double.init)
     }
     set {
-        this[.optionalNumberVar] = this.valueOf(newValue, wrapped: { this.valueOf($0) })
+        this[.optionalNumberVar] =  this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
 
@@ -183,16 +192,16 @@ public var optionalStringVar :String? {
         return String?(this[.optionalStringVar], wrapped: String.init)
     }
     set {
-        this[.optionalStringVar] = this.valueOf(newValue, wrapped: { this.valueOf($0) })
+        this[.optionalStringVar] =  this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
 
 public var optionalAnyVar :Any? {
     get {
-        return this[.optionalAnyVar].infer()
+        return Any?(this[.optionalAnyVar], wrapped: { $0.infer() })
     }
     set {
-        this[.optionalAnyVar] = this.valueOf(newValue)
+        this[.optionalAnyVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
 
@@ -236,4 +245,9 @@ extension JSProperty {
     static let callOverriddenMethod : JSProperty = "callOverriddenMethod"
     static let methodToOverrideCalled : JSProperty = "methodToOverrideCalled"
     static let methodToOverride : JSProperty = "methodToOverride"
+    static let throwSimpleError : JSProperty = "throwSimpleError"
+    static let throwSpecialError : JSProperty = "throwSpecialError"
+    static let message : JSProperty = "message"
+    static let optionalAnyObjectInstance : JSProperty = "optionalAnyObjectInstance"
+    
 }

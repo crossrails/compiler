@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import JavaScriptCore
 @testable import src
 
 class test: XCTestCase {
@@ -19,6 +20,28 @@ class test: XCTestCase {
         try! this.context.eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!) as Void
     }
     
+    func testSimpleException() {
+        do {
+            try throwSimpleError();
+            XCTFail();
+        } catch let e as CustomStringConvertible {
+            XCTAssertEqual("Simple error message", e.description);
+        } catch {
+            XCTFail();
+        }
+    }
+    
+    func testSpecialException() {
+        do {
+            try throwSpecialError();
+            XCTFail();
+        } catch let e as SpecialException {
+            XCTAssertEqual("Special error message", e.message);
+        } catch {
+            XCTFail();
+        }
+    }
+
     static var testInterfaceMethodCalled = false;
     
     class SimpleInterfaceImpl : SimpleInterface {
@@ -169,7 +192,7 @@ class test: XCTestCase {
         
         XCTAssertNil(optionalAnyVar)
         optionalAnyVar = "anyConstLiteral"
-        XCTAssertEqual(optionalAnyVar as? String, anyConst as? String)
+        XCTAssertEqual(optionalAnyVar! as? String, anyConst as? String)
         optionalAnyVar = nil
         XCTAssertNil(optionalAnyVar)
     }
@@ -180,10 +203,84 @@ class test: XCTestCase {
     }
     
     func testErasureForNonBasicTypes() {
-        XCTAssert(anyObjectInstance as? AnyObject === anyObjectInstance as? AnyObject);
-        anyVar = anyObjectInstance;
-        XCTAssert(anyVar == anyObjectInstance);
-        XCTAssertFalse(anyVar as? AnyObject === anyObjectInstance as? AnyObject);
+        XCTAssert(anyObjectInstance == anyObjectInstance);
+        anyVar = anyObjectInstance
+        XCTAssert(anyVar == anyObjectInstance)
     }
     
+    class UnknownNativeSideObject {
+        
+    }
+    
+    func testUnknownNativeSideObjectDeallocation() {
+        var o :AnyObject? = UnknownNativeSideObject()
+        weak var ref = o
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNotNil(ref);
+        optionalAnyVar = nil;
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNil(ref)
+    }
+
+    func testUnknownJSSideObjectDeallocation() {
+        var o :AnyObject? = optionalAnyObjectInstance as? AnyObject
+        weak var ref = o!
+        XCTAssertNotNil(ref);
+        optionalAnyObjectInstance = nil
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNil(ref);
+    }
+    
+    func testKnownNativeSideObjectDeallocation() {
+        var o :AnyObject? = SimpleObject(1)
+        weak var ref = o
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNotNil(ref);
+        optionalAnyVar = nil;
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNil(ref)
+    }
+    
+    func testKnownJSSideObjectDeallocation() {
+        var o :AnyObject? = simpleInterfaceInstance
+        weak var ref = o
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNotNil(ref);
+        optionalAnyVar = nil;
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNil(ref)
+    }
+    
+    func testNativeSideInterfaceDeallocation() {
+        var o :AnyObject? = SimpleInterfaceImpl()
+        weak var ref = o
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNotNil(ref);
+        optionalAnyVar = nil;
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNil(ref)
+    }
+    
+    func testJSSideInterfaceDeallocation() {
+        var o :AnyObject? = simpleInterfaceInstance
+        weak var ref = o
+        XCTAssertNotNil(ref);
+        optionalAnyVar = o;
+        o = nil;
+        XCTAssertNotNil(ref);
+        optionalAnyVar = nil;
+        JSSynchronousGarbageCollectForDebugging(this.context.ref)
+        XCTAssertNil(ref)
+    }
 }

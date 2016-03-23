@@ -30,16 +30,17 @@ struct JSContext {
             JSStringRelease(url)
             JSStringRelease(string)
         }
-        self.invoke {
+        try self.invoke {
             JSEvaluateScript(self.ref, string, nil, url, 0, &$0)
         }
     }
     
-    func invoke<T>(@noescape f: (inout exception :JSValueRef ) -> T) -> T {
+    func invoke<T>(@noescape f: (inout exception :JSValueRef ) -> T) throws -> T {
         var exception :JSValueRef = nil
         let result = f(exception: &exception)
         if exception != nil {
             print("Exception thrown: \(String(self, ref: exception))")
+            throw Error(JSValue(self, ref: exception))
         }
         return result
     }
@@ -93,8 +94,22 @@ struct JSProperty : CustomStringConvertible, StringLiteralConvertible {
 }
 
 private let length : JSProperty = "length"
+private let message : JSProperty = "message"
 private let name : JSProperty = "name"
 private let Function : JSProperty = "Function"
+
+public struct Error: ErrorType, CustomStringConvertible {
+    
+    let exception :JSValue
+    
+    init(_ value: JSValue) {
+        self.exception = value
+    }
+    
+    public var description: String {
+        return String(exception[message])
+    }
+}
 
 class JSValue : CustomStringConvertible {
     
@@ -112,13 +127,13 @@ class JSValue : CustomStringConvertible {
     
     subscript(property: JSProperty) -> JSValue {
         get {
-            let value = context.invoke {
+            let value = try! context.invoke {
                 JSObjectGetProperty(self.context.ref, self.ref, property.ref, &$0)
             }
             return JSValue(context, ref: value)
         }
         set(newValue) {
-            context.invoke {
+            try! context.invoke {
                 JSObjectSetProperty(self.context.ref, self.ref, property.ref, newValue.ref, UInt32(kJSPropertyAttributeNone), &$0)
             }
         }
@@ -126,34 +141,30 @@ class JSValue : CustomStringConvertible {
     
     subscript(index: UInt32) -> JSValue {
         get {
-            let value = context.invoke {
+            let value = try! context.invoke {
                 JSObjectGetPropertyAtIndex(self.context.ref, self.ref, index, &$0)
             }
             return JSValue(context, ref: value)
         }
         set(newValue) {
-            context.invoke {
+            try! context.invoke {
                 JSObjectSetPropertyAtIndex(self.context.ref, self.ref, index, newValue.ref, &$0)
             }
         }
     }
-    
-    func infer() -> Any? {
+
+    func infer() -> Any {
         switch JSValueGetType(context.ref, ref) {
-        case kJSTypeNull:
-            return nil
-        case kJSTypeNumber:
-            return Double(self)
-        case kJSTypeObject:
-            return self
-        case kJSTypeString:
-            return String(self)
-        case kJSTypeBoolean:
-            return Bool(self)
-        case kJSTypeUndefined:
-            return nil
-        default:
-            fatalError("Unknown type encounted")
+            case kJSTypeNumber:
+                return Double(self)
+            case kJSTypeObject:
+                return JSAnyObject(self)
+            case kJSTypeString:
+                return String(self)
+            case kJSTypeBoolean:
+                return Bool(self)
+            default:
+                fatalError("Unknown type encounted: \(JSValueGetType(context.ref, ref))")
         }
     }
 }
@@ -161,41 +172,57 @@ class JSValue : CustomStringConvertible {
 class JSObject : JSValue {
     
     private let object :AnyObject?
-    private let callbacks: [String :([JSValue]) -> (JSValue?)]
+    private let callbacks: [String :([JSValue]) throws -> (JSValue?)]
     
     convenience init(_ context :JSContext, wrap object: AnyObject?) {
         self.init(context, object: object, callbacks: [:])
     }
     
-    convenience init(_ context :JSContext, callback: ([JSValue]) -> (JSValue?)) {
+    convenience init(_ context :JSContext, callback: ([JSValue]) throws -> (JSValue?)) {
         self.init(context, callbacks:["Function": callback])
         JSObjectSetPrototype(context.ref, self.ref, context.globalObject[Function].ref)
     }
     
-    convenience init(_ context :JSContext, callbacks: [String :([JSValue]) -> (JSValue?)]) {
+    convenience init(_ context :JSContext, callbacks: [String :([JSValue]) throws -> (JSValue?)]) {
         self.init(context, object: nil, callbacks: callbacks)
     }
     
-    convenience init(_ context :JSContext, prototype :JSThis, callbacks: [String :([JSValue]) -> (JSValue?)]) {
+    convenience init(_ context :JSContext, prototype :JSThis, callbacks: [String :([JSValue]) throws -> (JSValue?)]) {
         self.init(context, object: nil, callbacks: callbacks)
         JSObjectSetPrototype(context.ref, JSObjectGetPrototype(context.ref, self.ref), prototype.ref)
     }
     
-    private init(_ context :JSContext, object: AnyObject?, callbacks: [String :([JSValue]) -> (JSValue?)]) {
+    private init(_ context :JSContext, object: AnyObject?, callbacks: [String :([JSValue]) throws -> (JSValue?)]) {
         self.object = object
         self.callbacks = callbacks
         var definition :JSClassDefinition = kJSClassDefinitionEmpty
-        definition.finalize = { Unmanaged<JSObject>.fromOpaque(COpaquePointer(JSObjectGetPrivate($0))).release() }
-        definition.callAsFunction = { (_, function, this, argCount, args, _) -> JSValueRef in
+        definition.finalize = {
+            Unmanaged<JSObject>.fromOpaque(COpaquePointer(JSObjectGetPrivate($0))).release()
+        }
+        definition.callAsFunction = { (_, function, this, argCount, args, exception) -> JSValueRef in
             let data = JSObjectGetPrivate(this)
             let object :JSObject = Unmanaged.fromOpaque(COpaquePointer(data == nil ? JSObjectGetPrivate(function) : data)).takeUnretainedValue()
-            let value = JSValue(object.context, ref: function)
-            var arguments = [JSValue]()
-            for index in 0..<argCount {
-                arguments.append(JSValue(object.context, ref: args[index]))
+            do {
+                let value = JSValue(object.context, ref: function)
+                var arguments = [JSValue]()
+                for index in 0..<argCount {
+                    arguments.append(JSValue(object.context, ref: args[index]))
+                }
+                let callback = object.callbacks[String(value[name])]!
+                return try callback(arguments)?.ref ?? JSValueMakeUndefined(object.context.ref)
+            } catch let error as Error {
+                exception.initialize(error.exception.ref)
+            } catch let error as CustomStringConvertible {
+                var value : JSValueRef = nil
+                var message = object.valueOf(error.description).ref
+                value = JSObjectMakeError(object.context.ref, 1, &message, &value)
+                exception.initialize(value)
+            } catch {
+                var value : JSValueRef = nil
+                value = JSObjectMakeError(object.context.ref, 0, nil, &value)
+                exception.initialize(value)
             }
-            let callback = object.callbacks[String(value[name])]!
-            return callback(arguments)?.ref ?? JSValueMakeUndefined(object.context.ref)
+            return JSValueMakeUndefined(object.context.ref)
         }
         var functions: [JSStaticFunction] = callbacks.keys.map({
             JSStaticFunction(name: ($0 as NSString).UTF8String, callAsFunction: definition.callAsFunction, attributes: UInt32(kJSPropertyAttributeNone))
@@ -208,15 +235,13 @@ class JSObject : JSValue {
         JSClassRelease(clazz)
     }
     
-    override func infer() -> Any? {
-        return object ?? self
-    }
+//    override func infer() -> Any? {
+//        return object ?? self
+//    }
 }
 
 private func cast(any :Any) -> JSValue? {
-    if let value = any as? JSValue {
-        return value
-    } else if let object = any as? AnyObject {
+    if let object = any as? AnyObject {
         if let value = bindings.objectForKey(object) as? JSValue {
             return value
         }
@@ -227,7 +252,7 @@ private func cast(any :Any) -> JSValue? {
 func == (lhs: Any, rhs: Any) -> Bool {
     if let left = cast(lhs) {
         if let right = cast(rhs) {
-            return left.context.invoke({
+            return try! left.context.invoke({
                 JSValueIsEqual(left.context.ref, left.ref, right.ref, &$0)
             })
         }
@@ -237,16 +262,16 @@ func == (lhs: Any, rhs: Any) -> Bool {
 
 protocol JSFunction {
     func bind(object: AnyObject)
-    func call(this :JSThis, args :JSValue...) -> JSValue
-    func call(this :JSThis, args :[JSValue]) -> JSValue
+    func call(this :JSThis, args :JSValue...) throws -> JSValue
+    func call(this :JSThis, args :[JSValue]) throws -> JSValue
 }
 
 extension JSValue : JSFunction {
-    func call(this :JSThis, args :JSValue...) -> JSValue {
-        return self.call(this, args: args)
+    func call(this :JSThis, args :JSValue...) throws -> JSValue {
+        return try self.call(this, args: args)
     }
     
-    func call(this :JSThis, args :[JSValue]) -> JSValue {
+    func call(this :JSThis, args :[JSValue]) throws -> JSValue {
 //        print("calling \(self) with \(args) on object \(this)")
 //        for arg in args {
 //            if(JSValueIsObject(context.ref, arg.ref)) {
@@ -258,10 +283,25 @@ extension JSValue : JSFunction {
 //                }
 //            }
 //        }
-        return JSValue(self.context, ref: self.context.invoke {
+        return try JSValue(self.context, ref: self.context.invoke {
             JSObjectCallAsFunction(self.context.ref, self.ref, this.ref, args.count, args.map({ $0.ref }), &$0)
         })
     }
+}
+
+class JSAnyObject {
+    
+    private let this :JSValue;
+    
+    init(_ instance :JSValue) {
+        this = instance
+        this.bind(self)
+    }
+    
+    deinit {
+        this.unbind(self)
+    }
+    
 }
 
 protocol JSThis {
@@ -272,7 +312,7 @@ protocol JSThis {
 
     subscript(property: JSProperty) -> JSValue { get set }
     
-    subscript(property: JSProperty) -> (_ :JSValue...) -> (JSValue) { get }
+    subscript(property: JSProperty) -> (_ :JSValue...) throws -> (JSValue) { get }
     
     func valueOf(value: Bool) -> JSValue
     
@@ -288,14 +328,14 @@ protocol JSThis {
     
     func valueOf(object: AnyObject, with eval :(JSContext) -> (JSValue)) -> JSValue
 
-    func valueOf(value :Any?) -> JSValue
+    func valueOf(value: Any?) -> JSValue
 }
 
 extension JSValue : JSThis {
     
-    subscript(property: JSProperty) -> (_ :JSValue...) -> (JSValue) {
+    subscript(property: JSProperty) -> (_ :JSValue...) throws -> (JSValue) {
         get {
-            return { (args :JSValue...) -> JSValue in self[property].call(self, args: args) }
+            return { (args :JSValue...) -> JSValue in try self[property].call(self, args: args) }
         }
     }
     
@@ -320,7 +360,7 @@ extension JSValue : JSThis {
     }
     
     func valueOf<Element>(value: Array<Element>, @noescape element:(Element) -> JSValue) -> JSValue {
-        return JSValue(context, ref: context.invoke {
+        return JSValue(context, ref: try! context.invoke {
             JSObjectMakeArray(self.context.ref, value.count, value.map({ element($0).ref }), &$0)
         })
     }
@@ -336,20 +376,20 @@ extension JSValue : JSThis {
     
     func valueOf(value :Any?) -> JSValue {
         switch value {
+            case nil:
+                return JSValue(context, ref: JSValueMakeNull(context.ref))
             case let bool as Bool:
                 return self.valueOf(bool)
             case let double as Double:
                 return self.valueOf(double)
             case let string as String:
                 return self.valueOf(string)
-            case nil:
-                return JSValue(context, ref: JSValueMakeNull(context.ref))
-            case let value as JSValue:
-                return value
+            case let object as JSAnyObject:
+                return object.this
             case let object as AnyObject:
                 return JSObject(context, wrap: object)
             default:
-                fatalError()
+                fatalError("Uknown type: \(value)")
         }
     }
     
@@ -357,11 +397,17 @@ extension JSValue : JSThis {
 
 protocol JSInstance : JSThis {
     func bind(object: AnyObject)
+    func unbind(object: AnyObject)
 }
 
 extension JSValue : JSInstance {
+    
     func bind(object: AnyObject) {
         bindings.setObject(self, forKey: object)
+    }
+    
+    func unbind(object: AnyObject) {
+        bindings.removeObjectForKey(object)
     }
 }
 
@@ -379,12 +425,12 @@ extension JSContext {
 }
 
 protocol JSClass : JSThis {
-    func construct(args :JSValue...) -> JSInstance
+    func construct(args :JSValue...) throws -> JSInstance
 }
 
 extension JSValue : JSClass {
-    func construct(args :JSValue...) -> JSInstance {
-        return JSValue(context, ref: context.invoke {
+    func construct(args :JSValue...) throws -> JSInstance {
+        return JSValue(context, ref: try context.invoke {
             JSObjectCallAsConstructor(self.context.ref, self.ref, args.count, args.map({ $0.ref}), &$0)
         })
     }
@@ -392,7 +438,7 @@ extension JSValue : JSClass {
 
 extension String {
     init(_ context: JSContext, ref: JSValueRef) {
-        self = JSStringCopyCFString(nil, context.invoke {
+        self = JSStringCopyCFString(nil, try! context.invoke {
             JSValueToStringCopy(context.ref, ref, &$0)
         }) as String
     }
@@ -408,7 +454,7 @@ extension Bool {
 extension Double {
     init(_ value: JSValue) {
         assert(JSValueIsNumber(value.context.ref, value.ref), "\(kJSTypeNumber) expected but got \(JSValueGetType(value.context.ref, value.ref)): \(String(value.context, ref: value.ref))")
-        self = value.context.invoke {
+        self = try! value.context.invoke {
             JSValueToNumber(value.context.ref, value.ref, &$0)
         }
     }
@@ -428,7 +474,7 @@ extension String {
 }
 
 extension Optional {
-    init(_ value: JSValue, wrapped:(JSValue) -> Wrapped) {
+    init(_ value: JSValue, @noescape wrapped:(JSValue) -> Wrapped) {
         self = JSValueIsNull(value.context.ref, value.ref) || JSValueIsUndefined(value.context.ref, value.ref) ? .None : wrapped(value)
     }
 }
@@ -437,7 +483,8 @@ extension Array {
     init(_ value: JSValue, @noescape element:(JSValue) -> Element) {
         assert(JSValueIsArray(value.context.ref, value.ref), "Array expected but got \(JSValueGetType(value.context.ref, value.ref)): \(String(value.context, ref: value.ref))")
         self = [Element]()
-        for index in 0..<UInt32(value[length]) {
+        let count = UInt32(value[length])
+        for index in 0..<count {
             self.append(element(value[index]))
         }
     }
