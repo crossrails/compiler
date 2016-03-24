@@ -1,0 +1,13 @@
+{
+  "name": "xrails-complier",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/xrails",
+    "build": "rm -rf dist && tsc",
+    "prepublish": "typings install && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "next"
+  }
+}

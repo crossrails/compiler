@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+//    "noImplicitAny": true,
+    "sourceMap": true
+  },
+  "exclude": [
+    "typings/browser.d.ts",
+    "typings/browser",
+    "node_modules",
+    "bin"
+  ]
+}
