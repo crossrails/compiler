@@ -4,10 +4,12 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/xrails",
-    "build": "rm -rf dist && tsc",
+    "build": "tsc",
     "prepublish": "typings install && npm run build"
   },
   "devDependencies": {
+    "rollup": "^0.25.6",
+    "rollup-plugin-typescript": "^0.6.0",
     "typescript": "next"
   }
 }

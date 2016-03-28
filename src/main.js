@@ -1,52 +1,70 @@
 "use strict";
-var fs_1 = require("fs");
 var ts = require("typescript");
-function delint(sourceFile) {
-    delintNode(sourceFile);
-    function delintNode(node) {
-        switch (node.kind) {
-            case ts.SyntaxKind.ForStatement:
-            case ts.SyntaxKind.ForInStatement:
-            case ts.SyntaxKind.WhileStatement:
-            case ts.SyntaxKind.DoStatement:
-                if (node.statement.kind !== ts.SyntaxKind.Block) {
-                    report(node, "A looping statement's contents should be wrapped in a block body.");
-                }
-                break;
-            case ts.SyntaxKind.IfStatement:
-                var ifStatement = node;
-                if (ifStatement.thenStatement.kind !== ts.SyntaxKind.Block) {
-                    report(ifStatement.thenStatement, "An if statement's contents should be wrapped in a block body.");
-                }
-                if (ifStatement.elseStatement &&
-                    ifStatement.elseStatement.kind !== ts.SyntaxKind.Block &&
-                    ifStatement.elseStatement.kind !== ts.SyntaxKind.IfStatement) {
-                    report(ifStatement.elseStatement, "An else statement's contents should be wrapped in a block body.");
-                }
-                break;
-            case ts.SyntaxKind.BinaryExpression:
-                var op = node.operatorToken.kind;
-                if (op === ts.SyntaxKind.EqualsEqualsToken || op == ts.SyntaxKind.ExclamationEqualsToken) {
-                    report(node, "Use '===' and '!=='.");
-                }
-                break;
-            case ts.SyntaxKind.VariableDeclaration:
-                report(node, "var");
-                break;
-        }
-        ts.forEachChild(node, delintNode);
+var fs = require("fs");
+;
+/** Generate documention for all classes in a set of .ts files */
+function generateDocumentation(fileNames, options) {
+    // Build a program using the set of root file names in fileNames
+    var program = ts.createProgram(fileNames, options);
+    // Get the checker, we will use it to find more about classes
+    var checker = program.getTypeChecker();
+    var output = [];
+    // Visit every sourceFile in the program    
+    for (var _i = 0, _a = program.getSourceFiles(); _i < _a.length; _i++) {
+        var sourceFile = _a[_i];
+        // Walk the tree to search for classes
+        ts.forEachChild(sourceFile, visit);
     }
-    function report(node, message) {
-        var _a = sourceFile.getLineAndCharacterOfPosition(node.getStart()), line = _a.line, character = _a.character;
-        console.log(sourceFile.fileName + " (" + (line + 1) + "," + (character + 1) + "): " + message);
+    // print out the doc
+    fs.writeFileSync("classes.json", JSON.stringify(output, [], 4));
+    return;
+    /** visit nodes finding exported classes */
+    function visit(node) {
+        // Only consider exported nodes
+        if (!isNodeExported(node)) {
+            return;
+        }
+        console.log(node.getText());
+        if (node.kind === ts.SyntaxKind.ClassDeclaration) {
+            // This is a top level class, get its symbol
+            var symbol = checker.getSymbolAtLocation(node);
+            output.push(serializeClass(symbol));
+        }
+        else if (node.kind === ts.SyntaxKind.ModuleDeclaration) {
+            // This is a namespace, visit its children
+            ts.forEachChild(node, visit);
+        }
+    }
+    /** Serialize a symbol into a json object */
+    function serializeSymbol(symbol) {
+        return {
+            name: symbol.getName(),
+            documentation: ts.displayPartsToString(symbol.getDocumentationComment()),
+            type: checker.typeToString(checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration))
+        };
+    }
+    /** Serialize a class symbol infomration */
+    function serializeClass(symbol) {
+        var details = serializeSymbol(symbol);
+        // Get the construct signatures
+        var constructorType = checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration);
+        details.constructors = constructorType.getConstructSignatures().map(serializeSignature);
+        return details;
+    }
+    /** Serialize a signature (call or construct) */
+    function serializeSignature(signature) {
+        return {
+            paramters: signature.parameters.map(serializeSymbol),
+            returnType: checker.typeToString(signature.getReturnType()),
+            documentation: ts.displayPartsToString(signature.getDocumentationComment())
+        };
+    }
+    /** True if this is visible outside this file, false otherwise */
+    function isNodeExported(node) {
+        return (node.flags & ts.NodeFlags.Export) !== 0 || (node.parent && node.parent.kind === ts.SyntaxKind.SourceFile);
     }
 }
-exports.delint = delint;
-var fileNames = process.argv.slice(2);
-fileNames.forEach(function (fileName) {
-    // Parse a file
-    var sourceFile = ts.createSourceFile(fileName, fs_1.readFileSync(fileName).toString(), ts.ScriptTarget.ES6, /*setParentNodes */ true);
-    // delint it
-    delint(sourceFile);
+generateDocumentation(process.argv.slice(2), {
+    target: ts.ScriptTarget.ES6, module: ts.ModuleKind.CommonJS
 });
 //# sourceMappingURL=main.js.map
