@@ -1,5 +1,6 @@
 {
   "ambientDependencies": {
-    "node": "registry:dt/node#4.0.0+20160319033040"
+    "acorn": "registry:dt/acorn#1.0.1+20160317120654",
+    "node": "registry:dt/node#4.0.0+20160330064709"
   }
 }
