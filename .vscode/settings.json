@@ -6,5 +6,10 @@
         // "**/*.js": { "when": "$(basename).ts"},
         "**/*.js.map": true
     },
-    "typescript.tsdk": "./node_modules/typescript/lib"
-}
+    "windows": {
+        "typescript.tsdk": ".\\node_modules\\typescript\\lib"
+    },
+    "osx": {
+        "typescript.tsdk": "./node_modules/typescript/lib"
+    }
+ }

@@ -7,27 +7,55 @@
 // ${cwd}: the current working directory of the spawned process
 {
 	"version": "0.1.0",    
-	"command": "node",
-	"isShellCommand": true,
-    "echoCommand": false,
-    "suppressTaskName": true,
-	"tasks": [
-		{
-			"taskName": "build",
-			"isBuildCommand": true,
-			"showOutput": "silent",
-            "problemMatcher": "$tsc",            
-            "args": [
-                "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}"
-            ]
-		},
-		{
-			"taskName": "build-test-project",
-			"showOutput": "silent",
-            "problemMatcher": "$tsc",            
-            "args": [
-                "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}\\tests"
-            ]
-		}
-	]
+    
+    "windows" : {
+        "command": "node",
+        "isShellCommand": true,
+        "echoCommand": false,
+        "suppressTaskName": true,
+        "tasks": [
+            {
+                "taskName": "build",
+                "isBuildCommand": true,
+                "showOutput": "silent",
+                "problemMatcher": "$tsc",            
+                "args": [
+                    "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}"
+                ]
+            },
+            {
+                "taskName": "build-test-project",
+                "showOutput": "silent",
+                "problemMatcher": "$tsc",            
+                "args": [
+                    "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}\\tests"
+                ]
+            }
+        ]        
+    },
+    "osx" : {
+        "command": "node",
+        "isShellCommand": true,
+        "echoCommand": false,
+        "suppressTaskName": true,
+        "tasks": [
+            {
+                "taskName": "build",
+                "isBuildCommand": true,
+                "showOutput": "silent",
+                "problemMatcher": "$tsc",            
+                "args": [
+                    "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}"
+                ]
+            },
+            {
+                "taskName": "build-test-project",
+                "showOutput": "silent",
+                "problemMatcher": "$tsc",            
+                "args": [
+                    "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}/tests"
+                ]
+            }
+        ]        
+    }
 }
