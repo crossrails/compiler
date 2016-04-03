@@ -8,10 +8,10 @@
 			"program": "${workspaceRoot}\\src\\main.js",
 			"stopOnEntry": false,
 			"args": [
-                "${workspaceRoot}\\tests\\objects.js"
+                "${workspaceRoot}\\tests\\types.js"
             ],
 			"cwd": "${workspaceRoot}",
-			"preLaunchTask": "build-test-project",
+			"preLaunchTask": "build",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
