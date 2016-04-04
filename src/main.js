@@ -1,27 +1,47 @@
 "use strict";
 var fs_1 = require('fs');
 var esprima = require('esprima');
+//import * as doctrine from 'doctrine';
 var ESTree = require('./estree-visitor');
 var program = esprima.parse(fs_1.readFileSync(process.argv[2]).toString(), {
     tolerant: true,
     attachComment: true
 });
-ESTree.visit(program, {
+ESTree.walk(program, {
     beforeNode: function (node) {
         delete node.loc;
         delete node.range;
     },
-    afterNode: function (node) {
-        return ESTree.Action.Delete;
+    beforeDeclaration: function (node) {
+        node.leadingComments && node.leadingComments.splice(0, node.leadingComments.length - 1);
+        delete node.trailingComments;
     },
-    onProgram: function (program) {
-        delete program.comments;
-        delete program.errors;
+    beforeFunction: function (node) {
+        delete node.body;
     },
-    onVariableDeclaration: function (variable) {
-        variable.leadingComments.splice(0, variable.leadingComments.length - 1);
-        delete variable.trailingComments;
+    onProgram: function (node) {
+        delete node.comments;
+        delete node.errors;
+    },
+    onVariableDeclarator: function (node) {
+        delete node.init;
         return ESTree.Action.Break;
+    },
+    onMethodDefinition: function (node) {
+        delete node.value;
+        return ESTree.Action.Break;
+    },
+    onIdentifier: function () {
+        return ESTree.Action.Break;
+    },
+    onComment: function () {
+        return ESTree.Action.Break;
+    },
+    afterDeclaration: function () {
+        return ESTree.Action.Break;
+    },
+    afterNode: function () {
+        return ESTree.Action.Delete;
     }
 });
 console.log(JSON.stringify(program, null, 4));

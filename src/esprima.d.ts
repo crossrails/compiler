@@ -4,12 +4,12 @@ declare namespace ESTree {
   }
   
   interface Node {
-    leadingComments?: Array<Comment>;
-    trailingComments?: Array<Comment>;
+    leadingComments?: Comment[];
+    trailingComments?: Comment[];
   }
   
   interface Program {
-      errors: Array<any>;
-      comments: Array<Comment>
+      errors: any[];
+      comments?: Comment[];
   }
 }
