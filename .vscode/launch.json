@@ -8,7 +8,7 @@
 			"program": "${workspaceRoot}\\src\\main.js",
 			"stopOnEntry": false,
 			"args": [
-                "${workspaceRoot}\\tests\\types.js"
+                "${workspaceRoot}\\tests\\types.ts"
             ],
 			"cwd": "${workspaceRoot}",
 			"preLaunchTask": "build",

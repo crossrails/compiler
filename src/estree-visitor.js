@@ -6,114 +6,114 @@
 var Action = exports.Action;
 function walk(node, walker) {
     visit(node, {
-        beforeNode: function (node) {
-            var action = walker.beforeNode && walker.beforeNode(node);
+        beforeNode(node) {
+            let action = walker.beforeNode && walker.beforeNode(node);
             visit(node.leadingComments, this);
             visit(node.trailingComments, this);
             return action;
         },
-        afterNode: function (node) {
+        afterNode(node) {
             return walker.afterNode && walker.afterNode(node);
         },
-        beforeStatement: function (node) {
+        beforeStatement(node) {
             return walker.beforeStatement && walker.beforeStatement(node);
         },
-        afterStatement: function (node) {
+        afterStatement(node) {
             return walker.afterStatement && walker.afterStatement(node);
         },
-        beforeDeclaration: function (node) {
+        beforeDeclaration(node) {
             return walker.beforeDeclaration && walker.beforeDeclaration(node);
         },
-        afterDeclaration: function (node) {
+        afterDeclaration(node) {
             return walker.afterDeclaration && walker.afterDeclaration(node);
         },
-        beforePattern: function (node) {
+        beforePattern(node) {
             return walker.beforePattern && walker.beforePattern(node);
         },
-        afterPattern: function (node) {
+        afterPattern(node) {
             return walker.afterPattern && walker.afterPattern(node);
         },
-        beforeExpression: function (node) {
+        beforeExpression(node) {
             return walker.beforeExpression && walker.beforeExpression(node);
         },
-        afterExpression: function (node) {
+        afterExpression(node) {
             return walker.afterExpression && walker.afterExpression(node);
         },
-        beforeFunction: function (node) {
-            var action = walker.beforeFunction && walker.beforeFunction(node);
+        beforeFunction(node) {
+            let action = walker.beforeFunction && walker.beforeFunction(node);
             visit(node.id, this);
             visit(node.params, this);
             visit(node.body, this);
             return action;
         },
-        afterFunction: function (node) {
+        afterFunction(node) {
             return walker.afterFunction && walker.afterFunction(node);
         },
-        beforeClass: function (node) {
-            var action = walker.beforeClass && walker.beforeClass(node);
+        beforeClass(node) {
+            let action = walker.beforeClass && walker.beforeClass(node);
             visit(node.id, this);
             visit(node.superClass, this);
             visit(node.body, this);
             return action;
         },
-        afterClass: function (node) {
+        afterClass(node) {
             return walker.afterClass && walker.afterClass(node);
         },
-        onProgram: function (node) {
-            var action = walker.onProgram && walker.onProgram(node);
+        onProgram(node) {
+            let action = walker.onProgram && walker.onProgram(node);
             visit(node.body, this);
             visit(node.comments, this);
             return action;
         },
-        onClassDeclaration: function (node) {
+        onClassDeclaration(node) {
             return walker.onClassDeclaration && walker.onClassDeclaration(node);
         },
-        onFunctionDeclaration: function (node) {
+        onFunctionDeclaration(node) {
             return walker.onFunctionDeclaration && walker.onFunctionDeclaration(node);
         },
-        onVariableDeclaration: function (node) {
-            var action = walker.onVariableDeclaration && walker.onVariableDeclaration(node);
+        onVariableDeclaration(node) {
+            let action = walker.onVariableDeclaration && walker.onVariableDeclaration(node);
             visit(node.declarations, this);
             return action;
         },
-        onVariableDeclarator: function (node) {
-            var action = walker.onVariableDeclarator && walker.onVariableDeclarator(node);
+        onVariableDeclarator(node) {
+            let action = walker.onVariableDeclarator && walker.onVariableDeclarator(node);
             visit(node.id, this);
             visit(node.init, this);
             return action;
         },
-        onIdentifier: function (node) {
+        onIdentifier(node) {
             return walker.onIdentifier && walker.onIdentifier(node);
         },
-        onLiteral: function (node) {
+        onLiteral(node) {
             return walker.onLiteral && walker.onLiteral(node);
         },
-        onClassBody: function (node) {
-            var action = walker.onClassBody && walker.onClassBody(node);
+        onClassBody(node) {
+            let action = walker.onClassBody && walker.onClassBody(node);
             visit(node.body, this);
             return action;
         },
-        onComment: function (node) {
+        onComment(node) {
             return walker.onComment && walker.onComment(node);
         },
-        onBlock: function (node) {
+        onBlock(node) {
             return this.onComment(node);
         },
-        onLine: function (node) {
+        onLine(node) {
             return this.onComment(node);
         },
-        onBlockStatement: function (node) {
-            var action = walker.onBlockStatement && walker.onBlockStatement(node);
+        onBlockStatement(node) {
+            let action = walker.onBlockStatement && walker.onBlockStatement(node);
             visit(node.body, this);
             return action;
         },
-        onExpressionStatement: function (node) {
-            var action = walker.onExpressionStatement && walker.onExpressionStatement(node);
+        onExpressionStatement(node) {
+            let action = walker.onExpressionStatement && walker.onExpressionStatement(node);
             visit(node.expression, this);
             return action;
         },
-        onMethodDefinition: function (node) {
-            var action = walker.onMethodDefinition && walker.onMethodDefinition(node);
+        onMethodDefinition(node) {
+            let action = walker.onMethodDefinition && walker.onMethodDefinition(node);
             visit(node.key, this);
             visit(node.value, this);
             return action;
@@ -123,12 +123,12 @@ function walk(node, walker) {
 exports.walk = walk;
 function visit(node, visitor) {
     if (node instanceof Array) {
-        for (var i = 0; i < node.length; i++) {
+        for (let i = 0; i < node.length; i++) {
             visit(node[i], visitor) == Action.Delete && node.splice(i--, 1);
         }
     }
     else if (node) {
-        return before(node, visitor) || visitor[("on" + node.type)](node) || after(node, visitor);
+        return before(node, visitor) || visitor[`on${node.type}`](node) || after(node, visitor);
     }
 }
 function before(node, visitor) {
@@ -165,7 +165,7 @@ function before(node, visitor) {
                 visitor.beforeStatement(node) ||
                 visitor.beforeDeclaration(node);
         default:
-            throw new Error("Not yet supported node type '" + node.type + "', time to submit a pull request!");
+            throw new Error(`Not yet supported node type '${node.type}', time to submit a pull request!`);
     }
 }
 function after(node, visitor) {
@@ -202,7 +202,7 @@ function after(node, visitor) {
                 visitor.afterStatement(node) ||
                 visitor.afterNode(node);
         default:
-            throw new Error("Not yet supported node type '" + node.type + "', time to submit a pull request!");
+            throw new Error(`Not yet supported node type '${node.type}', time to submit a pull request!`);
     }
 }
 //# sourceMappingURL=estree-visitor.js.map

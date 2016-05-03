@@ -1,50 +1,50 @@
-var voidNoArgFunctionCalled = false
-
+"use strict";
+exports.voidNoArgFunctionCalled = false;
 function voidNoArgFunction() {
-    voidNoArgFunctionCalled = true
+    exports.voidNoArgFunctionCalled = true;
 }
-
+exports.voidNoArgFunction = voidNoArgFunction;
 /**
  * @returns string
  */
 function stringNoArgFunction() {
-    return "stringNoArgFunctionReturnValue"
+    return "stringNoArgFunctionReturnValue";
 }
-
+exports.stringNoArgFunction = stringNoArgFunction;
 /**
  * @param a: number
  * @param b: number
- * @returns string
+ * @returns number
  */
 function numberMultipleArgFunction(a, b) {
     return a * b;
 }
-
+exports.numberMultipleArgFunction = numberMultipleArgFunction;
 /**
  * @type {function(): string}
  */
-var stringNoArgLambda = function () {
-    return "stringNoArgLambdaReturnValue"
-
-}
-
+exports.stringNoArgLambda = function () {
+    return "stringNoArgLambdaReturnValue";
+};
 /**
  * @throws Error
  */
 function throwSimpleError() {
-    throw new Error("Simple error message")
+    throw new Error("Simple error message");
 }
-
+exports.throwSimpleError = throwSimpleError;
 class SpecialError {
-
     constructor(message) {
-        this.message = message
+        this.message = message;
+        this.message = message;
     }
 }
-
+exports.SpecialError = SpecialError;
 /**
  * @throws SpecialError
  */
 function throwSpecialError() {
-    throw new SpecialError("Special error message")
+    throw new SpecialError("Special error message");
 }
+exports.throwSpecialError = throwSpecialError;
+//# sourceMappingURL=functions.js.map

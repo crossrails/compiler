@@ -1,29 +1,24 @@
+"use strict";
 /**
  * Created by nbransby on 21/02/2016.
  */
 class SimpleObject {
-
-    static staticVoidNoArgMethod() {
-        this.staticVoidNoArgMethodCalled = true
-    }
-
     constructor(v) {
-        this.value = v ? v : 7
-        this.methodToOverrideCalled = false
+        this.value = v ? v : 7;
+        this.methodToOverrideCalled = false;
     }
-
+    static staticVoidNoArgMethod() {
+        this.staticVoidNoArgMethodCalled = true;
+    }
     numberSingleObjectArgMethod(a) {
         return a.value * this.value;
     }
-
     callOverriddenMethod() {
-        this.methodToOverride()
+        this.methodToOverride();
     }
-
     methodToOverride() {
-        this.methodToOverrideCalled = true
+        this.methodToOverrideCalled = true;
     }
-
     /**
      * @returns {Object}
      */
@@ -31,37 +26,34 @@ class SimpleObject {
         return this;
     }
 }
-
+exports.SimpleObject = SimpleObject;
 /**
  * @type {!SimpleObject}
  */
-const simpleObjectInstance = new SimpleObject;
-
+exports.simpleObjectInstance = new SimpleObject;
 /**
  * @type {!Object}
  */
-const anyObjectInstance = simpleObjectInstance;
-
+exports.anyObjectInstance = exports.simpleObjectInstance;
 /**
  * @type {?Object}
  */
-var optionalAnyObjectInstance = new SimpleObject;
-
-var simpleInterfaceInstanceCalled = false
-
+exports.optionalAnyObjectInstance = new SimpleObject;
+exports.simpleInterfaceInstanceCalled = false;
 /**
  * @type {!}
  */
-var simpleInterfaceInstance = {
+exports.simpleInterfaceInstance = {
     voidNoArgMethod() {
-        simpleInterfaceInstanceCalled = true
+        exports.simpleInterfaceInstanceCalled = true;
     }
 };
-
 /**
  * @param a
  */
 function acceptSimpleInterface(simpleInterface) {
-    simpleInterfaceInstance = simpleInterface;
+    exports.simpleInterfaceInstance = simpleInterface;
     simpleInterface.voidNoArgMethod();
 }
+exports.acceptSimpleInterface = acceptSimpleInterface;
+//# sourceMappingURL=objects.js.map

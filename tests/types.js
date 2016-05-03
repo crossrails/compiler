@@ -1,101 +1,72 @@
-//constants
+"use strict";
+//export constants
 /**
  * @type {!boolean}
  */
-const booleanConst = false;
+exports.booleanConst = false;
 /**
  * @type {!number}
  */
-const numberConst = Number.NaN;
+exports.numberConst = Number.NaN;
 /**
  * @type {!string}
  */
-const stringConst = 'stringConstLiteral';
+exports.stringConst = 'stringConstLiteral';
 /**
  * @type {!Array<number>}
  */
-const numberArrayConst = [1, 2, 3];
+exports.numberArrayConst = [1, 2, 3];
 /**
  * @type {!Array<Array<string>>}
  */
-const stringArrayArrayConst = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
+exports.stringArrayArrayConst = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
 /**
  * @type {!Object}
  */
-const anyConst = 'anyConstLiteral';
-
-
-//nullable constants
+exports.anyConst = 'anyConstLiteral';
+//nullable export constants
 /**
  * @type {?boolean}
  */
-const optionalBooleanConst = null
+exports.optionalBooleanConst = null;
 /**
  * @type {?number}
  */
-const optionalNumberConst = null
+exports.optionalNumberConst = null;
 /**
  * @type {?string}
  */
-const optionalStringConst = null
+exports.optionalStringConst = null;
 /**
  * @type {?Array<number>}
  */
-const optionalNumberArrayConst = null
+exports.optionalNumberArrayConst = null;
 /**
  * @type {?Object}
  */
-const optionalAnyConst = null
-
-
-
+exports.optionalAnyConst = null;
 //variables
 /**
  * @type {!boolean}
  */
-var booleanVar = true
+exports.booleanVar = true;
 /**
  * @type {!number}
  */
-var numberVar = 0
+exports.numberVar = 0;
 /**
  * @type {!string}
  */
-var stringVar = "stringVarLiteral"
+exports.stringVar = "stringVarLiteral";
 /**
  * @type {!Array<number>}
  */
-var numberArrayVar = [];
+exports.numberArrayVar = [];
 /**
  * @type {!Object}
  */
-var anyVar = "anyVarLiteral"
+exports.anyVar = "anyVarLiteral";
 /**
  * @type {!Array<Array<string>>}
  */
-var stringArrayArrayVar = [];
-
-
-
-
-//nullable variables
-/**
- * @type {?boolean}
- */
-var optionalBooleanVar
-/**
- * @type {?number}
- */
-var optionalNumberVar
-/**
- * @type {?string}
- */
-var optionalStringVar
-/**
- * @type {?Array<number>}
- */
-var optionalNumberArrayVar
-/**
- * @type {?Object}
- */
-var optionalAnyVar
+exports.stringArrayArrayVar = [];

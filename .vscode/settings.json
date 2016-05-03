@@ -2,14 +2,10 @@
 {
     "files.exclude": {
         "**/.git": true,
-        "**/.DS_Store": true,
-        // "**/*.js": { "when": "$(basename).ts"},
-        "**/*.js.map": true
-    }
-    // "windows": {
-    //     "typescript.tsdk": ".\\node_modules\\typescript\\lib"
-    // },
-    // "osx": {
-    //     "typescript.tsdk": "./node_modules/typescript/lib"
-    // }
+        "**/.DS_Store": true
+        // "**/*.js": { "when": "$(basename).ts" },
+        //  "**/*.js.map": true
+    },
+   "typescript.tsdk": ".\\node_modules\\typescript\\lib",
+   "files.autoSave": "onFocusChange"
  }
