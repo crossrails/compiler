@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "strictNullChecks": false
   }, 
