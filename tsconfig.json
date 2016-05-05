@@ -11,6 +11,7 @@
     "typings/browser",
     "node_modules",
     "bin",
-    "tests"
+    "tests",
+    "src/ast"
   ]
 }
