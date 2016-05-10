@@ -5,6 +5,7 @@ import {Module, SourceFile, Declaration, VariableDeclaration, ClassDeclaration, 
 export interface Output {
     writeFile(file: string, output: string): void;
     copyFile(source: string, destination: string): void;
+    fileExists(file: string): boolean;
     emitChildren(): void;
 }
 
@@ -21,12 +22,12 @@ type NodeEmitter<T> = (node: T, out: Output) => void;
 export class Transpiler implements DeclarationVisitor {
     private readonly language: Emitter;
     private readonly engine: Emitter;
-    private readonly files: { [index: string]: string};
+    private readonly files: Map<string, string>;
     
     constructor(language: Emitter, engine: Emitter) {
         this.language = language;
         this.engine = engine;
-        this.files = {};
+        this.files = new Map();
     }
 
     transpile(module: Module) {
@@ -39,9 +40,9 @@ export class Transpiler implements DeclarationVisitor {
                 })
             }
         });    
-        for(let file in this.files) {
-            console.log(`FILE ${file}:`);
-            console.log(this.files[file]);
+        for(let entry of this.files) {
+            console.log(`FILE ${entry[0]}:`);
+            console.log(entry[1]);
         }    
     }    
 
@@ -58,33 +59,36 @@ export class Transpiler implements DeclarationVisitor {
     }
 
     private emitNode<T>(node: T, emitInterface: NodeEmitter<T>, emitImplementation: NodeEmitter<T>, emitChildren: () => void = () => {}) {
-        let files = this.files;
+        let self = this;
         let implementationEmitted = false;
-        let output = {
+        let output :Output = {
+            fileExists(file: string): boolean {
+                return self.files.has(file);
+            },
             copyFile(source: string, destination: string) {
                 
             },
             writeFile(file: string, output: string) {
-                let contents = files[file];
-                files[file] = contents == undefined ? output : contents + output;            
+                self.files.set(file, !self.files.has(file) ? output : self.files.get(file) + output);            
             },
             emitChildren() {
                 let childrenEmitted = false;
-                emitImplementation(node, {
+                emitImplementation.apply(self.engine, [node, {
+                    fileExists: this.fileExists, 
                     copyFile: this.copyFile, 
                     writeFile: this.writeFile, 
                     emitChildren() {
                         emitChildren();
                         childrenEmitted = true;
                     }
-                });
+                }]);
                 if(!childrenEmitted) {
                     emitChildren();
                 }
                 implementationEmitted = true;
             } 
         }
-        emitInterface(node, output);
+        emitInterface.apply(self.language, [node, output]);
         if(!implementationEmitted) {
             output.emitChildren();
         }

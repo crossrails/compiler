@@ -4,13 +4,11 @@ import {VariableDeclaration, ClassDeclaration, MethodDeclaration, Module, Declar
 class Swift implements Emitter {
     
     emitModule(node: Module, out: Output) {
-        out.emitChildren();
     }
     
     emitSourceFile(node: SourceFile, out :Output) {
         //insert header comment
-        out.writeFile(`${node.filename}.swift`, `import Foundation\n`);
-        out.emitChildren();
+        out.writeFile(`${node.filename}.swift`, `import Foundation\n\n`);
     }
     
     emitVariable(node: VariableDeclaration, out :Output) {

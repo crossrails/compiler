@@ -1,73 +1,68 @@
 "use strict";
-var Transpiler = (function () {
-    function Transpiler(language, engine) {
+class Transpiler {
+    constructor(language, engine) {
         this.language = language;
         this.engine = engine;
-        this.files = {};
+        this.files = new Map();
     }
-    Transpiler.prototype.transpile = function (module) {
-        var _this = this;
-        this.emitNode(module, this.language.emitModule, this.engine.emitModule, function () {
-            var _loop_1 = function(file) {
-                _this.emitNode(file, _this.language.emitSourceFile, _this.engine.emitSourceFile, function () {
-                    for (var _i = 0, _a = file.declarations; _i < _a.length; _i++) {
-                        var declaration = _a[_i];
-                        declaration.accept(_this);
+    transpile(module) {
+        this.emitNode(module, this.language.emitModule, this.engine.emitModule, () => {
+            for (let file of module.files) {
+                this.emitNode(file, this.language.emitSourceFile, this.engine.emitSourceFile, () => {
+                    for (let declaration of file.declarations) {
+                        declaration.accept(this);
                     }
                 });
-            };
-            for (var _i = 0, _a = module.files; _i < _a.length; _i++) {
-                var file = _a[_i];
-                _loop_1(file);
             }
         });
-        for (var file in this.files) {
-            console.log("FILE " + file + ":");
-            console.log(this.files[file]);
+        for (let entry of this.files) {
+            console.log(`FILE ${entry[0]}:`);
+            console.log(entry[1]);
         }
-    };
-    Transpiler.prototype.visitVariable = function (node) {
+    }
+    visitVariable(node) {
         this.emitNode(node, this.language.emitVariable, this.engine.emitVariable);
-    };
-    Transpiler.prototype.visitClass = function (node) {
+    }
+    visitClass(node) {
         this.emitNode(node, this.language.emitClass, this.engine.emitClass);
-    };
-    Transpiler.prototype.visitMethod = function (node) {
+    }
+    visitMethod(node) {
         this.emitNode(node, this.language.emitMethod, this.engine.emitMethod);
-    };
-    Transpiler.prototype.emitNode = function (node, emitInterface, emitImplementation, emitChildren) {
-        if (emitChildren === void 0) { emitChildren = function () { }; }
-        var files = this.files;
-        var implementationEmitted = false;
-        var output = {
-            copyFile: function (source, destination) {
+    }
+    emitNode(node, emitInterface, emitImplementation, emitChildren = () => { }) {
+        let self = this;
+        let implementationEmitted = false;
+        let output = {
+            fileExists(file) {
+                return self.files.has(file);
             },
-            writeFile: function (file, output) {
-                var contents = files[file];
-                files[file] = contents == undefined ? output : contents + output;
+            copyFile(source, destination) {
             },
-            emitChildren: function () {
-                var childrenEmitted = false;
-                emitImplementation(node, {
-                    copyFile: this.copyFile,
-                    writeFile: this.writeFile,
-                    emitChildren: function () {
-                        emitChildren();
-                        childrenEmitted = true;
-                    }
-                });
+            writeFile(file, output) {
+                self.files.set(file, !self.files.has(file) ? output : self.files.get(file) + output);
+            },
+            emitChildren() {
+                let childrenEmitted = false;
+                emitImplementation.apply(self.engine, [node, {
+                        fileExists: this.fileExists,
+                        copyFile: this.copyFile,
+                        writeFile: this.writeFile,
+                        emitChildren() {
+                            emitChildren();
+                            childrenEmitted = true;
+                        }
+                    }]);
                 if (!childrenEmitted) {
                     emitChildren();
                 }
                 implementationEmitted = true;
             }
         };
-        emitInterface(node, output);
+        emitInterface.apply(self.language, [node, output]);
         if (!implementationEmitted) {
             output.emitChildren();
         }
-    };
-    return Transpiler;
-}());
+    }
+}
 exports.Transpiler = Transpiler;
 //# sourceMappingURL=transpiler.js.map

@@ -26,7 +26,6 @@ export abstract class Declaration {
 }
 
 export interface DeclarationVisitor {
-    visitSourceFile?(node: SourceFile): void;
     visitVariable(node: VariableDeclaration): void;
     visitClass(node: ClassDeclaration): void;
     visitMethod(node: MethodDeclaration): void;
@@ -112,6 +111,7 @@ export class Module {
     constructor(file: string) {
         let path = Path.parse(file);
         this.src = path.base;
+        this.name = path.name;
         let files: SourceFile[] = [];
         try {
             log.debug(`Attempting to open sourcemap at ` + Path.relative('.', `${file}.map`));

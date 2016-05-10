@@ -1,23 +1,18 @@
 "use strict";
-var Swift = (function () {
-    function Swift() {
+class Swift {
+    emitModule(node, out) {
     }
-    Swift.prototype.emitModule = function (node, out) {
-        out.emitChildren();
-    };
-    Swift.prototype.emitSourceFile = function (node, out) {
+    emitSourceFile(node, out) {
         //insert header comment
-        out.writeFile(node.filename + ".swift", "import Foundation\n");
-        out.emitChildren();
-    };
-    Swift.prototype.emitVariable = function (node, out) {
+        out.writeFile(`${node.filename}.swift`, `import Foundation\n\n`);
+    }
+    emitVariable(node, out) {
         //public let name :Any        
-    };
-    Swift.prototype.emitClass = function (node, out) {
-    };
-    Swift.prototype.emitMethod = function (node, out) {
-    };
-    return Swift;
-}());
+    }
+    emitClass(node, out) {
+    }
+    emitMethod(node, out) {
+    }
+}
 module.exports = new Swift();
 //# sourceMappingURL=swift.js.map

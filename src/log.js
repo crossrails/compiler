@@ -1,36 +1,34 @@
 "use strict";
-var Path = require('path');
-var Log = (function () {
-    function Log() {
+const Path = require('path');
+class Log {
+    constructor() {
         this.level = Log.Level.DEBUG;
     }
-    Log.prototype.debug = function (message, node) {
+    debug(message, node) {
         this.log(Log.Level.DEBUG, message, node);
-    };
-    Log.prototype.info = function (message, node) {
+    }
+    info(message, node) {
         this.log(Log.Level.INFO, message, node);
-    };
-    Log.prototype.warn = function (message, node) {
+    }
+    warn(message, node) {
         this.log(Log.Level.WARNING, message, node);
-    };
-    Log.prototype.error = function (message, node) {
+    }
+    error(message, node) {
         this.log(Log.Level.ERROR, message, node);
-    };
-    Log.prototype.log = function (level, message, node) {
+    }
+    log(level, message, node) {
         if (level >= this.level) {
             if (node) {
-                var file = node.getSourceFile();
-                var path = Path.relative('.', file.fileName);
-                var pos = file.getLineAndCharacterOfPosition(node.pos);
-                message = path + "(" + (pos.line + 1) + "," + (pos.character + 1) + "): " + message;
+                let file = node.getSourceFile();
+                let path = Path.relative('.', file.fileName);
+                let pos = file.getLineAndCharacterOfPosition(node.pos);
+                message = `${path}(${pos.line + 1},${pos.character + 1}): ${message}`;
             }
-            message = Log.Level[level] + ": " + message;
+            message = `${Log.Level[level]}: ${message}`;
             console.log(message);
         }
-    };
-    return Log;
-}());
-var Log;
+    }
+}
 (function (Log) {
     (function (Level) {
         Level[Level["DEBUG"] = 0] = "DEBUG";
@@ -40,7 +38,7 @@ var Log;
     })(Log.Level || (Log.Level = {}));
     var Level = Log.Level;
 })(Log || (Log = {}));
-var log = new Log();
+let log = new Log();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = log;
 //# sourceMappingURL=log.js.map
