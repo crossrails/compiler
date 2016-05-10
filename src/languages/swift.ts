@@ -1,26 +1,25 @@
 import {Emitter, Output} from "../transpiler" 
 import {VariableDeclaration, ClassDeclaration, MethodDeclaration, Module, Declaration, SourceFile} from "../ast" 
 
-let emitter: Emitter = {
+class Swift implements Emitter {
     
     emitModule(node: Module, out: Output) {
         out.emitChildren();
-    },
+    }
     
     emitSourceFile(node: SourceFile, out :Output) {
         //insert header comment
-        out.emit(`${node.filename}.swift`, `import Foundation\n`);
+        out.writeFile(`${node.filename}.swift`, `import Foundation\n`);
         out.emitChildren();
-    },
+    }
     
     emitVariable(node: VariableDeclaration, out :Output) {
         //public let name :Any        
-        
-    },
+    }
     
     emitClass(node: ClassDeclaration, out :Output) {
         
-    },
+    }
     
     emitMethod(node: MethodDeclaration, out :Output) {
         
@@ -33,5 +32,5 @@ let emitter: Emitter = {
     // abstract visitArrayType(node: ast.ArrayType);
 }
 
-export default emitter;
+export = new Swift();
 

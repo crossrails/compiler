@@ -38,19 +38,34 @@ var Transpiler = (function () {
     Transpiler.prototype.emitNode = function (node, emitInterface, emitImplementation, emitChildren) {
         if (emitChildren === void 0) { emitChildren = function () { }; }
         var files = this.files;
-        emitInterface(node, {
-            emitChildren: function () {
-                var emitter = this.emit;
-                emitImplementation(node, {
-                    emitChildren: emitChildren,
-                    emit: emitter
-                });
+        var implementationEmitted = false;
+        var output = {
+            copyFile: function (source, destination) {
             },
-            emit: function (file, output) {
+            writeFile: function (file, output) {
                 var contents = files[file];
                 files[file] = contents == undefined ? output : contents + output;
+            },
+            emitChildren: function () {
+                var childrenEmitted = false;
+                emitImplementation(node, {
+                    copyFile: this.copyFile,
+                    writeFile: this.writeFile,
+                    emitChildren: function () {
+                        emitChildren();
+                        childrenEmitted = true;
+                    }
+                });
+                if (!childrenEmitted) {
+                    emitChildren();
+                }
+                implementationEmitted = true;
             }
-        });
+        };
+        emitInterface(node, output);
+        if (!implementationEmitted) {
+            output.emitChildren();
+        }
     };
     return Transpiler;
 }());

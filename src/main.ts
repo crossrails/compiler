@@ -10,7 +10,7 @@ if(filename == undefined) {
     let module = new Module(filename);
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
-    // }, 4));
-    let transpiler = new Transpiler(require("./languages/swift").default, require("./engines/swift/javascriptcore").default);
+    // }, 4));   
+    let transpiler = new Transpiler(require("./languages/swift"), require("./engines/swift/javascriptcore"));
     transpiler.transpile(module);
 }

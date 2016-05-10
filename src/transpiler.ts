@@ -3,7 +3,8 @@ import {WriteStream} from 'fs';
 import {Module, SourceFile, Declaration, VariableDeclaration, ClassDeclaration, MethodDeclaration, DeclarationVisitor} from "./ast" 
 
 export interface Output {
-    emit(file: string, output: string): void;
+    writeFile(file: string, output: string): void;
+    copyFile(source: string, destination: string): void;
     emitChildren(): void;
 }
 
@@ -58,18 +59,34 @@ export class Transpiler implements DeclarationVisitor {
 
     private emitNode<T>(node: T, emitInterface: NodeEmitter<T>, emitImplementation: NodeEmitter<T>, emitChildren: () => void = () => {}) {
         let files = this.files;
-        emitInterface(node, {
-            emitChildren() {
-                let emitter = this.emit;
-                emitImplementation(node, {
-                    emitChildren: emitChildren, 
-                    emit: emitter 
-                });
-            }, 
-            emit(file: string, output: string) {
+        let implementationEmitted = false;
+        let output = {
+            copyFile(source: string, destination: string) {
+                
+            },
+            writeFile(file: string, output: string) {
                 let contents = files[file];
                 files[file] = contents == undefined ? output : contents + output;            
+            },
+            emitChildren() {
+                let childrenEmitted = false;
+                emitImplementation(node, {
+                    copyFile: this.copyFile, 
+                    writeFile: this.writeFile, 
+                    emitChildren() {
+                        emitChildren();
+                        childrenEmitted = true;
+                    }
+                });
+                if(!childrenEmitted) {
+                    emitChildren();
+                }
+                implementationEmitted = true;
             } 
-        });
+        }
+        emitInterface(node, output);
+        if(!implementationEmitted) {
+            output.emitChildren();
+        }
     }        
 }
