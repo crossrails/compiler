@@ -9,7 +9,7 @@ export abstract class Declaration {
     readonly comment: string
     readonly parent: Declaration|SourceFile;
     
-    constructor(node: ts.Declaration, parent?: Declaration|SourceFile) {
+    constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
         this.parent = parent; 
         this.name = (node.name as ts.Identifier).text;
     }
@@ -38,8 +38,13 @@ export class VariableDeclaration extends Declaration {
     
     constructor(node: ts.VariableDeclaration, parent: Declaration|SourceFile) {
         super(node, parent);
-        this.type = Type.from(node.type, false); 
-        this.constant = (node.parent.flags & ts.NodeFlags.Const) != 0
+        if(node.type) {
+            this.type = Type.from(node.type, false);
+        } else {
+            log.warn(`Type information missing, resorting to Any`, node);
+            this.type = new AnyType(false);
+        } 
+        this.constant = (node.parent && node.parent.flags & ts.NodeFlags.Const) != 0
     }
     
     accept<T>(visitor: DeclarationVisitor) {
@@ -194,7 +199,7 @@ export abstract class GenericType extends Type {
     constructor(type: ts.TypeReferenceNode, optional: boolean) {
         super(optional);
         let typeArguments: Type[] = [];
-        for (let typeArgument of type.typeArguments) {
+        if(type.typeArguments) for (let typeArgument of type.typeArguments) {
             typeArguments.push(Type.from(typeArgument, false))
         }
         this.typeArguments = typeArguments;      

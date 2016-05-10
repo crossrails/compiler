@@ -1,34 +1,36 @@
 "use strict";
-const Path = require('path');
-class Log {
-    constructor() {
+var Path = require('path');
+var Log = (function () {
+    function Log() {
         this.level = Log.Level.DEBUG;
     }
-    debug(message, node) {
+    Log.prototype.debug = function (message, node) {
         this.log(Log.Level.DEBUG, message, node);
-    }
-    info(message, node) {
+    };
+    Log.prototype.info = function (message, node) {
         this.log(Log.Level.INFO, message, node);
-    }
-    warn(message, node) {
+    };
+    Log.prototype.warn = function (message, node) {
         this.log(Log.Level.WARNING, message, node);
-    }
-    error(message, node) {
+    };
+    Log.prototype.error = function (message, node) {
         this.log(Log.Level.ERROR, message, node);
-    }
-    log(level, message, node) {
+    };
+    Log.prototype.log = function (level, message, node) {
         if (level >= this.level) {
             if (node) {
-                let file = node.getSourceFile();
-                let path = Path.relative('.', file.fileName);
-                let pos = file.getLineAndCharacterOfPosition(node.pos);
-                message = `${path}(${pos.line + 1},${pos.character + 1}): ${message}`;
+                var file = node.getSourceFile();
+                var path = Path.relative('.', file.fileName);
+                var pos = file.getLineAndCharacterOfPosition(node.pos);
+                message = path + "(" + (pos.line + 1) + "," + (pos.character + 1) + "): " + message;
             }
-            message = `${Log.Level[level]}: ${message}`;
+            message = Log.Level[level] + ": " + message;
             console.log(message);
         }
-    }
-}
+    };
+    return Log;
+}());
+var Log;
 (function (Log) {
     (function (Level) {
         Level[Level["DEBUG"] = 0] = "DEBUG";
@@ -38,7 +40,7 @@ class Log {
     })(Log.Level || (Log.Level = {}));
     var Level = Log.Level;
 })(Log || (Log = {}));
-let log = new Log();
+var log = new Log();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = log;
 //# sourceMappingURL=log.js.map

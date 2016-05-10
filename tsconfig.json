@@ -1,10 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
     "noImplicitAny": true,
     "sourceMap": true,
-    "strictNullChecks": false
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "preserveConstEnums": true,
+    "pretty": true
   }, 
   "exclude": [
     "typings/browser.d.ts",

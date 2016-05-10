@@ -1,4 +1,4 @@
-import {Emitter, Output} from "../emitter" 
+import {Emitter, Output} from "../transpiler" 
 import {VariableDeclaration, ClassDeclaration, MethodDeclaration, Module, Declaration, SourceFile} from "../ast" 
 
 let emitter: Emitter = {

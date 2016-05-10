@@ -11,8 +11,6 @@
     "typescript": "next"
   },
   "dependencies": {
-    "doctrine": "^1.2.1",
-    "esprima": "^2.7.2",
-    "winston": "^2.2.0"
+    "doctrine": "^1.2.1"
   }
 }
