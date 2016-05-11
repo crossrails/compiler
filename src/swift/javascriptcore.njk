@@ -1,0 +1,45 @@
+<% extends "swift.njk" %>
+
+<# Global object #>
+    <% block file_prefix_impl %>
+        <% if is module file -%>
+            var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "<$ bundle_id $>")!.pathForResource("<$ src $>", ofType: "js")!)
+        <%- endif %>
+    <% endblock %>
+
+<# Constants #>
+    <% block let_impl %>
+        <% if is any -%>
+            = this[.<$ name $>].infer()
+        <% else %>
+            = <$ type $>(this[.<$ name $>])
+        <% endif %>
+    <% endblock %>
+
+<# Variables #>
+    <% block var_impl %>
+        {
+            get {
+                <% if is any -%>
+                    return this[.<$ name $>].infer()
+                <% else %>
+                    return <$ type $>(this[.<$ name $>])
+                <% endif %>
+            }
+            set {
+                this[.<$ name $>] =  this.valueOf(newValue)
+            }
+        }    
+    <% endblock %>
+
+<# Symbol Table #>
+    <% block file_suffix_impl %>
+        <% if is module file %>
+            extension JSProperty {
+                <% for identifier in this.identifiers %>
+                    static let <$ identifier } : JSProperty = "<$ identifier $>"
+                <% endfor %>
+            }
+        <% endif %>
+    <% endblock %>
+

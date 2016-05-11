@@ -1,0 +1,17 @@
+import Foundation
+
+<# Global object #>
+    <%- block file_prefix_impl %><% endblock %>
+
+<%- for declaration in file.declarations %>
+    <% if declaration.constant %>
+        <#- Constants -#>
+            public let <$ declaration.name $> :<$ declaration.type|typename $> <% block let_impl %><% endblock %>
+    <% elif declaration.constant %>
+        <#- Variables -#>
+            public var <$ declaration.name $> :<$ declaration.type|typename $> <% block var_impl %><% endblock %>
+    <% endif %>
+<%- endfor -%>
+
+<#- Symbol Table -#>
+    <%- block file_suffix_impl %><% endblock -%>

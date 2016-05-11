@@ -11,6 +11,7 @@
     "typescript": "next"
   },
   "dependencies": {
-    "doctrine": "^1.2.1"
+    "doctrine": "^1.2.1",
+    "nunjucks": "^2.4.2"
   }
 }

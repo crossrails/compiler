@@ -1,8 +1,12 @@
 "use strict";
+const ast = require("../ast");
 class JavaScriptCore {
     constructor() {
         this.identifiers = new Set();
     }
+    // constructor(visitor: ast.TypeVisitor<string>) {
+    //     this.visitor = visitor;
+    // }
     emitModule(node, out) {
         out.emitChildren();
         out.copyFile('javascriptcore.swift', 'js.swift');
@@ -28,9 +32,37 @@ class JavaScriptCore {
     emitMethod(node, out) {
         this.identifiers.add(node.name);
     }
+    emitConstant(node, out) {
+        this.identifiers.add(node.name);
+        if (node.type instanceof ast.AnyType) {
+            out.writeFile(`${node.sourceFile.filename}.swift`, ` = this[.${node.name}].infer()`);
+        }
+        else {
+            out.writeFile(`${node.sourceFile.filename}.swift`, ` = ${node.type.accept(this.visitor)}(this[.${node.name}])\n\n`);
+        }
+    }
     emitVariable(node, out) {
         this.identifiers.add(node.name);
-        // = this[.name].infer()
+        if (node.type instanceof ast.AnyType) {
+            out.writeFile(`${node.sourceFile.filename}.swift`, ` {
+    get {
+        return this[.${node.name}].infer()
+    }
+    set {
+        this[.${node.name}] =  this.valueOf(newValue)
+    }
+}`);
+        }
+        else {
+            out.writeFile(`${node.sourceFile.filename}.swift`, ` {
+    get {
+        return ${node.type.accept(this.visitor)}(this[.${node.name}])
+    }
+    set {
+        this[.${node.name}] =  this.valueOf(newValue)
+    }
+}\n\n`);
+        }
     }
 }
 module.exports = new JavaScriptCore();
