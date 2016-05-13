@@ -64,7 +64,7 @@ if(filename == undefined) {
         }) + (type.optional ? '?' : '')
     });
     
-    require("./swift/swift");
+    require("./swift/javascriptcore");
     for(let file of module.files as Array<ast.SourceFile>) {
         writeFile(`${file.filename}.swift`, nunjucks.render('javascriptcore.njk', {
             file: file,
