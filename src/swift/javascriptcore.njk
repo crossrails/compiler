@@ -32,9 +32,11 @@
     <% if module.name == file.filename -%>
         <% filter indent(-3) %>
             extension JSProperty {
-                <% for identifier in this.identifiers -%>
-                    static let <$ identifier $> : JSProperty = "<$ identifier $>"
-                <% endfor %>
+                <%- filter indent(-2) -%>
+                    <% for identifier in module.identifiers|array %>
+                        static let <$ identifier $> : JSProperty = "<$ identifier $>"
+                    <%- endfor %>
+                <%- endfilter %>
             }
         <%- endfilter %>
     <% endif %>

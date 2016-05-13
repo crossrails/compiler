@@ -4,27 +4,25 @@ import * as Path from 'path';
 import * as ts from "typescript";
 import log from "./log"
 
-export abstract class Declaration {    
+export abstract class Declaration {       
     readonly name: string; 
     readonly comment: string
     readonly parent: Declaration|SourceFile;
     
     constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
-        //this.parent = parent; 
+        //make parent non-enumerable to avoid circular reference 
+        Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
         this.name = (node.name as ts.Identifier).text;
+        this.module.identifiers.add(this.name);
+    }
+
+    get module(): Module {
+        return this.parent.module;
     }
     
-    // get kind(): string {
-    //     return this.constructor.name;
-    // }    
-
-    // get module(): Module {
-    //     return this.parent.module;
-    // }
-    
-    // get sourceFile(): SourceFile {
-    //     return this.parent.sourceFile;
-    // }
+    get sourceFile(): SourceFile {
+        return this.parent.sourceFile;
+    }
         
     abstract accept(visitor: DeclarationVisitor): void;   
 }
@@ -83,7 +81,7 @@ export class SourceFile {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
         this.filename = Path.parse(node.fileName).name;
-        // this.module = module
+        Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: Declaration[] = [];
         for (let statement of node.statements) {
             if(!(statement.flags & ts.NodeFlags.Export)) {
@@ -100,7 +98,7 @@ export class SourceFile {
         }
         this.declarations = declarations;
     }
-    
+        
     get sourceFile(): SourceFile {
         return this;
     }
@@ -111,11 +109,13 @@ export class Module {
     readonly name: string;    
     readonly src: string;
     readonly files: ReadonlyArray<SourceFile>;
+    readonly identifiers: Set<string>;
     
     constructor(file: string) {
         let path = Path.parse(file);
         this.src = path.base;
         this.name = path.name;
+        this.identifiers = new Set();
         let files: SourceFile[] = [];
         try {
             log.debug(`Attempting to open sourcemap at ` + Path.relative('.', `${file}.map`));
@@ -125,6 +125,7 @@ export class Module {
                 let filename = `${map.sourceRoot}${source}`;
                 log.info(`Parsing ` + Path.relative('.', filename));
                 files.push(new SourceFile(ts.createSourceFile(filename, readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this));
+                this.identifiers.add
             }
         } catch(error) {
             log.debug(`No sourcemap found, parsing ` + Path.relative('.', file));

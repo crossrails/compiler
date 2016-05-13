@@ -1,6 +1,7 @@
 import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
 import log from "./log"
 import * as ast from "./ast" 
+import {writeFile} from 'fs';
 
 let filename: string|undefined = process.argv[2];
 
@@ -29,6 +30,10 @@ if(filename == undefined) {
     nunjucks.addFilter('indent', (text: string, direction: number) => {
         let indent = /^( *)\S/m.exec(text)![1].length;
         return text.replace(new RegExp(`^ {${indent}}`, 'gm'), "    ".repeat(indent/4 + direction));
+    });
+    
+    nunjucks.addFilter('array', (iterable: Iterable<any>) => {
+        return Array.from(iterable);
     });
     
     nunjucks.addFilter('kind', (object: any) => {
@@ -61,7 +66,7 @@ if(filename == undefined) {
     
     require("./swift/swift");
     for(let file of module.files as Array<ast.SourceFile>) {
-        console.log(nunjucks.render('javascriptcore.njk', {
+        writeFile(`${file.filename}.swift`, nunjucks.render('javascriptcore.njk', {
             file: file,
             module: module, 
         }));

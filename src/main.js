@@ -2,12 +2,14 @@
 const nunjucks_1 = require('nunjucks');
 const log_1 = require("./log");
 const ast = require("./ast");
+const fs_1 = require('fs');
 let filename = process.argv[2];
 if (filename == undefined) {
     log_1.default.debug('No filename supplied attempting to read package.json');
 }
 else {
     let module = new ast.Module(filename);
+    log_1.default.debug(module.identifiers.entries());
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));   
@@ -28,6 +30,9 @@ else {
     nunjucks.addFilter('indent', (text, direction) => {
         let indent = /^( *)\S/m.exec(text)[1].length;
         return text.replace(new RegExp(`^ {${indent}}`, 'gm'), "    ".repeat(indent / 4 + direction));
+    });
+    nunjucks.addFilter('array', (iterable) => {
+        return Array.from(iterable);
     });
     nunjucks.addFilter('kind', (object) => {
         return object.constructor.name;
@@ -56,7 +61,7 @@ else {
     });
     require("./swift/swift");
     for (let file of module.files) {
-        console.log(nunjucks.render('javascriptcore.njk', {
+        fs_1.writeFile(`${file.filename}.swift`, nunjucks.render('javascriptcore.njk', {
             file: file,
             module: module,
         }));

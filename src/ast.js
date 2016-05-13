@@ -6,8 +6,16 @@ const ts = require("typescript");
 const log_1 = require("./log");
 class Declaration {
     constructor(node, parent) {
-        //this.parent = parent; 
+        //make parent non-enumerable to avoid circular reference 
+        Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent });
         this.name = node.name.text;
+        this.module.identifiers.add(this.name);
+    }
+    get module() {
+        return this.parent.module;
+    }
+    get sourceFile() {
+        return this.parent.sourceFile;
     }
 }
 exports.Declaration = Declaration;
@@ -46,7 +54,7 @@ class SourceFile {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
         this.filename = Path.parse(node.fileName).name;
-        // this.module = module
+        Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module });
         let declarations = [];
         for (let statement of node.statements) {
             if (!(statement.flags & ts.NodeFlags.Export)) {
@@ -75,6 +83,7 @@ class Module {
         let path = Path.parse(file);
         this.src = path.base;
         this.name = path.name;
+        this.identifiers = new Set();
         let files = [];
         try {
             log_1.default.debug(`Attempting to open sourcemap at ` + Path.relative('.', `${file}.map`));
@@ -84,6 +93,7 @@ class Module {
                 let filename = `${map.sourceRoot}${source}`;
                 log_1.default.info(`Parsing ` + Path.relative('.', filename));
                 files.push(new SourceFile(ts.createSourceFile(filename, fs_1.readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this));
+                this.identifiers.add;
             }
         }
         catch (error) {
