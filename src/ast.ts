@@ -10,17 +10,21 @@ export abstract class Declaration {
     readonly parent: Declaration|SourceFile;
     
     constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
-        this.parent = parent; 
+        //this.parent = parent; 
         this.name = (node.name as ts.Identifier).text;
     }
     
-    get module(): Module {
-        return this.parent.module;
-    }
+    // get kind(): string {
+    //     return this.constructor.name;
+    // }    
+
+    // get module(): Module {
+    //     return this.parent.module;
+    // }
     
-    get sourceFile(): SourceFile {
-        return this.parent.sourceFile;
-    }
+    // get sourceFile(): SourceFile {
+    //     return this.parent.sourceFile;
+    // }
         
     abstract accept(visitor: DeclarationVisitor): void;   
 }
@@ -79,7 +83,7 @@ export class SourceFile {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
         this.filename = Path.parse(node.fileName).name;
-        this.module = module
+        // this.module = module
         let declarations: Declaration[] = [];
         for (let statement of node.statements) {
             if(!(statement.flags & ts.NodeFlags.Export)) {

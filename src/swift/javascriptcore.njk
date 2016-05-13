@@ -1,45 +1,42 @@
 <% extends "swift.njk" %>
 
-<# Global object #>
-    <% block file_prefix_impl %>
-        <% if is module file -%>
-            var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "<$ bundle_id $>")!.pathForResource("<$ src $>", ofType: "js")!)
+<% block header %>
+    <%- if module.name == file.filename -%>
+        var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "<$ bundle_id $>")!.pathForResource("<$ src $>", ofType: "js")!)
+    <% endif %>
+<% endblock %>
+
+<% block let %>
+    <%- if declaration.type|kind == 'AnyType' -%>
+        = this[.<$ declaration.name $>].infer()
+    <%- else -%>
+        = <$ declaration.type|signature $>(this[.<$ declaration.name $>])
+    <%- endif %>
+<% endblock %>
+
+<% block var -%> {
+    get {
+        <% if declaration.type|kind == 'AnyType' -%>
+            return this[.<$ declaration.name $>].infer()
+        <%- else -%>
+            return <$ declaration.type|signature $>(this[.<$ declaration.name $>])
         <%- endif %>
-    <% endblock %>
+    }
+    set {
+        this[.<$ declaration.name $>] = this.valueOf(newValue)
+    }
+} 
+<% endblock %>
 
-<# Constants #>
-    <% block let_impl %>
-        <% if is any -%>
-            = this[.<$ name $>].infer()
-        <% else %>
-            = <$ type $>(this[.<$ name $>])
-        <% endif %>
-    <% endblock %>
-
-<# Variables #>
-    <% block var_impl %>
-        {
-            get {
-                <% if is any -%>
-                    return this[.<$ name $>].infer()
-                <% else %>
-                    return <$ type $>(this[.<$ name $>])
-                <% endif %>
-            }
-            set {
-                this[.<$ name $>] =  this.valueOf(newValue)
-            }
-        }    
-    <% endblock %>
-
-<# Symbol Table #>
-    <% block file_suffix_impl %>
-        <% if is module file %>
+<% block footer -%>
+    <% if module.name == file.filename -%>
+        <% filter indent(-3) %>
             extension JSProperty {
-                <% for identifier in this.identifiers %>
-                    static let <$ identifier } : JSProperty = "<$ identifier $>"
+                <% for identifier in this.identifiers -%>
+                    static let <$ identifier $> : JSProperty = "<$ identifier $>"
                 <% endfor %>
             }
-        <% endif %>
-    <% endblock %>
+        <%- endfilter %>
+    <% endif %>
+<% endblock %>
 

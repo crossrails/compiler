@@ -1,14 +1,13 @@
 import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
 import log from "./log"
-import {Transpiler} from "./transpiler" 
-import {Module, Type, SourceFile} from "./ast" 
+import * as ast from "./ast" 
 
 let filename: string|undefined = process.argv[2];
 
 if(filename == undefined) {
     log.debug('No filename supplied attempting to read package.json')
 } else {
-    let module = new Module(filename);
+    let module = new ast.Module(filename);
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));   
@@ -16,9 +15,7 @@ if(filename == undefined) {
     // transpiler.transpile(module);
     var nunjucks = new Nunjucks(new FileSystemLoader('src/swift'), { 
         autoescape: false, 
-        throwOnUndefined: true,
-        trimBlocks: false,
-        lstripBlocks: true,
+        // throwOnUndefined: true,
         tags: {
             blockStart: '<%',
             blockEnd: '%>',
@@ -28,11 +25,43 @@ if(filename == undefined) {
             commentEnd: '#>'
         }
     });
-    nunjucks.addFilter('typename', (type: Type) => {
-        return type.constructor.name;
+    
+    nunjucks.addFilter('indent', (text: string, direction: number) => {
+        let indent = /^( *)\S/m.exec(text)![1].length;
+        return text.replace(new RegExp(`^ {${indent}}`, 'gm'), "    ".repeat(indent/4 + direction));
     });
-    for(let file of module.files as Array<SourceFile>) {
-        console.log(nunjucks.render('swift.njk', {
+    
+    nunjucks.addFilter('kind', (object: any) => {
+        return object.constructor.name;
+    });
+    
+    nunjucks.addFilter('keyword', (variable: ast.VariableDeclaration) => {
+        return variable.constant ? 'let' : 'var';
+    });
+    
+    nunjucks.addFilter('signature', (type: ast.Type) => {
+        return type.accept({
+            visitAnyType(node: ast.AnyType): string {
+                return 'Any';
+            },
+            visitStringType(node: ast.StringType): string {
+                return 'String'
+            },            
+            visitNumberType(node: ast.NumberType): string {
+                return 'Double'
+            },            
+            visitBooleanType(node: ast.BooleanType): string {
+                return 'Bool'
+            },
+            visitArrayType(node: ast.ArrayType): string {
+                return `[${node.typeArguments[0].accept(this)}]`;        
+            }
+        }) + (type.optional ? '?' : '')
+    });
+    
+    require("./swift/swift");
+    for(let file of module.files as Array<ast.SourceFile>) {
+        console.log(nunjucks.render('javascriptcore.njk', {
             file: file,
             module: module, 
         }));

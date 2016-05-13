@@ -1,17 +1,12 @@
 import Foundation
 
-<# Global object #>
-    <%- block file_prefix_impl %><% endblock %>
+<% block header %><% endblock -%>
 
-<%- for declaration in file.declarations %>
-    <% if declaration.constant %>
-        <#- Constants -#>
-            public let <$ declaration.name $> :<$ declaration.type|typename $> <% block let_impl %><% endblock %>
-    <% elif declaration.constant %>
-        <#- Variables -#>
-            public var <$ declaration.name $> :<$ declaration.type|typename $> <% block var_impl %><% endblock %>
-    <% endif %>
-<%- endfor -%>
+<% for declaration in file.declarations %>
+    <%- if declaration|kind == 'VariableDeclaration' -%>
+        public <$ declaration|keyword $> <$ declaration.name $> :<$ declaration.type|signature $> <% if declaration.constant %><% block let %><% endblock %><% else %><% block var %><% endblock %><% endif %>
+    <%- elif declaration.constant -%>
+    <%- endif %>
+<% endfor -%>
 
-<#- Symbol Table -#>
-    <%- block file_suffix_impl %><% endblock -%>
+<% block footer %><% endblock %>

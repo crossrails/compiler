@@ -6,14 +6,8 @@ const ts = require("typescript");
 const log_1 = require("./log");
 class Declaration {
     constructor(node, parent) {
-        this.parent = parent;
+        //this.parent = parent; 
         this.name = node.name.text;
-    }
-    get module() {
-        return this.parent.module;
-    }
-    get sourceFile() {
-        return this.parent.sourceFile;
     }
 }
 exports.Declaration = Declaration;
@@ -52,7 +46,7 @@ class SourceFile {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
         this.filename = Path.parse(node.fileName).name;
-        this.module = module;
+        // this.module = module
         let declarations = [];
         for (let statement of node.statements) {
             if (!(statement.flags & ts.NodeFlags.Export)) {

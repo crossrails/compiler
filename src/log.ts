@@ -4,23 +4,23 @@ import * as Path from 'path';
 class Log {
     public level: Log.Level = Log.Level.DEBUG;
 
-    public debug(message: string, node?: ts.Node) {
+    public debug(message: any, node?: ts.Node) {
         this.log(Log.Level.DEBUG, message, node);
     }
     
-    public info(message: string, node?: ts.Node) {
+    public info(message: any, node?: ts.Node) {
         this.log(Log.Level.INFO, message, node);
     }
     
-    public warn(message: string, node?: ts.Node) {
+    public warn(message: any, node?: ts.Node) {
         this.log(Log.Level.WARNING, message, node);
     }
     
-    public error(message: string, node?: ts.Node) {
+    public error(message: any, node?: ts.Node) {
         this.log(Log.Level.ERROR, message, node);
     }
     
-    public log(level: Log.Level, message: string, node?: ts.Node) {
+    public log(level: Log.Level, message: any   , node?: ts.Node) {
         if(level >= this.level) {
             if(node) {
                 let file = node.getSourceFile();
