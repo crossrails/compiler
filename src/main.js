@@ -9,7 +9,6 @@ if (filename == undefined) {
 }
 else {
     let module = new ast.Module(filename);
-    log_1.default.debug(module.identifiers.entries());
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));   

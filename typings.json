@@ -1,8 +1,7 @@
 {
   "ambientDependencies": {
-    "esprima": "registry:dt/esprima#2.1.0+20160317120654",
-    "estree": "registry:dt/estree#0.0.0+20160317120654",
+    "commander": "registry:dt/commander#2.3.0+20160317120654",
     "node": "registry:dt/node#4.0.0+20160330064709",
-    "winston": "registry:dt/winston#0.0.0+20160324163241"
+    "nunjucks": "registry:dt/nunjucks#0.0.0+20160505174532"
   }
 }
