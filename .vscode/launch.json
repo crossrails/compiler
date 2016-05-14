@@ -8,9 +8,10 @@
 			"program": "${workspaceRoot}\\src\\main.js",
 			"stopOnEntry": false,
 			"args": [
-                "${workspaceRoot}\\tests\\types.ts"
+                "types.ts",
+				"--swift.outDir=swift"
             ],
-			"cwd": "${workspaceRoot}",
+			"cwd": "${workspaceRoot}\\tests",
 			"preLaunchTask": "build",
 			"runtimeExecutable": null,
 			"runtimeArgs": [
@@ -19,9 +20,8 @@
 			"env": {
 				"NODE_ENV": "development"
 			},
-			"externalConsole": true,
-			"sourceMaps": true,
-			"outDir": null
+			"externalConsole": false,
+			"sourceMaps": true
 		},
 		{
 			"name": "Attach",

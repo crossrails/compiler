@@ -71,7 +71,7 @@ export class MethodDeclaration extends Declaration {
 }
 
 export class SourceFile {
-    readonly filename: string;    
+    readonly path: path.ParsedPath;    
     readonly comment: string;  
     readonly declarations: ReadonlyArray<Declaration>
     readonly module: Module;
@@ -80,7 +80,7 @@ export class SourceFile {
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
-        this.filename = path.parse(node.fileName).name;
+        this.path = path.parse(node.fileName);
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: Declaration[] = [];
         for (let statement of node.statements) {
@@ -123,8 +123,10 @@ export class Module {
             for (let source of map.sources) {
                 let filename = `${map.sourceRoot}${source}`;
                 log.info(`Parsing ` + path.relative('.', filename));
-                files.push(new SourceFile(ts.createSourceFile(filename, readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this));
-                this.identifiers.add
+                let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this);
+                if(sourceFile.declarations.length) {
+                    files.push(sourceFile);
+                }
             }
         } catch(error) {
             log.debug(`No sourcemap found, parsing ` + path.relative('.', file));

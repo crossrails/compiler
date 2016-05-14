@@ -15,6 +15,7 @@ else {
     // }, 4));       
     if (options.swift) {
         let emitter = new swift_1.SwiftEmitter(module);
+        log_1.default.debug(options.swift.outDir);
         emitter.emit(Object.assign({}, options, options.swift));
     }
 }

@@ -1,6 +1,5 @@
 import log from "./log"
 import {Module} from "./ast" 
-import {EmitterOptions} from './emitter'
 import {SwiftEmitter, SwiftOptions} from './swift/swift'
 import args = require('yargs');
 
