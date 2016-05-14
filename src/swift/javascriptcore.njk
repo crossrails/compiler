@@ -2,7 +2,7 @@
 
 <% block header %>
     <%- if module.name == file.filename -%>
-        var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "<$ bundle_id $>")!.pathForResource("<$ src $>", ofType: "js")!)
+        var this :JSInstance = try! JSContext().eval(NSBundle<% if bundleId %>(identifier: "<$ bundleId $>")!<% else %>.mainBundle<% endif %>.pathForResource("<$ module.src.name $>", ofType: "js")!)
     <% endif %>
 <% endblock %>
 

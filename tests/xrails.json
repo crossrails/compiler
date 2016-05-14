@@ -1,0 +1,16 @@
+{
+    "outDir": ".",
+    "newLine": "crlf",
+    "noEmit": false,
+    "noEmitHelpers": false,
+    "swift": {
+        "engine": "javascriptcore",
+        "outDir": "swift/src",
+        "bundleId": "io.xrails.src"
+    },
+    "java": {
+        "engine": "nashorn",
+        "outDir": "java/src/io/xrails"
+        //"preserveFolders": true
+    }
+}

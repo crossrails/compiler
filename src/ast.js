@@ -1,6 +1,6 @@
 "use strict";
 const fs_1 = require('fs');
-const Path = require('path');
+const path = require('path');
 //import * as doctrine from 'doctrine';
 const ts = require("typescript");
 const log_1 = require("./log");
@@ -53,7 +53,7 @@ class SourceFile {
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
-        this.filename = Path.parse(node.fileName).name;
+        this.filename = path.parse(node.fileName).name;
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module });
         let declarations = [];
         for (let statement of node.statements) {
@@ -80,24 +80,23 @@ class SourceFile {
 exports.SourceFile = SourceFile;
 class Module {
     constructor(file) {
-        let path = Path.parse(file);
-        this.src = path.base;
-        this.name = path.name;
+        this.src = path.parse(file);
+        this.name = this.src.name;
         this.identifiers = new Set();
         let files = [];
         try {
-            log_1.default.debug(`Attempting to open sourcemap at ` + Path.relative('.', `${file}.map`));
+            log_1.default.debug(`Attempting to open sourcemap at ` + path.relative('.', `${file}.map`));
             let map = JSON.parse(fs_1.readFileSync(`${file}.map`).toString());
             log_1.default.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             for (let source of map.sources) {
                 let filename = `${map.sourceRoot}${source}`;
-                log_1.default.info(`Parsing ` + Path.relative('.', filename));
+                log_1.default.info(`Parsing ` + path.relative('.', filename));
                 files.push(new SourceFile(ts.createSourceFile(filename, fs_1.readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this));
                 this.identifiers.add;
             }
         }
         catch (error) {
-            log_1.default.debug(`No sourcemap found, parsing ` + Path.relative('.', file));
+            log_1.default.debug(`No sourcemap found, parsing ` + path.relative('.', file));
             files = [new SourceFile(ts.createSourceFile(file, fs_1.readFileSync(file).toString(), ts.ScriptTarget.ES6, true), this)];
         }
         this.files = files;
