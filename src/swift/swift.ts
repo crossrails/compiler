@@ -50,7 +50,7 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
     
     protected writeFiles(module: ast.Module, nunjucks: Nunjucks, options: SwiftOptions): void {
         for(let file of module.files as Array<ast.SourceFile>) {
-            writeFile(`${file.filename}.swift`, nunjucks.render(`${options.engine || 'javascriptcore'}.njk`, {
+            writeFile(`${file.filename}.swift`, nunjucks.render(`${options.engine}.njk`, {
                 file: file,
                 module: module, 
                 bundleId: options.bundleId
