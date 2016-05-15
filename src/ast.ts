@@ -2,7 +2,7 @@ import {readFileSync} from 'fs';
 import * as path from 'path';
 //import * as doctrine from 'doctrine';
 import * as ts from "typescript";
-import log from "./log"
+import {log} from "./log"
 
 export abstract class Declaration {       
     readonly name: string; 

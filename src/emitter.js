@@ -28,16 +28,29 @@ class Emitter {
         this.addFilters(this.nunjucks);
     }
     emit(options) {
-        let defaults = {
-            outDir: '.',
-            newLine: 'crlf',
-            noEmit: false,
-            noEmitHelpers: false
-        };
-        this.writeFiles(this.module, this.nunjucks, Object.assign(defaults, this.defaultOptions, options));
+        this.writeFiles(this.module, this.nunjucks, options);
     }
-    get defaultOptions() { }
     get loader() { }
 }
+Emitter.options = {
+    'outDir': {
+        group: 'General options:',
+        desc: 'The directory to output the transpiled files to, omit to output beside original source files',
+        type: 'string',
+        default: '.'
+    },
+    'noEmit': {
+        group: 'General options:',
+        desc: 'Do not emit outputs',
+        type: 'boolean',
+        default: false
+    },
+    'noEmitWrapper': {
+        group: 'General options:',
+        desc: 'Do not include the wrapper for JS engine in compiled output',
+        type: 'boolean',
+        default: false
+    }
+};
 exports.Emitter = Emitter;
 //# sourceMappingURL=emitter.js.map

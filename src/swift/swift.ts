@@ -1,9 +1,10 @@
 import * as path from 'path';
-import log from "../log"
+import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
 import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
 import * as ast from "../ast" 
 import {writeFile} from 'fs';
+import {Options} from 'yargs';
 
 export type SwiftOptions = EmitterOptions & SwiftEmitterOptions; 
 
@@ -13,16 +14,27 @@ interface SwiftEmitterOptions {
 }
 
 export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
-
-    protected get loader(): FileSystemLoader {
-        return new FileSystemLoader(__dirname);
+    
+    static readonly options :{ [option :string] :Options} = { 
+        swift: { 
+            group: 'Swift options:',
+            type: 'boolean', 
+            desc: 'Tranpile source to swift (enabled automatically if any swift. option specified e.g. swift.outDir=gen)' 
+        },
+        'swift.javascriptcore': { 
+            group: 'Swift options:',
+            type: 'boolean', 
+            desc: 'Use the JavaScriptCore engine under the hood [default]',
+        },
+        'swift.bundleId': { 
+            group: 'Swift options:',
+            desc: 'The id of the bundle containing the javascript source file, omit to use the main bundle',
+            type: 'string'             
+        }
     }
     
-    protected get defaultOptions(): SwiftEmitterOptions {
-        return {
-            engine: 'javascriptcore',
-            bundleId: undefined 
-        }
+    protected get loader(): FileSystemLoader {
+        return new FileSystemLoader(__dirname);
     }
     
     protected addFilters(nunjucks: Nunjucks): void {

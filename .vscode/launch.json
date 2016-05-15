@@ -5,11 +5,13 @@
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}\\src\\main.js",
+			"program": "${workspaceRoot}\\src\\main.ts",
 			"stopOnEntry": false,
 			"args": [
-                "types.js",
-				"--swift.outDir=swift\\src"
+				"--help"
+                // "types.js",
+				// "--logLevel=debug",
+				// "--swift.outDir=swift\\src"
             ],
 			"cwd": "${workspaceRoot}\\tests",
 			"preLaunchTask": "build",
@@ -21,6 +23,7 @@
 				"NODE_ENV": "development"
 			},
 			"externalConsole": false,
+			"outDir": "${workspaceRoot}\\src",
 			"sourceMaps": true
 		},
 		{

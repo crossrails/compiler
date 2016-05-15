@@ -1,14 +1,36 @@
 import {Environment as Nunjucks, ILoader as Loader} from 'nunjucks'
 import {Module} from "./ast" 
+import {Options} from 'yargs';
 
 export interface EmitterOptions {
    outDir: string
-   newLine: 'lf'|'crlf'
+//    newLine: 'lf'|'crlf'
    noEmit: boolean
    noEmitHelpers: boolean
 }
 
 export abstract class Emitter<T> {
+    
+    static readonly options :{ [option :string] :Options} = { 
+        'outDir': { 
+            group: 'General options:',
+            desc: 'The directory to output the transpiled files to, omit to output beside original source files',
+            type: 'string',
+            default: '.'             
+        },
+        'noEmit': { 
+            group: 'General options:',
+            desc: 'Do not emit outputs',
+            type: 'boolean',             
+            default: false             
+        },
+        'noEmitWrapper': { 
+            group: 'General options:',
+            desc: 'Do not include the wrapper for JS engine in compiled output',
+            type: 'boolean',         
+            default: false             
+        }
+    }
     
     private readonly module: Module;
     private readonly nunjucks: Nunjucks;
@@ -41,16 +63,8 @@ export abstract class Emitter<T> {
     }
     
     public emit(options: EmitterOptions & T) {
-        let defaults: EmitterOptions = {
-            outDir: '.',
-            newLine: 'crlf',
-            noEmit: false,
-            noEmitHelpers: false        
-        }        
-        this.writeFiles(this.module, this.nunjucks, Object.assign(defaults, this.defaultOptions, options));
+        this.writeFiles(this.module, this.nunjucks, options);
     }
-
-    protected abstract get defaultOptions(): T;
     
     protected abstract get loader(): Loader;
     

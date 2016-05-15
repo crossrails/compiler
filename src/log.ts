@@ -1,8 +1,19 @@
 import * as ts from "typescript";
 import * as Path from 'path';
 
-class Log {
-    public level: Log.Level = Log.Level.DEBUG;
+export class Log {
+    public level: Log.Level = Log.Level.WARNING;
+    
+    public setLevel(level: string) {
+        let i = 0;
+        for(let i = 0, l :string; l = Log.Level[i]; i++) {
+            if(l == level.toUpperCase()) {
+                this.level = i;
+                return;
+            }
+        }
+        this.warn(`Unknown log level '${level}', level remaining unchanged at ${Log.Level[this.level]}`);        
+    }
 
     public debug(message: any, node?: ts.Node) {
         this.log(Log.Level.DEBUG, message, node);
@@ -34,7 +45,7 @@ class Log {
     }
 }
 
-namespace Log {
+export namespace Log {
     export enum Level {
         DEBUG,
         INFO,
@@ -43,6 +54,4 @@ namespace Log {
     }
 }
 
-let log = new Log();
-
-export default log;
+export let log = new Log();

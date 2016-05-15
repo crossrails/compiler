@@ -2,7 +2,17 @@
 const Path = require('path');
 class Log {
     constructor() {
-        this.level = Log.Level.DEBUG;
+        this.level = Log.Level.WARNING;
+    }
+    setLevel(level) {
+        let i = 0;
+        for (let i = 0, l; l = Log.Level[i]; i++) {
+            if (l == level.toUpperCase()) {
+                this.level = i;
+                return;
+            }
+        }
+        this.warn(`Unknown log level '${level}', level remaining unchanged at ${Log.Level[this.level]}`);
     }
     debug(message, node) {
         this.log(Log.Level.DEBUG, message, node);
@@ -29,6 +39,7 @@ class Log {
         }
     }
 }
+exports.Log = Log;
 (function (Log) {
     (function (Level) {
         Level[Level["DEBUG"] = 0] = "DEBUG";
@@ -37,8 +48,6 @@ class Log {
         Level[Level["ERROR"] = 3] = "ERROR";
     })(Log.Level || (Log.Level = {}));
     var Level = Log.Level;
-})(Log || (Log = {}));
-let log = new Log();
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = log;
+})(Log = exports.Log || (exports.Log = {}));
+exports.log = new Log();
 //# sourceMappingURL=log.js.map
