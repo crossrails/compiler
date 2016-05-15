@@ -1,14 +1,12 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "umd",
+    "module": "none",
     "noImplicitAny": true,
     "sourceMap": true,
-    "strictNullChecks": true,
-    "outDir": "js",
-    "declaration": true
+    "strictNullChecks": true
   },
   "files": [
-    "src.ts"
+    "types.ts"
   ]
 }

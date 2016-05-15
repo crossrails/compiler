@@ -8,8 +8,8 @@
 			"program": "${workspaceRoot}\\src\\main.js",
 			"stopOnEntry": false,
 			"args": [
-                "types.ts",
-				"--swift.outDir=swift"
+                "types.js",
+				"--swift.outDir=swift\\src"
             ],
 			"cwd": "${workspaceRoot}\\tests",
 			"preLaunchTask": "build",

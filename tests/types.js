@@ -1,72 +1,93 @@
-"use strict";
-//export constants
+//constants
 /**
  * @type {!boolean}
  */
-exports.booleanConst = false;
+var booleanConst = false;
 /**
  * @type {!number}
  */
-exports.numberConst = Number.NaN;
+var numberConst = Number.NaN;
 /**
  * @type {!string}
  */
-exports.stringConst = 'stringConstLiteral';
+var stringConst = 'stringConstLiteral';
 /**
  * @type {!Array<number>}
  */
-exports.numberArrayConst = [1, 2, 3];
+var numberArrayConst = [1, 2, 3];
 /**
  * @type {!Array<Array<string>>}
  */
-exports.stringArrayArrayConst = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
+var stringArrayArrayConst = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
 /**
  * @type {!Object}
  */
-exports.anyConst = 'anyConstLiteral';
-//nullable export constants
+var anyConst = 'anyConstLiteral';
+//nullable constants
 /**
  * @type {?boolean}
  */
-exports.optionalBooleanConst = null;
+var optionalBooleanConst = null;
 /**
  * @type {?number}
  */
-exports.optionalNumberConst = null;
+var optionalNumberConst = null;
 /**
  * @type {?string}
  */
-exports.optionalStringConst = null;
+var optionalStringConst = null;
 /**
  * @type {?Array<number>}
  */
-exports.optionalNumberArrayConst = null;
+var optionalNumberArrayConst = null;
 /**
  * @type {?Object}
  */
-exports.optionalAnyConst = null;
+var optionalAnyConst = null;
 //variables
 /**
  * @type {!boolean}
  */
-exports.booleanVar = true;
+var booleanVar = true;
 /**
  * @type {!number}
  */
-exports.numberVar = 0;
+var numberVar = 0;
 /**
  * @type {!string}
  */
-exports.stringVar = "stringVarLiteral";
+var stringVar = "stringVarLiteral";
 /**
  * @type {!Array<number>}
  */
-exports.numberArrayVar = [];
+var numberArrayVar = [];
 /**
  * @type {!Object}
  */
-exports.anyVar = "anyVarLiteral";
+var anyVar = "anyVarLiteral";
 /**
  * @type {!Array<Array<string>>}
  */
-exports.stringArrayArrayVar = [];
+var stringArrayArrayVar = [];
+//nullable variables
+/**
+ * @type {?boolean}
+ */
+var optionalBooleanVar;
+/**
+ * @type {?number}
+ */
+var optionalNumberVar;
+/**
+ * @type {?string}
+ */
+var optionalStringVar;
+/**
+ * @type {?Array<number>}
+ */
+var optionalNumberArrayVar;
+/**
+ * @type {?Object}
+ */
+var optionalAnyVar;
+//# sourceMappingURL=types.js.map
