@@ -43,6 +43,7 @@ if(options.logLevel) {
 
 if(filename == undefined) {
     log.debug('No filename supplied attempting to read package.json')
+    //todo
 } else {
     let module = new Module(filename);
     // console.log(JSON.stringify(module, (key, value) => {

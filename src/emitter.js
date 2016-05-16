@@ -1,7 +1,9 @@
 "use strict";
+const log_1 = require("./log");
 const nunjucks_1 = require('nunjucks');
 class Emitter {
     constructor(module) {
+        log_1.log.debug(`Loading ${this.constructor.name}`);
         this.module = module;
         this.nunjucks = new nunjucks_1.Environment(this.loader, {
             autoescape: false,
@@ -32,10 +34,13 @@ class Emitter {
         for (let engine of this.engines) {
             if (options[engine]) {
                 emittedOutput = true;
-                this.writeFiles(this.module, this.nunjucks, engine, Object.assign({}, options, options[engine]));
+                let engineOptions = Object.assign({}, options, options[engine]);
+                log_1.log.info(`Emitting source for engine ${engine} to ${engineOptions.outDir}`);
+                this.writeFiles(this.module, this.nunjucks, engine, engineOptions);
             }
         }
         if (!emittedOutput) {
+            log_1.log.info(`Emitting source for engine ${this.engines[0]} to ${options.outDir}`);
             this.writeFiles(this.module, this.nunjucks, this.engines[0], options);
         }
     }

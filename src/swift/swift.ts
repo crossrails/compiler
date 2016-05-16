@@ -67,6 +67,7 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         for(let file of module.files as Array<ast.SourceFile>) {
             writtenModuleFile = writtenModuleFile || module.name == file.path.name;
             let filename = path.join(options.outDir, path.relative('.', file.path.dir), module.name);
+            log.info(`Emitting file ${filename}.swift`);
             writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
                 file: file,
                 module: module, 
@@ -74,7 +75,9 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
             }));
         }        
         if(!writtenModuleFile) {
-            writeFile(`${path.join(options.outDir, module.name)}.swift`, nunjucks.render(`${engine}.njk`, {
+            let filename = path.join(options.outDir, module.name);
+            log.info(`Emitting file ${filename}.swift`);
+            writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
                 module: module, 
                 bundleId: options.bundleId
             }));            

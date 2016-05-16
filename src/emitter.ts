@@ -1,3 +1,4 @@
+import {log} from "./log"
 import {Environment as Nunjucks, ILoader as Loader} from 'nunjucks'
 import {Module} from "./ast" 
 import {Options} from 'yargs';
@@ -36,6 +37,7 @@ export abstract class Emitter<T extends EmitterOptions> {
     private readonly nunjucks: Nunjucks;
     
     constructor(module: Module) {
+        log.debug(`Loading ${this.constructor.name}`);
         this.module = module;
         this.nunjucks = new Nunjucks(this.loader, { 
             autoescape: false, 
@@ -67,10 +69,13 @@ export abstract class Emitter<T extends EmitterOptions> {
         for(let engine of this.engines as Array<string>) {
             if(options[engine]) {
                 emittedOutput = true;
-                this.writeFiles(this.module, this.nunjucks, engine, Object.assign({}, options, options[engine]));
+                let engineOptions = Object.assign({}, options, options[engine])
+                log.info(`Emitting source for engine ${engine} to ${engineOptions.outDir}`);
+                this.writeFiles(this.module, this.nunjucks, engine, engineOptions);
             }
         }
         if(!emittedOutput) {
+            log.info(`Emitting source for engine ${this.engines[0]} to ${options.outDir}`);
             this.writeFiles(this.module, this.nunjucks, this.engines[0], options);            
         }
     }

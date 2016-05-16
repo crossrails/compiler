@@ -40,7 +40,9 @@ else {
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));       
+    //todo improve logging
     if (options.swift) {
+        log_1.log.debug('Starting swift emission...');
         let emitter = new swift_1.SwiftEmitter(module);
         emitter.emit(Object.assign({}, options, options.swift));
     }
