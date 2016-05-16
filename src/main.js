@@ -7,8 +7,8 @@ const args = require('yargs');
 let options = args
     .usage('Usage: $0 [file] [options]')
     .demand(1)
-    .example('$0 src.min.js --swift', 'Transpiles to swift, outputting beside original source files')
-    .example('$0 src.js --java.outDir java/src', 'Transpiles to java, outputting to the subdirectory java/src')
+    .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
+    .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')
     .alias('v', 'version').version()
     .help('h').alias('h', 'help')
     .group(['p', 'l', 'h', 'v'], 'Global options:')

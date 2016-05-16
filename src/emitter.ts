@@ -6,27 +6,27 @@ export interface EmitterOptions {
    outDir: string
 //    newLine: 'lf'|'crlf'
    noEmit: boolean
-   noEmitHelpers: boolean
+   noEmitWrapper: boolean
 }
 
-export abstract class Emitter<T> {
+export abstract class Emitter<T extends EmitterOptions> {
     
     static readonly options :{ [option :string] :Options} = { 
         'outDir': { 
             group: 'General options:',
-            desc: 'The directory to output the transpiled files to, omit to output beside original source files',
+            desc: 'Redirect output structure to a directory',
             type: 'string',
             default: '.'             
         },
         'noEmit': { 
             group: 'General options:',
-            desc: 'Do not emit outputs',
+            desc: 'Do not emit complied output',
             type: 'boolean',             
             default: false             
         },
         'noEmitWrapper': { 
             group: 'General options:',
-            desc: 'Do not include the wrapper for JS engine in compiled output',
+            desc: 'Do not emit the wrapper for the specified JS engine in compiled output',
             type: 'boolean',         
             default: false             
         }
@@ -62,13 +62,24 @@ export abstract class Emitter<T> {
         this.addFilters(this.nunjucks);
     }
     
-    public emit(options: EmitterOptions & T) {
-        this.writeFiles(this.module, this.nunjucks, options);
+    public emit(options: T & { [option :string] :Options}) {
+        let emittedOutput = false;  
+        for(let engine of this.engines as Array<string>) {
+            if(options[engine]) {
+                emittedOutput = true;
+                this.writeFiles(this.module, this.nunjucks, engine, Object.assign({}, options, options[engine]));
+            }
+        }
+        if(!emittedOutput) {
+            this.writeFiles(this.module, this.nunjucks, this.engines[0], options);            
+        }
     }
     
-    protected abstract get loader(): Loader;
+    protected abstract get engines(): ReadonlyArray<string>
+
+    protected abstract get loader(): Loader
     
-    protected abstract addFilters(nunjucks: Nunjucks): void;
+    protected abstract addFilters(nunjucks: Nunjucks): void
     
-    protected abstract writeFiles(module: Module, nunjucks: Nunjucks, options: EmitterOptions & T): void;
+    protected abstract writeFiles(module: Module, nunjucks: Nunjucks, engine: string, options: T): void
 }

@@ -6,31 +6,31 @@ import * as ast from "../ast"
 import {writeFile} from 'fs';
 import {Options} from 'yargs';
 
-export type SwiftOptions = EmitterOptions & SwiftEmitterOptions; 
-
-interface SwiftEmitterOptions {
-    engine: 'javascriptcore' 
+export interface SwiftEmitterOptions extends EmitterOptions {
+    javascriptcore?: EmitterOptions 
     bundleId: string | undefined    
 }
 
 export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
     
     static readonly options :{ [option :string] :Options} = { 
-        swift: { 
+        'swift': { 
             group: 'Swift options:',
-            type: 'boolean', 
-            desc: 'Tranpile source to swift (enabled automatically if any swift. option specified e.g. swift.outDir=gen)' 
+            desc: 'Compile source to swift (enabled automatically if any swift option specified e.g. swift.outDir=gen)' 
         },
         'swift.javascriptcore': { 
             group: 'Swift options:',
-            type: 'boolean', 
-            desc: 'Use the JavaScriptCore engine under the hood [default]',
+            desc: 'Compile source to use the JavaScriptCore engine under the hood [default]',
         },
         'swift.bundleId': { 
             group: 'Swift options:',
             desc: 'The id of the bundle containing the javascript source file, omit to use the main bundle',
             type: 'string'             
         }
+    }
+    
+    protected get engines(): ReadonlyArray<string> {
+        return ['javascriptcore'];
     }
     
     protected get loader(): FileSystemLoader {
@@ -62,19 +62,19 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         });        
     }
     
-    protected writeFiles(module: ast.Module, nunjucks: Nunjucks, options: SwiftOptions): void {
+    protected writeFiles(module: ast.Module, nunjucks: Nunjucks, engine: string, options: SwiftEmitterOptions): void {
         let writtenModuleFile = false;  
         for(let file of module.files as Array<ast.SourceFile>) {
             writtenModuleFile = writtenModuleFile || module.name == file.path.name;
             let filename = path.join(options.outDir, path.relative('.', file.path.dir), module.name);
-            writeFile(`${filename}.swift`, nunjucks.render(`${options.engine}.njk`, {
+            writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
                 file: file,
                 module: module, 
                 bundleId: options.bundleId
             }));
         }        
         if(!writtenModuleFile) {
-            writeFile(`${path.join(options.outDir, module.name)}.swift`, nunjucks.render(`${options.engine}.njk`, {
+            writeFile(`${path.join(options.outDir, module.name)}.swift`, nunjucks.render(`${engine}.njk`, {
                 module: module, 
                 bundleId: options.bundleId
             }));            

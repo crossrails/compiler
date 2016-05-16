@@ -1,21 +1,20 @@
 import {log} from "./log"
 import {Module} from "./ast" 
 import {Emitter} from "./emitter" 
-import {SwiftEmitter, SwiftOptions} from './swift/swift'
+import {SwiftEmitter, SwiftEmitterOptions} from './swift/swift'
 import args = require('yargs');
 
 interface CompilerOptions {
-   swift?: SwiftOptions
+   swift?: SwiftEmitterOptions
    java?: CompilerOptions & { engine?: 'nashorn'|'android-jsc', bundleId?: string }
    logLevel?: string
 }
 
-
-let options: CompilerOptions  = args
+let options: CompilerOptions = args
     .usage('Usage: $0 [file] [options]')
     .demand(1)
-    .example('$0 src.min.js --swift', 'Transpiles to swift, outputting beside original source files')
-    .example('$0 src.js --java.outDir java/src', 'Transpiles to java, outputting to the subdirectory java/src')
+    .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
+    .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')
     .alias('v', 'version').version()
     .help('h').alias('h', 'help')
     .group(['p', 'l', 'h', 'v'], 'Global options:')

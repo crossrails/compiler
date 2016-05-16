@@ -8,10 +8,10 @@
 			"program": "${workspaceRoot}\\src\\main.ts",
 			"stopOnEntry": false,
 			"args": [
-				"--help"
-                // "types.js",
-				// "--logLevel=debug",
-				// "--swift.outDir=swift\\src"
+				// "--help"
+                "types.js",
+				"--logLevel=debug",
+				"--swift.outDir=swift\\src"
             ],
 			"cwd": "${workspaceRoot}\\tests",
 			"preLaunchTask": "build",
