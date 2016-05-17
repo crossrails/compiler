@@ -5,10 +5,10 @@
   "scripts": {
     "start": "node ./bin/xrails",
     "build": "tsc",
-    "prepublish": "typings install && npm run build"
+    "prepublish": "npm run build"
   },
   "devDependencies": {
-    "typescript": "next"
+    "typescript": "1.9.0-dev.20160516"
   },
   "dependencies": {
     "doctrine": "^1.2.1",
