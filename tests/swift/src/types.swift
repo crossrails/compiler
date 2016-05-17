@@ -1,6 +1,6 @@
 import Foundation
 
-var this :JSInstance = try! JSContext().eval(NSBundle.mainBundle.pathForResource("types", ofType: "js")!)
+var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("types", ofType: "js")!)
     
 public let booleanConst :Bool = Bool(this[.booleanConst])
     
@@ -14,11 +14,11 @@ public let stringArrayArrayConst :[[String]] = [[String]](this[.stringArrayArray
     
 public let anyConst :Any = this[.anyConst].infer()
     
-public let optionalBooleanConst :Bool? = Bool?(this[.optionalBooleanConst])
+public let optionalBooleanConst :Bool? = Bool?(this[.optionalBooleanConst], wrapped: Bool.init)
     
-public let optionalNumberConst :Double? = Double?(this[.optionalNumberConst])
+public let optionalNumberConst :Double? = Double?(this[.optionalNumberConst], wrapped: Double.init)
     
-public let optionalStringConst :String? = String?(this[.optionalStringConst])
+public let optionalStringConst :String? = String?(this[.optionalStringConst], wrapped: String.init)
     
 public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst], element: Double.init)
     
@@ -80,7 +80,7 @@ public var stringArrayArrayVar :[[String]] {
     
 public var optionalBooleanVar :Bool? {
     get {
-        return Bool?(this[.optionalBooleanVar])
+        return Bool?(this[.optionalBooleanVar], wrapped: Bool.init)
     }
     set {
         this[.optionalBooleanVar] = this.valueOf(newValue)
@@ -89,7 +89,7 @@ public var optionalBooleanVar :Bool? {
     
 public var optionalNumberVar :Double? {
     get {
-        return Double?(this[.optionalNumberVar])
+        return Double?(this[.optionalNumberVar], wrapped: Double.init)
     }
     set {
         this[.optionalNumberVar] = this.valueOf(newValue)
@@ -98,7 +98,7 @@ public var optionalNumberVar :Double? {
     
 public var optionalStringVar :String? {
     get {
-        return String?(this[.optionalStringVar])
+        return String?(this[.optionalStringVar], wrapped: String.init)
     }
     set {
         this[.optionalStringVar] = this.valueOf(newValue)

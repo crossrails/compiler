@@ -2,7 +2,7 @@
 
 <% block header %>
     <%- if module.name == file.path.name -%>
-        var this :JSInstance = try! JSContext().eval(NSBundle<% if bundleId %>(identifier: "<$ bundleId $>")!<% else %>.mainBundle<% endif %>.pathForResource("<$ module.src.name $>", ofType: "js")!)
+        var this :JSInstance = try! JSContext().eval(NSBundle<% if bundleId %>(identifier: "<$ bundleId $>")!<% else %>.mainBundle()<% endif %>.pathForResource("<$ module.src.name $>", ofType: "js")!)
     <% endif %>
 <% endblock %>
 
@@ -30,7 +30,11 @@
     <%- elif declaration.type|kind == 'ArrayType' -%>
         <$ signature(declaration.type) $>(this[.<$ declaration.name $>], element: <$ arrayElement(declaration.type.typeArguments[0]) $>)    
     <%- else -%>
-        <$ signature(declaration.type) $>(this[.<$ declaration.name $>])
+        <%- if declaration.type.optional -%>
+            <$ signature(declaration.type) $>(this[.<$ declaration.name $>], wrapped: <$ signature(declaration.type, false) $>.init)
+        <%- else -%>
+            <$ signature(declaration.type) $>(this[.<$ declaration.name $>])
+        <%- endif %>
     <%- endif %>
 <%- endmacro -%>
 

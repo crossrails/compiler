@@ -8,7 +8,7 @@ import Foundation
     <%- endif -%>
 <%- endmacro -%>
 
-<% macro signature(type) -%>
+<% macro signature(type, optional=true) -%>
     <%- if type|kind == 'AnyType' -%>
         Any
     <%- elif type|kind == 'StringType' -%>
@@ -20,7 +20,7 @@ import Foundation
     <%- elif type|kind == 'ArrayType' -%>
         [<$ signature(type.typeArguments[0]) $>]
     <%- endif %>
-    <%- if type.optional -%>
+    <%- if optional and type.optional -%>
         ?
     <%- endif -%>    
 <%- endmacro -%>
