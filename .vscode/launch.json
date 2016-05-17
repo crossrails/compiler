@@ -6,15 +6,16 @@
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}\\src\\main.ts",
-			"stopOnEntry": false,
+			"cwd": "${workspaceRoot}\\tests\\reference",
 			"args": [
 				// "--help"
                 "types.js",
 				"--logLevel=debug",
-				"--swift.outDir=swift\\src"
+				"--swift.outDir=..\\swift\\src",
+				"--swift.bundleId=io.xrails.src"				
             ],
-			"cwd": "${workspaceRoot}\\tests",
 			"preLaunchTask": "build",
+			"stopOnEntry": false,
 			"runtimeExecutable": null,
 			"runtimeArgs": [
 				"--nolazy"
