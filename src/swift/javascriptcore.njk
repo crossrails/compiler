@@ -16,7 +16,11 @@
     <%- elif type|kind == 'ArrayType' -%>
         { <$ signature(type) $>($0, element: <$ arrayElement(type.typeArguments[0]) $>) }
     <%- else -%>
-        <$ signature(type) $>.init
+        <%- if type.optional -%>
+            { <$ signature(type) $>($0, wrapped: <$ signature(declaration.type, false) $>.init) }
+        <%- else -%>
+            <$ signature(type) $>.init
+        <%- endif %>
     <%- endif %>
 <%- endmacro -%>
 
