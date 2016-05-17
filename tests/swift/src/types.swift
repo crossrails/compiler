@@ -3,27 +3,27 @@ import Foundation
 var this :JSInstance = try! JSContext().eval(NSBundle.mainBundle.pathForResource("types", ofType: "js")!)
     
 public let booleanConst :Bool = Bool(this[.booleanConst])
-
+    
 public let numberConst :Double = Double(this[.numberConst])
-
+    
 public let stringConst :String = String(this[.stringConst])
-
-public let numberArrayConst :[Double] = [Double](this[.numberArrayConst])
-
-public let stringArrayArrayConst :[[String]] = [[String]](this[.stringArrayArrayConst])
-
+    
+public let numberArrayConst :[Double] = [Double](this[.numberArrayConst], element: Double.init)
+    
+public let stringArrayArrayConst :[[String]] = [[String]](this[.stringArrayArrayConst], element: { [String]($0, element: String.init) })
+    
 public let anyConst :Any = this[.anyConst].infer()
-
+    
 public let optionalBooleanConst :Bool? = Bool?(this[.optionalBooleanConst])
-
+    
 public let optionalNumberConst :Double? = Double?(this[.optionalNumberConst])
-
+    
 public let optionalStringConst :String? = String?(this[.optionalStringConst])
-
-public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst])
-
-public let optionalAnyConst :Any? = this[.optionalAnyConst].infer()
-
+    
+public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst], element: Double.init)
+    
+public let optionalAnyConst :Any? = Any?(this[.optionalAnyConst], wrapped: JSValue.infer)
+    
 public var booleanVar :Bool {
     get {
         return Bool(this[.booleanVar])
@@ -31,8 +31,8 @@ public var booleanVar :Bool {
     set {
         this[.booleanVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var numberVar :Double {
     get {
         return Double(this[.numberVar])
@@ -40,8 +40,8 @@ public var numberVar :Double {
     set {
         this[.numberVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var stringVar :String {
     get {
         return String(this[.stringVar])
@@ -49,17 +49,17 @@ public var stringVar :String {
     set {
         this[.stringVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var numberArrayVar :[Double] {
     get {
-        return [Double](this[.numberArrayVar])
+        return [Double](this[.numberArrayVar], element: Double.init)
     }
     set {
         this[.numberArrayVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var anyVar :Any {
     get {
         return this[.anyVar].infer()
@@ -67,17 +67,17 @@ public var anyVar :Any {
     set {
         this[.anyVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var stringArrayArrayVar :[[String]] {
     get {
-        return [[String]](this[.stringArrayArrayVar])
+        return [[String]](this[.stringArrayArrayVar], element: { [String]($0, element: String.init) })
     }
     set {
         this[.stringArrayArrayVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var optionalBooleanVar :Bool? {
     get {
         return Bool?(this[.optionalBooleanVar])
@@ -85,8 +85,8 @@ public var optionalBooleanVar :Bool? {
     set {
         this[.optionalBooleanVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var optionalNumberVar :Double? {
     get {
         return Double?(this[.optionalNumberVar])
@@ -94,8 +94,8 @@ public var optionalNumberVar :Double? {
     set {
         this[.optionalNumberVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var optionalStringVar :String? {
     get {
         return String?(this[.optionalStringVar])
@@ -103,26 +103,26 @@ public var optionalStringVar :String? {
     set {
         this[.optionalStringVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var optionalNumberArrayVar :[Double]? {
     get {
-        return [Double]?(this[.optionalNumberArrayVar])
+        return [Double]?(this[.optionalNumberArrayVar], element: Double.init)
     }
     set {
         this[.optionalNumberArrayVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 public var optionalAnyVar :Any? {
     get {
-        return this[.optionalAnyVar].infer()
+        return Any?(this[.optionalAnyVar], wrapped: JSValue.infer)
     }
     set {
         this[.optionalAnyVar] = this.valueOf(newValue)
     }
-} 
-
+}
+    
 
 extension JSProperty {
     static let booleanConst : JSProperty = "booleanConst"

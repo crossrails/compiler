@@ -61,7 +61,6 @@ export abstract class Emitter<T extends EmitterOptions> {
         this.nunjucks.addFilter('kind', (object: any) => {
             return object.constructor.name;
         });    
-        this.addFilters(this.nunjucks);
     }
     
     public emit(options: T & { [option :string] :Options}) {
@@ -83,8 +82,6 @@ export abstract class Emitter<T extends EmitterOptions> {
     protected abstract get engines(): ReadonlyArray<string>
 
     protected abstract get loader(): Loader
-    
-    protected abstract addFilters(nunjucks: Nunjucks): void
-    
+        
     protected abstract writeFiles(module: Module, nunjucks: Nunjucks, engine: string, options: T): void
 }

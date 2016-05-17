@@ -37,31 +37,6 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         return new FileSystemLoader(__dirname);
     }
     
-    protected addFilters(nunjucks: Nunjucks): void {
-        nunjucks.addFilter('keyword', (variable: ast.VariableDeclaration) => {
-            return variable.constant ? 'let' : 'var';
-        });        
-        nunjucks.addFilter('signature', (type: ast.Type) => {
-            return type.accept({
-                visitAnyType(node: ast.AnyType): string {
-                    return 'Any';
-                },
-                visitStringType(node: ast.StringType): string {
-                    return 'String'
-                },            
-                visitNumberType(node: ast.NumberType): string {
-                    return 'Double'
-                },            
-                visitBooleanType(node: ast.BooleanType): string {
-                    return 'Bool'
-                },
-                visitArrayType(node: ast.ArrayType): string {
-                    return `[${node.typeArguments[0].accept(this)}]`;        
-                }
-            }) + (type.optional ? '?' : '')
-        });        
-    }
-    
     protected writeFiles(module: ast.Module, nunjucks: Nunjucks, engine: string, options: SwiftEmitterOptions): void {
         let writtenModuleFile = false;  
         for(let file of module.files as Array<ast.SourceFile>) {

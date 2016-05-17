@@ -6,30 +6,54 @@
     <% endif %>
 <% endblock %>
 
-<% block let %>
-    <%- if declaration.type|kind == 'AnyType' -%>
-        = this[.<$ declaration.name $>].infer()
-    <%- else -%>
-        = <$ declaration.type|signature $>(this[.<$ declaration.name $>])
-    <%- endif %>
-<% endblock %>
-
-<% block var -%> {
-    get {
-        <% if declaration.type|kind == 'AnyType' -%>
-            return this[.<$ declaration.name $>].infer()
+<% macro arrayElement(type) -%>
+    <%- if type|kind == 'AnyType' -%>
+        <%- if type.optional -%>
+            { Any?($0, wrapped: JSValue.infer) }
         <%- else -%>
-            return <$ declaration.type|signature $>(this[.<$ declaration.name $>])
+            JSValue.infer
         <%- endif %>
+    <%- elif type|kind == 'ArrayType' -%>
+        { <$ signature(type) $>($0, element: <$ arrayElement(type.typeArguments[0]) $>) }
+    <%- else -%>
+        <$ signature(type) $>.init
+    <%- endif %>
+<%- endmacro -%>
+
+<% macro returnValue(declaration) -%>
+    <%- if declaration.type|kind == 'AnyType' -%>
+        <%- if declaration.type.optional -%>
+            Any?(this[.<$ declaration.name $>], wrapped: JSValue.infer)
+        <%- else -%>
+            this[.<$ declaration.name $>].infer()
+        <%- endif %>
+    <%- elif declaration.type|kind == 'ArrayType' -%>
+        <$ signature(declaration.type) $>(this[.<$ declaration.name $>], element: <$ arrayElement(declaration.type.typeArguments[0]) $>)    
+    <%- else -%>
+        <$ signature(declaration.type) $>(this[.<$ declaration.name $>])
+    <%- endif %>
+<%- endmacro -%>
+
+<% macro var(declaration) -%> {
+    get {
+        return <$ returnValue(declaration) $>
     }
     set {
         this[.<$ declaration.name $>] = this.valueOf(newValue)
     }
 } 
+<%- endmacro -%>
+
+<% block variable %>
+    <%- if declaration.constant -%>
+        = <$ returnValue(declaration) $>
+    <%- else -%>
+        <$ var(declaration) $>
+    <%- endif -%>
 <% endblock %>
 
 <% block footer -%>
-    <% if module.name == file.path.name -%>
+    <%- if module.name == file.path.name -%>
         <% filter indent(-3) %>
             extension JSProperty {
                 <%- filter indent(-2) -%>
