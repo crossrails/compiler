@@ -20,7 +20,7 @@ public let optionalNumberConst :Double? = Double?(this[.optionalNumberConst], wr
     
 public let optionalStringConst :String? = String?(this[.optionalStringConst], wrapped: String.init)
     
-public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst], element: Double.init)
+public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst], wrapped: { [Double]($0, element: Double.init) })
     
 public let optionalAnyConst :Any? = Any?(this[.optionalAnyConst], wrapped: JSValue.infer)
     
@@ -107,7 +107,7 @@ public var optionalStringVar :String? {
     
 public var optionalNumberArrayVar :[Double]? {
     get {
-        return [Double]?(this[.optionalNumberArrayVar], element: Double.init)
+        return [Double]?(this[.optionalNumberArrayVar], wrapped: { [Double]($0, element: Double.init) })
     }
     set {
         this[.optionalNumberArrayVar] = this.valueOf(newValue, element: this.valueOf)

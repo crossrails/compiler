@@ -6,20 +6,20 @@
     <% endif %>
 <% endblock %>
 
-<% macro arrayElementReturnValue(type) -%>
+<% macro arrayElementReturnValue(type, optional = type.optional) -%>
     <%- if type|kind == 'AnyType' -%>
-        <%- if type.optional -%>
+        <%- if optional -%>
             { Any?($0, wrapped: JSValue.infer) }
         <%- else -%>
             JSValue.infer
         <%- endif %>
     <%- elif type|kind == 'ArrayType' -%>
-        { <$ signature(type) $>($0, element: <$ arrayElementReturnValue(type.typeArguments[0]) $>) }
+        { <$ signature(type, optional) $>($0, element: <$ arrayElementReturnValue(type.typeArguments[0]) $>) }
     <%- else -%>
-        <%- if type.optional -%>
-            { <$ signature(type) $>($0, wrapped: <$ signature(declaration.type, false) $>.init) }
+        <%- if optional -%>
+            { <$ signature(type, optional) $>($0, wrapped: <$ signature(declaration.type, false) $>.init) }
         <%- else -%>
-            <$ signature(type) $>.init
+            <$ signature(type, optional) $>.init
         <%- endif %>
     <%- endif %>
 <%- endmacro -%>
@@ -32,7 +32,11 @@
             this[.<$ declaration.name $>].infer()
         <%- endif %>
     <%- elif declaration.type|kind == 'ArrayType' -%>
-        <$ signature(declaration.type) $>(this[.<$ declaration.name $>], element: <$ arrayElementReturnValue(declaration.type.typeArguments[0]) $>)    
+        <%- if declaration.type.optional -%>
+            <$ signature(declaration.type) $>(this[.<$ declaration.name $>], wrapped: <$ arrayElementReturnValue(declaration.type, false) $>)
+        <%- else -%>
+            <$ signature(declaration.type) $>(this[.<$ declaration.name $>], element: <$ arrayElementReturnValue(declaration.type.typeArguments[0]) $>)    
+        <%- endif %>
     <%- else -%>
         <%- if declaration.type.optional -%>
             <$ signature(declaration.type) $>(this[.<$ declaration.name $>], wrapped: <$ signature(declaration.type, false) $>.init)
