@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00A968FA1CEBC837001C97AA /* src.js in Resources */ = {isa = PBXBuildFile; fileRef = 00A968F91CEBC837001C97AA /* src.js */; };
+		00A968FC1CEBC846001C97AA /* types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A968FB1CEBC846001C97AA /* types.swift */; };
 		1D15F92A1C92FA5800952FBE /* js.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D15F9291C92FA5800952FBE /* js.swift */; };
 		1D4532141C99EE4A00098A44 /* specialException.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D4532131C99EE4A00098A44 /* specialException.swift */; };
 		1DB561251C680B59003442CF /* src.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB561241C680B59003442CF /* src.swift */; };
-		1DB561271C681B5D003442CF /* src.js in Resources */ = {isa = PBXBuildFile; fileRef = 1DB561261C681B5D003442CF /* src.js */; };
 		1DD38DB11C93AAF5007AE8EA /* simpleObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD38DB01C93AAF5007AE8EA /* simpleObject.swift */; };
 		1DD38DB31C95CEB4007AE8EA /* simpleInterface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DD38DB21C95CEB4007AE8EA /* simpleInterface.swift */; };
 		1DE3D3D11C66BA6F009671D8 /* src.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DE3D3D01C66BA6F009671D8 /* src.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -29,10 +30,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00A968F91CEBC837001C97AA /* src.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = src.js; path = ../reference/src.js; sourceTree = "<group>"; };
+		00A968FB1CEBC846001C97AA /* types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = types.swift; sourceTree = "<group>"; };
 		1D15F9291C92FA5800952FBE /* js.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = js.swift; sourceTree = "<group>"; };
 		1D4532131C99EE4A00098A44 /* specialException.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = specialException.swift; sourceTree = "<group>"; };
 		1DB561241C680B59003442CF /* src.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = src.swift; sourceTree = "<group>"; };
-		1DB561261C681B5D003442CF /* src.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = src.js; path = ../src.js; sourceTree = "<group>"; };
 		1DD38DB01C93AAF5007AE8EA /* simpleObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = simpleObject.swift; sourceTree = "<group>"; };
 		1DD38DB21C95CEB4007AE8EA /* simpleInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = simpleInterface.swift; sourceTree = "<group>"; };
 		1DE3D3CD1C66BA6F009671D8 /* src.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = src.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,7 +67,7 @@
 		1DE3D3C11C66B9E8009671D8 = {
 			isa = PBXGroup;
 			children = (
-				1DB561261C681B5D003442CF /* src.js */,
+				00A968F91CEBC837001C97AA /* src.js */,
 				1DE3D3CF1C66BA6F009671D8 /* src */,
 				1DE3D3DB1C66BAA6009671D8 /* test */,
 				1DE3D3CE1C66BA6F009671D8 /* Products */,
@@ -84,6 +86,7 @@
 		1DE3D3CF1C66BA6F009671D8 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				00A968FB1CEBC846001C97AA /* types.swift */,
 				1DE3D3D01C66BA6F009671D8 /* src.h */,
 				1DE3D3D21C66BA6F009671D8 /* Info.plist */,
 				1DB561241C680B59003442CF /* src.swift */,
@@ -194,7 +197,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1DB561271C681B5D003442CF /* src.js in Resources */,
+				00A968FA1CEBC837001C97AA /* src.js in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,6 +218,7 @@
 				1D15F92A1C92FA5800952FBE /* js.swift in Sources */,
 				1DD38DB11C93AAF5007AE8EA /* simpleObject.swift in Sources */,
 				1DB561251C680B59003442CF /* src.swift in Sources */,
+				00A968FC1CEBC846001C97AA /* types.swift in Sources */,
 				1DD38DB31C95CEB4007AE8EA /* simpleInterface.swift in Sources */,
 				1D4532141C99EE4A00098A44 /* specialException.swift in Sources */,
 			);

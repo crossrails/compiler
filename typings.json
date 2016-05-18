@@ -1,9 +1,9 @@
 {
-  "ambientDependencies": {
-    "node": "registry:dt/node#4.0.0+20160330064709",
-    "nunjucks": "registry:dt/nunjucks#0.0.0+20160505174532"
-  },
   "dependencies": {
     "yargs": "registry:npm/yargs#3.31.0+20160316010718"
+  },
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160514165920",
+    "nunjucks": "registry:dt/nunjucks#0.0.0+20160505174532"
   }
 }
