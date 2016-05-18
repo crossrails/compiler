@@ -2,7 +2,7 @@
 
 <% block header %>
     <%- if module.name == file.path.name -%>
-        var this :JSInstance = try! JSContext().eval(NSBundle<% if bundleId %>(identifier: "<$ bundleId $>")!<% else %>.mainBundle()<% endif %>.pathForResource("<$ module.src.name $>", ofType: "js")!)
+        var this :JSInstance = try! JSContext().eval(NSBundle<% if bundleId %>(identifier: "<$ bundleId $>")!<% else %>.mainBundle()<% endif %>.pathForResource("src", ofType: "js")!)
     <% endif %>
 <% endblock %>
 
@@ -55,10 +55,10 @@
 <%- endmacro -%>
 
 <% macro argumentValue(declaration) -%>
-    <%- if declaration.type|kind == 'ArrayType' -%>
+    <%- if not declaration.type.optional and declaration.type|kind == 'ArrayType' -%>
         this.valueOf(newValue, element: <$ arrayElementArgumentValue(declaration.type.typeArguments[0]) $>)
     <%- else -%>
-        this.valueOf(newValue<% if declaration.type.optional %>, wrapped: this.valueOf<% endif %>)
+        this.valueOf(newValue<% if declaration.type.optional %>, wrapped: <$ arrayElementArgumentValue(declaration.type) $><% endif %>)
     <%- endif %>
 <%- endmacro -%>
 

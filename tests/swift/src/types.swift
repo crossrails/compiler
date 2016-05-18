@@ -1,6 +1,6 @@
 import Foundation
 
-var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("types", ofType: "js")!)
+var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
     
 public let booleanConst :Bool = Bool(this[.booleanConst])
     
@@ -110,7 +110,7 @@ public var optionalNumberArrayVar :[Double]? {
         return [Double]?(this[.optionalNumberArrayVar], wrapped: { [Double]($0, element: Double.init) })
     }
     set {
-        this[.optionalNumberArrayVar] = this.valueOf(newValue, element: this.valueOf)
+        this[.optionalNumberArrayVar] = this.valueOf(newValue, wrapped: { this.valueOf($0, element: this.valueOf) })
     }
 }
     
