@@ -56,7 +56,7 @@ public var numberArrayVar :[Double] {
         return [Double](this[.numberArrayVar], element: Double.init)
     }
     set {
-        this[.numberArrayVar] = this.valueOf(newValue)
+        this[.numberArrayVar] = this.valueOf(newValue, element: this.valueOf)
     }
 }
     
@@ -74,7 +74,7 @@ public var stringArrayArrayVar :[[String]] {
         return [[String]](this[.stringArrayArrayVar], element: { [String]($0, element: String.init) })
     }
     set {
-        this[.stringArrayArrayVar] = this.valueOf(newValue)
+        this[.stringArrayArrayVar] = this.valueOf(newValue, element: { this.valueOf($0, element: this.valueOf) })
     }
 }
     
@@ -83,7 +83,7 @@ public var optionalBooleanVar :Bool? {
         return Bool?(this[.optionalBooleanVar], wrapped: Bool.init)
     }
     set {
-        this[.optionalBooleanVar] = this.valueOf(newValue)
+        this[.optionalBooleanVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
     
@@ -92,7 +92,7 @@ public var optionalNumberVar :Double? {
         return Double?(this[.optionalNumberVar], wrapped: Double.init)
     }
     set {
-        this[.optionalNumberVar] = this.valueOf(newValue)
+        this[.optionalNumberVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
     
@@ -101,7 +101,7 @@ public var optionalStringVar :String? {
         return String?(this[.optionalStringVar], wrapped: String.init)
     }
     set {
-        this[.optionalStringVar] = this.valueOf(newValue)
+        this[.optionalStringVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
     
@@ -110,7 +110,7 @@ public var optionalNumberArrayVar :[Double]? {
         return [Double]?(this[.optionalNumberArrayVar], element: Double.init)
     }
     set {
-        this[.optionalNumberArrayVar] = this.valueOf(newValue)
+        this[.optionalNumberArrayVar] = this.valueOf(newValue, element: this.valueOf)
     }
 }
     
@@ -119,7 +119,7 @@ public var optionalAnyVar :Any? {
         return Any?(this[.optionalAnyVar], wrapped: JSValue.infer)
     }
     set {
-        this[.optionalAnyVar] = this.valueOf(newValue)
+        this[.optionalAnyVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
 }
     
