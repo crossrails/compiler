@@ -1,0 +1,6 @@
+language: node_js
+node_js:
+  - "5"
+language: objective-c
+xcode_project: tests/swift/swift.xcodeproj
+xcode_scheme: SwiftTests
