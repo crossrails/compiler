@@ -5,10 +5,10 @@ import {Options} from 'yargs';
 import {writeFile} from 'fs';
 
 export interface EmitterOptions {
-   outDir: string
+   outDir?: string
 //    newLine: 'lf'|'crlf'
-   noEmit: boolean
-   noEmitWrapper: boolean
+   noEmit?: boolean
+   noEmitWrapper?: boolean
 }
 
 export abstract class Emitter<T extends EmitterOptions> {
@@ -36,8 +36,11 @@ export abstract class Emitter<T extends EmitterOptions> {
     
     private readonly module: Module;
     private readonly nunjucks: Nunjucks;
+    private readonly fileWritter: (filename: string, data: any) => void;
     
-    constructor(module: Module) {
+    private noEmit: boolean | undefined;
+    
+    constructor(module: Module, fileWritter = null) {
         log.debug(`Loading ${this.constructor.name}`);
         this.module = module;
         this.nunjucks = new Nunjucks(this.loader, { 
@@ -65,6 +68,7 @@ export abstract class Emitter<T extends EmitterOptions> {
     }
     
     public emit(options: T & { [option :string] :Options}) {
+        this.noEmit = options.noEmit;
         let emittedOutput = false;  
         for(let engine of this.engines as Array<string>) {
             if(options[engine]) {
@@ -80,12 +84,12 @@ export abstract class Emitter<T extends EmitterOptions> {
         }
     }
     
-    protected writeFile(filename: string, options: EmitterOptions, data: string) {
-        if(options.noEmit) {
+    protected writeFile(filename: string, data: string) {
+        if(this.noEmit) {
             log.info(`Skipping emit of file ${filename}`);
         } else {
             log.info(`Emitting file ${filename}`);
-            writeFile(`${filename}.swift`, data);            
+            writeFile(filename, data);            
         }
     }
     
