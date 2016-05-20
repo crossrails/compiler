@@ -5,13 +5,13 @@
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}\\src\\main.ts",
-			"cwd": "${workspaceRoot}\\tests\\reference",
+			"program": "${workspaceRoot}/src/main.ts",
+			"cwd": "${workspaceRoot}/tests/reference",
 			"args": [
 				// "--help"
                 "types.js",
 				"--logLevel=debug",
-				"--swift.outDir=..\\swift\\src",
+				"--swift.outDir=../swift/src",
 				"--swift.bundleId=io.xrails.src"				
             ],
 			"preLaunchTask": "build",
@@ -24,7 +24,7 @@
 				"NODE_ENV": "development"
 			},
 			"externalConsole": false,
-			"outDir": "${workspaceRoot}\\src",
+			"outDir": "${workspaceRoot}/src",
 			"sourceMaps": true
 		},
 		{
