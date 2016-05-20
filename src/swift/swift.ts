@@ -3,7 +3,6 @@ import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
 import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
 import * as ast from "../ast" 
-import {writeFile} from 'fs';
 import {Options} from 'yargs';
 
 export interface SwiftEmitterOptions extends EmitterOptions {
@@ -42,8 +41,7 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         for(let file of module.files as Array<ast.SourceFile>) {
             writtenModuleFile = writtenModuleFile || module.name == file.path.name;
             let filename = path.join(options.outDir, path.relative('.', file.path.dir), module.name);
-            log.info(`Emitting file ${filename}.swift`);
-            writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
+            this.writeFile(`${filename}.swift`, options, nunjucks.render(`${engine}.njk`, {
                 file: file,
                 module: module, 
                 bundleId: options.bundleId
@@ -51,8 +49,7 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         }        
         if(!writtenModuleFile) {
             let filename = path.join(options.outDir, module.name);
-            log.info(`Emitting file ${filename}.swift`);
-            writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
+            this.writeFile(`${filename}.swift`, options, nunjucks.render(`${engine}.njk`, {
                 module: module, 
                 bundleId: options.bundleId
             }));            

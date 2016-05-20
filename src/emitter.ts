@@ -2,6 +2,7 @@ import {log} from "./log"
 import {Environment as Nunjucks, ILoader as Loader} from 'nunjucks'
 import {Module} from "./ast" 
 import {Options} from 'yargs';
+import {writeFile} from 'fs';
 
 export interface EmitterOptions {
    outDir: string
@@ -76,6 +77,15 @@ export abstract class Emitter<T extends EmitterOptions> {
         if(!emittedOutput) {
             log.info(`Emitting source for engine ${this.engines[0]} to ${options.outDir}`);
             this.writeFiles(this.module, this.nunjucks, this.engines[0], options);            
+        }
+    }
+    
+    protected writeFile(filename: string, options: EmitterOptions, data: string) {
+        if(options.noEmit) {
+            log.info(`Skipping emit of file ${filename}`);
+        } else {
+            log.info(`Emitting file ${filename}`);
+            writeFile(`${filename}.swift`, data);            
         }
     }
     
