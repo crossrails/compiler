@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "doctrine": "^1.2.1",
+    "jasmine": "^2.4.1",
     "nunjucks": "^2.4.2",
     "yargs": "^4.7.1"
   }

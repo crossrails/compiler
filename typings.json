@@ -3,6 +3,7 @@
     "yargs": "registry:npm/yargs#3.31.0+20160316010718"
   },
   "globalDependencies": {
+    "jasmine": "registry:dt/jasmine#2.2.0+20160505161446",
     "node": "registry:dt/node#6.0.0+20160514165920",
     "nunjucks": "registry:dt/nunjucks#0.0.0+20160505174532"
   }
