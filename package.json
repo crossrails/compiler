@@ -2,18 +2,19 @@
   "name": "xrails-complier",
   "version": "0.1.0",
   "private": true,
+  "bin": "./bin/xrails",
   "scripts": {
-    "start": "node ./bin/xrails",
-    "build": "tsc",
-    "prepublish": "npm run build"
+    "prepublish": "tsc",
+    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
+    "compile-reference-project": "cd tests/reference && node ../../bin/xrails types.ts --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
   },
   "devDependencies": {
     "typescript": "1.9.0-dev.20160516",
-    "tslint": "^3.10.2"
+    "tslint": "^3.10.2",
+    "jasmine": "^2.4.1"
   },
   "dependencies": {
     "doctrine": "^1.2.1",
-    "jasmine": "^2.4.1",
     "nunjucks": "^2.4.2",
     "yargs": "^4.7.1"
   }
