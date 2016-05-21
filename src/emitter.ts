@@ -56,8 +56,11 @@ export abstract class Emitter<T extends EmitterOptions> {
             }
         });        
         this.nunjucks.addFilter('indent', (text: string, direction: number) => {
-            let indent = /^( *)\S/m.exec(text)![1].length;
-            return text.replace(new RegExp(`^ {${indent}}`, 'gm'), "    ".repeat(indent/4 + direction));
+            if(text) {
+                let indent = /^( *)\S/m.exec(text)![1].length;
+                text = text.replace(new RegExp(`^ {${indent}}`, 'gm'), "    ".repeat(indent/4 + direction));
+            }
+            return text;
         });        
         this.nunjucks.addFilter('array', (iterable: Iterable<any>) => {
             return Array.from(iterable);
