@@ -1,10 +1,11 @@
 {
   "testFramework": "jasmine",
   "files": [
-      "'src/**/*.ts'"
+      "src/**/*.ts",
+      "src/**/*.njk"
   ],
   "tests": [
-      "tests/**/*Spec.ts"
+      "tests/js/**/*Spec.ts"
   ],
   "env" : {
       "type": "node"

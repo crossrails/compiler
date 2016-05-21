@@ -40,7 +40,7 @@ export class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         let writtenModuleFile = false;  
         for(let file of module.files as Array<ast.SourceFile>) {
             writtenModuleFile = writtenModuleFile || module.name == file.path.name;
-            let filename = path.join(options.outDir, path.relative('.', file.path.dir), module.name);
+            let filename = path.join(options.outDir, path.relative('.', file.path.dir), file.path.name);
             this.writeFile(`${filename}.swift`, nunjucks.render(`${engine}.njk`, {
                 file: file,
                 module: module, 
