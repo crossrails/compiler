@@ -5,8 +5,10 @@
   "bin": "./bin/xrails",
   "scripts": {
     "prepublish": "tsc",
-    "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
-    "compile-reference-project": "cd tests/reference && node ../../bin/xrails types.ts --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
+    "test": "npm run test-compiler && npm run make-ref-proj && npm run test-swift",
+    "test-compiler": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
+    "test-swift": "xctool -project tests/swift/swift.xcodeproj -scheme src build test",
+    "make-ref-proj": "cd tests/reference && node ../../bin/xrails types.ts --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
   },
   "devDependencies": {
     "typescript": "1.9.0-dev.20160516",

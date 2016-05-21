@@ -1,7 +1,4 @@
-language: node_js
+language: node_js, objective-c
+osx_image: xcode7.3
 node_js:
   - "5"
-language: objective-c
-xcode_project: tests/swift/swift.xcodeproj
-xcode_scheme: src
-osx_image: xcode7.3
