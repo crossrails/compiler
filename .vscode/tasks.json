@@ -8,54 +8,27 @@
 {
 	"version": "0.1.0",    
     
-    "windows" : {
-        "command": "node",
-        "isShellCommand": true,
-        "echoCommand": false,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "taskName": "build",
-                "isBuildCommand": true,
-                "showOutput": "silent",
-                "problemMatcher": "$tsc",            
-                "args": [
-                    "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}"
-                ]
-            },
-            {
-                "taskName": "build-test-project",
-                "showOutput": "silent",
-                "problemMatcher": "$tsc",            
-                "args": [
-                    "${workspaceRoot}\\node_modules\\typescript\\lib\\tsc", "-p", "${workspaceRoot}\\tests"
-                ]
-            }
-        ]        
-    },
-    "osx" : {
-        "command": "node",
-        "isShellCommand": true,
-        "echoCommand": false,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "taskName": "build",
-                "isBuildCommand": true,
-                "showOutput": "silent",
-                "problemMatcher": "$tsc",            
-                "args": [
-                    "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}"
-                ]
-            },
-            {
-                "taskName": "build-test-project",
-                "showOutput": "silent",
-                "problemMatcher": "$tsc",            
-                "args": [
-                    "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}/tests"
-                ]
-            }
-        ]        
-    }
+    "command": "node",
+    "isShellCommand": true,
+    "echoCommand": false,
+    "suppressTaskName": true,
+    "tasks": [
+        {
+            "taskName": "build",
+            "isBuildCommand": true,
+            "showOutput": "always",
+            "problemMatcher": "$tsc",            
+            "args": [
+                "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}"
+            ]
+        },
+        {
+            "taskName": "build-reference-project",
+            "showOutput": "silent",
+            "problemMatcher": "$tsc",            
+            "args": [
+                "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}/tests/reference"
+            ]
+        }
+    ]        
 }
