@@ -481,7 +481,9 @@ extension Optional {
 
 extension Array {
     init(_ value: JSValue, @noescape element:(JSValue) -> Element) {
-        assert(JSValueIsArray(value.context.ref, value.ref), "Array expected but got \(JSValueGetType(value.context.ref, value.ref)): \(String(value.context, ref: value.ref))")
+        if #available(OSX 10.11, *) {
+            assert(JSValueIsArray(value.context.ref, value.ref), "Array expected but got \(JSValueGetType(value.context.ref, value.ref)): \(String(value.context, ref: value.ref))")
+        }
         self = [Element]()
         let count = UInt32(value[length])
         for index in 0..<count {
