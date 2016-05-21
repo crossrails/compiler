@@ -4,7 +4,7 @@
   "private": true,
   "bin": "./bin/xrails",
   "scripts": {
-    "prepublish": "tsc",
+    "prepublish": "typings install & tsc",
     "test": "npm run test-compiler && npm run make-ref-proj && npm run test-swift",
     "test-compiler": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
     "test-swift": "xctool -project tests/swift/swift.xcodeproj -scheme src build test",
@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "typescript": "1.9.0-dev.20160516",
+    "typings": "^1.0.4",
     "tslint": "^3.10.2",
     "jasmine": "^2.4.1"
   },
