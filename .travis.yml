@@ -4,4 +4,4 @@ xcode_project: tests/swift/swift.xcodeproj
 xcode_scheme: src 
 node_js:
   - "6"
-before_script: npm test
+before_script: npm install && npm test
