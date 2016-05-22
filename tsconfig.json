@@ -5,7 +5,6 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "strictNullChecks": true,
-//    "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
