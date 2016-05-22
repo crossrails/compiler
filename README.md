@@ -3,10 +3,17 @@
 A simple to use compiler for generating cross-platform files, for Java, iOS(swift) and Android.
 
 [![NPM version][npm-image]][npm-url]
+[![Typings][typings-image]][typings-url]
+[![Typescript][typescript-image]][typescript-url]
 [![Build status][travis-image]][travis-url]
 [![Gitter][gitter-image]][gitter-url]
 
-[npm-image]: https://img.shields.io/npm/v/typings.svg?style=flat
+
+[typescript-image]: https://img.shields.io/badge/typescript-1.9.0--dev.20160516-green.svg
+[typescript-url]: https://github.com/Microsoft/TypeScript
+[typings-url]: https://github.com/typings/typings
+[typings-image]: https://img.shields.io/badge/typings-1.0.4-green.svg
+[npm-image]: https://img.shields.io/npm/v/@cycle/core.svg
 [npm-url]: https://npmjs.org/package/typings
 [travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
 [travis-url]: https://travis-ci.org/crossrails/compiler
