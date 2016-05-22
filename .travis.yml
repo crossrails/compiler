@@ -1,18 +1,15 @@
+before_script: "npm -v && npm install && npm test"
+env: NODE_VERSION="6"
+install: 
+  - "rm -rf ~/.nvm"
+  - "git clone https://github.com/creationix/nvm.git ~/.nvm"
+  - "source ~/.nvm/nvm.sh"
+  - "nvm install $NODE_VERSION"
+  - "node --version"
+  - "npm install"
 language: objective-c
-osx_image: xcode7.3
-env:
-	- NODE_VERSION="6"
-
-install:
-	- rm -rf ~/.nvm
-  	- git clone https://github.com/creationix/nvm.git ~/.nvm
-  	- source ~/.nvm/nvm.sh
-  	- nvm install $NODE_VERSION
-  	- node --version
-  	- npm install
-
-xcode_project: tests/swift/swift.xcodeproj 
-xcode_scheme: src 
-node_js:
+node_js: 
   - "6"
-before_script: npm -v && npm install && npm test
+osx_image: xcode7.3
+xcode_project: tests/swift/swift.xcodeproj
+xcode_scheme: src
