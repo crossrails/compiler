@@ -1,4 +1,7 @@
 language: objective-c
 osx_image: xcode7.3
+xcode_project: tests/swift/swift.xcodeproj 
+xcode_scheme: src 
 node_js:
   - "6"
+before_script: npm test
