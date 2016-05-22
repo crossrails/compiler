@@ -2,6 +2,10 @@
 
 A simple to use compiler for generating cross-platform files, for Java, iOS(swift) and Android.
 
+[![Build status][travis-image]][travis-url]
+[![Gitter][gitter-image]][gitter-url]
 
-[![Join the chat at https://gitter.im/crossrails/compiler](https://badges.gitter.im/crossrails/compiler.svg)](https://gitter.im/crossrails/compiler?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/crossrails/compiler.svg?branch=master)](https://travis-ci.org/crossrails/compiler)
+[travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
+[travis-url]: https://travis-ci.org/crossrails/compiler
+[gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
+[gitter-url]: https://gitter.im/crossrails/compiler?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
