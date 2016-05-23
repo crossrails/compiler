@@ -11,7 +11,7 @@
     "make-ref-proj": "cd tests/reference && node ../../bin/xrails types.ts --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
   },
   "devDependencies": {
-    "typescript": "1.9.0-dev.20160516",
+    "typescript": "next",
     "typings": "^1.0.4",
     "tslint": "^3.10.2",
     "jasmine": "^2.4.1"
