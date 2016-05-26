@@ -1,19 +1,11 @@
 import {Module} from "../../src/ast"
 import {Emitter, EmitterOptions} from "../../src/emitter"
-import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
 import {Options} from 'yargs';
 import * as fs from 'fs';
 
 class MockEmitter extends Emitter<EmitterOptions> {
-    protected get engines(): ReadonlyArray<string> {
-        return ['mockengine1', 'mockengine2'];
-    }
-    
-    protected get loader(): FileSystemLoader {
-        return new FileSystemLoader(__dirname);
-    }
-    
-    public writeFiles(module: Module, nunjucks: Nunjucks, engine: string, options: EmitterOptions): void {
+    protected emitModule(module: Module, options: EmitterOptions): void {
+        
     }
 }
 
@@ -21,7 +13,7 @@ describe("Emitter", () => {
     
     beforeEach(() => {
         this.module = {}
-        this.emitter = new MockEmitter(this.module)
+        this.emitter = new MockEmitter()
         this.fs = fs;
         spyOn(this.emitter, 'writeFiles');
         spyOn(this.fs, 'writeFile');

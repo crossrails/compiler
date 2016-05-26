@@ -1,16 +1,10 @@
 import {log} from "./log"
-import {Module} from "./ast" 
-import {Emitter} from "./emitter" 
-import {SwiftEmitter, SwiftEmitterOptions} from './swift/swift'
+import {Module} from "./ast"
+import {Compiler, CompilerOptions} from "./compiler"
+
 import args = require('yargs');
 
-interface CompilerOptions {
-   swift?: SwiftEmitterOptions
-   java?: CompilerOptions & { engine?: 'nashorn'|'android-jsc', bundleId?: string }
-   logLevel?: string
-}
-
-let options: CompilerOptions = args
+let options: CompilerOptions & {logLevel?: string} = args
     .usage('Usage: $0 [file] [options]')
     .demand(1)
     .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
@@ -30,30 +24,64 @@ let options: CompilerOptions = args
         describe: 'Set the complier log level',
         choices: ['debug', 'info', 'warning', 'error']
     })
-    .options(SwiftEmitter.options)
-    .options(Emitter.options)
+    .options({
+        'swift': { 
+            group: 'Swift options:',
+            desc: 'Compile source to swift (enabled automatically if any swift option specified e.g. swift.outDir=gen)' 
+        },
+        'swift.javascriptcore': { 
+            group: 'Swift options:',
+            desc: 'Compile source to use the JavaScriptCore engine under the hood [default]',
+        },
+        'swift.bundleId': { 
+            group: 'Swift options:',
+            desc: 'The id of the bundle containing the javascript source file, omit to use the main bundle',
+            type: 'string'             
+        }
+    })
+    .options({ 
+        'outDir': { 
+            group: 'General options:',
+            desc: 'Redirect output structure to a directory',
+            type: 'string',
+            default: '.'             
+        },
+        'noEmit': { 
+            group: 'General options:',
+            desc: 'Do not emit complied output',
+            type: 'boolean',             
+            default: false             
+        },
+        'noEmitWrapper': { 
+            group: 'General options:',
+            desc: 'Do not emit the wrapper for the specified JS engine in compiled output',
+            type: 'boolean',         
+            default: false             
+        }
+    })
     .epilog('General options can be applied globally or to any language or engine, e.g. swift.outDir or swift.javascriptcore.outDir')
     .argv;
     
-let filename: string|undefined = args.argv._[0];
 
 if(options.logLevel) {
     log.setLevel(options.logLevel);
 }
 
+let compiler = new Compiler(options, new Map([
+    [`swift`, [`javascriptcore`]], 
+    ['java', [`nashorn`, 'javascriptcore']],
+    [`csharp`, [`chakracore`]], 
+    [`php`, [`v8`]], 
+]));
+
+let filename: string|undefined = args.argv._[0];
+
 if(filename == undefined) {
     log.debug('No filename supplied attempting to read package.json')
     //todo
 } else {
-    let module = new Module(filename);
+    compiler.compile(new Module(filename));
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));       
-    if(options.swift) {
-        let emitter = new SwiftEmitter(module);
-        emitter.emit(Object.assign({}, options, options.swift));        
-    }
-    if(!(options.swift || options.java)) {
-        log.error("No output languages specified use --java or --swift");
-    }
 }

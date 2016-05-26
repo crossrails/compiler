@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "nunjucks": "github:crossrails/npm-nunjucks#590941d728afc876658693237bd29c99a7ca7b0c",
     "yargs": "github:crossrails/npm-yargs#221ea7354c00f372577c903fce0d053c6eaf8b20"
   },
   "globalDevDependencies": {
