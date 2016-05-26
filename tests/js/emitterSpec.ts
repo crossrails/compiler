@@ -1,7 +1,6 @@
+import * as fs from 'fs';
 import {Module} from "../../src/ast"
 import {Emitter, EmitterOptions} from "../../src/emitter"
-import {Options} from 'yargs';
-import * as fs from 'fs';
 
 class MockEmitter extends Emitter<EmitterOptions> {
     protected emitModule(module: Module, options: EmitterOptions): void {

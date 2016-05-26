@@ -68,10 +68,10 @@ if(options.logLevel) {
 }
 
 let compiler = new Compiler(options, new Map([
-    [`swift`, [`javascriptcore`]], 
-    ['java', [`nashorn`, 'javascriptcore']],
-    [`csharp`, [`chakracore`]], 
-    [`php`, [`v8`]], 
+    [`swift`,   [`javascriptcore`]], 
+    ['java',    [`nashorn`, 'javascriptcore']],
+    [`csharp`,  [`chakracore`]], 
+    [`php`,     [`v8`]], 
 ]));
 
 let filename: string|undefined = args.argv._[0];

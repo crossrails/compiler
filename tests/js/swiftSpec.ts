@@ -1,8 +1,6 @@
+import * as path from 'path';
 import {Module, Declaration} from "../../src/ast"
 import {SwiftEmitter} from "../../src/swift/swift"
-import {Environment as Nunjucks, FileSystemLoader} from 'nunjucks'
-import {Options} from 'yargs';
-import * as path from 'path';
 
 class MockEmitter extends SwiftEmitter {
     protected header(resourcePath?: string): string {
