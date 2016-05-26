@@ -5,6 +5,7 @@
   "bin": "./bin/xrails",
   "scripts": {
     "prepublish": "typings -v && tsc -v && typings install && tsc",
+    "swift-wrapper-builder": "gulp swiftJSCWrapper",
     "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
     "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
   },
@@ -12,7 +13,11 @@
     "typescript": "next",
     "typings": "^1.0.4",
     "tslint": "^3.10.2",
-    "jasmine": "^2.4.1"
+    "jasmine": "^2.4.1",
+    "gulp-cli": "^1.2.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-git": "^1.7.2",
+    "del": "^2.2.0"
   },
   "dependencies": {
     "doctrine": "^1.2.1",
