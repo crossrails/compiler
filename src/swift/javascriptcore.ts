@@ -15,7 +15,7 @@ class JavaScriptCoreEmitter extends SwiftEmitter {
     protected footer(identifiers?: Set<string>): string {
         let lines: string[] = [];
         if(identifiers) {
-            lines.push('\nextension JSProperty {')
+            lines.push('extension JSProperty {')
             for(let identifier of identifiers!) {
                 lines.push(`\tstatic let ${identifier}: JSProperty = "${identifier}"`);
             }

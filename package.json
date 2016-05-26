@@ -6,7 +6,7 @@
   "scripts": {
     "prepublish": "typings -v && tsc -v && typings install && tsc",
     "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
-    "build-reference-project": "cd tests/reference && node ../../bin/xrails types.ts --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
+    "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
   },
   "devDependencies": {
     "typescript": "next",
