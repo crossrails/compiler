@@ -67,12 +67,12 @@ if(options.logLevel) {
     log.setLevel(options.logLevel);
 }
 
-let compiler = new Compiler(options, new Map([
+let compiler = new Compiler(options, [
     [`swift`,   [`javascriptcore`]], 
     ['java',    [`nashorn`, 'javascriptcore']],
     [`csharp`,  [`chakracore`]], 
     [`php`,     [`v8`]], 
-]));
+]);
 
 let filename: string|undefined = args.argv._[0];
 
@@ -80,8 +80,9 @@ if(filename == undefined) {
     log.debug('No filename supplied attempting to read package.json')
     //todo
 } else {
-    compiler.compile(new Module(filename));
+    process.exit(compiler.compile(new Module(filename)));
     // console.log(JSON.stringify(module, (key, value) => {
     //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
     // }, 4));       
 }
+

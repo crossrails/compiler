@@ -2,7 +2,7 @@
   "testFramework": "jasmine",
   "files": [
       "src/**/*.ts",
-      "src/**/*.njk"
+      "tests/reference/*.ts"
   ],
   "tests": [
       "tests/js/**/*Spec.ts"
@@ -10,5 +10,6 @@
   "env" : {
       "type": "node",
       "runner": "node"      
-  }
+  },
+  "reportConsoleErrorAsError": true
 }

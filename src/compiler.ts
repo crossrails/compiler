@@ -7,16 +7,23 @@ export interface CompilerOptions {
 }
 
 export class Compiler {
-    constructor(private readonly options: CompilerOptions, private readonly languages: Map<string, string[]>) {}
     
-    compile(module: Module) {
+    private readonly languages: Map<string, string[]>
+    
+    constructor(private readonly options: CompilerOptions, languages: [string, string[]][]) {
+        this.languages = new Map(languages);
+    }
+    
+    compile(module: Module): number {
         let emittedOutput = false;  
         for(let [language, engines] of this.languages) {
             emittedOutput = this.emitLanguage(module, language, engines) || emittedOutput;            
         }
         if(!emittedOutput) {
             log.error(`No output languages specified use --${[...this.languages.keys()].join(' or --')}`);
+            return 1;
         }       
+        return 0;
     }
     
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
@@ -37,9 +44,13 @@ export class Compiler {
         return false;
     }
     
-    private emit<T extends EmitterOptions>(module: Module, language: string, engine: string, options: T & { [option :string] :T}) {
+    protected loadEmitter<T>(language: string, engine: string): Emitter<T> {
+        return require(`./${language}/${engine}`).default;        
+    }
+    
+    private emit<T extends EmitterOptions>(module: Module, language: string, engine: string, options: T & CompilerOptions) {
         let engineOptions = Object.assign({}, options, options[engine])
-        let emitter: Emitter<T> = require(`./${language}/${engine}`).default;
+        let emitter: Emitter<T> = this.loadEmitter(language, engine);
         log.info(`Emitting source for engine ${engine} to ${engineOptions.outDir}`);
         emitter.emit(module, engineOptions);                        
     }
