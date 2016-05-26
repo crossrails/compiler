@@ -6,6 +6,7 @@ install:
   - "nvm install $NODE_VERSION"
   - "node --version"
   - "npm install"
+  - "npm swift-wrapper-builder"
   - "npm test"
   - "npm run build-reference-project"
 language: objective-c
