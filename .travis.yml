@@ -7,6 +7,7 @@ install:
   - "node --version"
   - "npm install"
   - "npm test"
+  - "npm run swift-wrapper-builder"
   - "npm run build-reference-project"
 language: objective-c
 osx_image: xcode7.3

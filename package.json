@@ -14,6 +14,7 @@
     "typings": "^1.0.4",
     "tslint": "^3.10.2",
     "jasmine": "^2.4.1",
+    "gulp": "^3.9.1",
     "gulp-cli": "^1.2.1",
     "gulp-concat": "^2.6.0",
     "gulp-git": "^1.7.2",
