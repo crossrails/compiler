@@ -3,7 +3,6 @@ import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
 import {Module, SourceFile, Type, AnyType, ArrayType, BooleanType, StringType, NumberType, Declaration, VariableDeclaration} from "../ast"
 
-
 export interface SwiftEmitterOptions extends EmitterOptions {
     javascriptcore?: EmitterOptions 
     bundleId: string | undefined    

@@ -1,7 +1,7 @@
 
 describe("Main", () => {
     
-    it("successfuly compiles reference project", function() {
+    it("successfuly compiles the reference project", function() {
         process.argv = ['node', 'main', `./tests/reference/types.js`, "--swift", "--noEmit"]
         let exitMethod = spyOn(process, "exit");
         require('../../src/main');
