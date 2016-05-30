@@ -117,12 +117,12 @@ export class Module {
         this.identifiers = new Set();
         let files: SourceFile[] = [];
         try {
-            log.debug(`Attempting to open sourcemap at ` + path.relative('.', `${file}.map`));
+            log.debug(`Attempting to open sourcemap at ${path.relative('.', `${file}.map`)}`);
             let map = JSON.parse(readFileSync(`${file}.map`).toString());
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             for (let source of map.sources) {
-                let filename = `${map.sourceRoot}${source}`;
-                log.info(`Parsing ` + path.relative('.', filename));
+                let filename = path.join(this.src.dir, `${map.sourceRoot}${source}`);
+                log.info(`Parsing ${path.relative('.', filename)}`);
                 let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this);
                 if(sourceFile.declarations.length) {
                     files.push(sourceFile);
