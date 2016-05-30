@@ -8,7 +8,7 @@ describe("Main", () => {
         process.argv = ['node', 'main', `./tests/reference/types.js`, "--swift"]
         require('../../src/main');
         expect(writeFileMethod).toHaveBeenCalledTimes(1)
-        expect(writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/tests[\\/]reference[\\/]types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
+        expect(writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/tests[\\\/]reference[\\\/]types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
         expect(exitMethod).toHaveBeenCalledWith(0);
     });
         
