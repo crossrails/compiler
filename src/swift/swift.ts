@@ -59,7 +59,7 @@ declare module "../ast" {
     }
 }
 
-VariableDeclaration.prototype.definition = function (this: VariableDeclaration) {
+VariableDeclaration.prototype.definition = function (this: VariableDeclaration): string {
     return `public ${this.constant ? 'let' : 'var'} ${this.name} :${this.type.signature()}`;
 }
 

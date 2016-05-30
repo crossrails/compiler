@@ -1,7 +1,7 @@
 import {log} from "./log"
 import {Module} from "./ast" 
 import {Options} from 'yargs';
-import {writeFile} from 'fs';
+import {writeFileSync} from 'fs';
 
 export interface EmitterOptions {
    outDir?: string
@@ -24,7 +24,7 @@ export abstract class Emitter<T extends EmitterOptions> {
             log.info(`Skipping emit of file ${filename}`);
         } else {
             log.info(`Emitting file ${filename}`);
-            writeFile(filename, data);            
+            writeFileSync(filename, data);            
         }
     }
     

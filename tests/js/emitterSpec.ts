@@ -16,16 +16,16 @@ describe("Emitter", () => {
     
     beforeEach(function(this: This) {
         this.emitter = new MockEmitter();
-        spyOn(fs, 'writeFile');
+        spyOn(fs, 'writeFileSync');
     });
     
     it("writeFile emits when noEmit is not present", function(this: This) {
         this.emitter.emit({} as Module, {});
-        expect(fs.writeFile).toHaveBeenCalledTimes(1)
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(1)
     });
 
     it("writeFile does not emit when noEmit is present", function(this: This) {
         this.emitter.emit({} as Module, {'noEmit': true});
-        expect(fs.writeFile).not.toHaveBeenCalled();
+        expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 });
