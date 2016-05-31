@@ -10,6 +10,7 @@ install:
   - "npm run swift-wrapper-builder"
   - "npm run build-reference-project"
   - "npm install -g codecov"
+  - "npm run create-code-coverage"
 script:
   - istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec
   - codecov
