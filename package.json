@@ -7,18 +7,22 @@
     "prepublish": "typings -v && tsc -v && typings install && tsc",
     "swift-wrapper-builder": "gulp swiftJSCWrapper",
     "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
-    "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug"
+    "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug",
+    "create-code-coverage": "istanbul cover jasmine-node --captureExceptions src/"
   },
   "devDependencies": {
-    "typescript": "next",
-    "typings": "^1.0.4",
-    "tslint": "^3.10.2",
-    "jasmine": "^2.4.1",
+    "coveralls": "^2.11.9",
+    "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-cli": "^1.2.1",
     "gulp-concat": "^2.6.0",
     "gulp-git": "^1.7.2",
-    "del": "^2.2.0"
+    "istanbul": "^0.4.3",
+    "jasmine": "^2.4.1",
+    "jasmine-node": "^1.14.5",
+    "tslint": "^3.10.2",
+    "typescript": "next",
+    "typings": "^1.0.4"
   },
   "dependencies": {
     "doctrine": "^1.2.1",
