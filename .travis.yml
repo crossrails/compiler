@@ -17,10 +17,6 @@ language: objective-c
 osx_image: xcode7.3
 xcode_project: tests/swift/swift.xcodeproj
 xcode_scheme: src
-
-after_failure:
-  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
-
 notifications:
   webhooks:
     urls:
