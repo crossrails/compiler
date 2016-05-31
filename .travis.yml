@@ -9,6 +9,10 @@ install:
   - "npm test"
   - "npm run swift-wrapper-builder"
   - "npm run build-reference-project"
+  - "npm install -g codecov"
+script:
+  - istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec
+  - codecov
 language: objective-c
 osx_image: xcode7.3
 xcode_project: tests/swift/swift.xcodeproj
