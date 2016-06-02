@@ -8,7 +8,7 @@
     "swift-wrapper-builder": "gulp swiftJSCWrapper",
     "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
     "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug",
-    "create-code-coverage": "istanbul cover jasmine-node tests/js/ JASMINE_CONFIG_PATH=jasmine.json && codecov"
+    "create-code-coverage": "istanbul cover jasmine-node tests/js/ && codecov"
   },
   "devDependencies": {
     "coveralls": "^2.11.9",
