@@ -11,6 +11,7 @@ install:
   - "npm run build-reference-project"
   - "npm install -g codecov"
   - "npm run create-code-coverage"
+  - "npm run upload-code-coverage"
 language: objective-c
 osx_image: xcode7.3
 xcode_project: tests/swift/swift.xcodeproj
