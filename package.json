@@ -12,8 +12,6 @@
     "upload-code-coverage": "codecov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
   },
   "devDependencies": {
-    "coveralls": "^2.11.9",
-    "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-cli": "^1.2.1",
     "gulp-concat": "^2.6.0",
@@ -21,9 +19,12 @@
     "istanbul": "^0.4.3",
     "jasmine": "^2.4.1",
     "jasmine-node": "^2.0.0",
+    "rewire": "^2.5.1",
     "tslint": "^3.10.2",
     "typescript": "next",
-    "typings": "^1.0.4"
+    "typings": "^1.0.4",
+    "coveralls": "^2.11.9",
+    "del": "^2.2.0"
   },
   "dependencies": {
     "doctrine": "^1.2.1",

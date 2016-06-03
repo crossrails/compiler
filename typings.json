@@ -7,5 +7,8 @@
   },
   "globalDependencies": {
     "node": "github:demurgos/env-node/4#d64f790aaa018e9ae9e02bf7b4666f15eef39c08"
+  },
+  "devDependencies": {
+    "rewire": "registry:npm/rewire#2.5.1+20160601175240"
   }
 }

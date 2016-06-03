@@ -111,29 +111,37 @@ export class Module {
     readonly files: ReadonlyArray<SourceFile>;
     readonly identifiers: Set<string>;
     
-    constructor(file: string) {
+    constructor(file: string, charset: string) {
         this.src = path.parse(file);
         this.name = this.src.name;
         this.identifiers = new Set();
         let files: SourceFile[] = [];
         try {
             log.debug(`Attempting to open sourcemap at ${path.relative('.', `${file}.map`)}`);
-            let map = JSON.parse(readFileSync(`${file}.map`).toString());
+            let map = JSON.parse(readFileSync(`${file}.map`, charset));
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             for (let source of map.sources) {
-                let filename = path.join(this.src.dir, `${map.sourceRoot}${source}`);
-                log.info(`Parsing ${path.relative('.', filename)}`);
-                let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename).toString(), ts.ScriptTarget.ES6, true), this);
-                if(sourceFile.declarations.length) {
-                    files.push(sourceFile);
-                }
+                this.addSourceFile(files, path.join(this.src.dir, `${map.sourceRoot}${source}`), charset);
             }
         } catch(error) {
-            log.debug(`No sourcemap found, parsing ` + path.relative('.', file));
-            files = [new SourceFile(ts.createSourceFile(file, readFileSync(file).toString(), ts.ScriptTarget.ES6, true), this)];                    
+            log.debug(`No sourcemap found`);
+            this.addSourceFile(files, file, charset);
+        }
+        if(files.length == 0) {
+            log.warn(`Nothing to output as no exported declarations found in the source files`);                
         }
         this.files = files;
     }    
+
+    private addSourceFile(files: SourceFile[], filename: string, charset: string): void {
+        log.info(`Parsing ${path.relative('.', filename)}`);
+        let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), this);
+        if(sourceFile.declarations.length) {
+            files.push(sourceFile);
+        } else {
+            log.info(`No exported declarations found in ${path.relative('.', filename)}`);            
+        }
+    }
 }
 
 export abstract class Type {
