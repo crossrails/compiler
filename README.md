@@ -7,7 +7,7 @@ A simple to use compiler for generating cross-platform files, for Java, iOS(swif
 [![Typescript][typescript-image]][typescript-url]
 [![Build status][travis-image]][travis-url]
 [![Gitter][gitter-image]][gitter-url]
-
+[![Coverage Status][coverage-image]][coverage-url]
 
 [typescript-image]: https://img.shields.io/badge/typescript-1.9.0--dev.20160516-green.svg
 [typescript-url]: https://github.com/Microsoft/TypeScript
@@ -19,3 +19,5 @@ A simple to use compiler for generating cross-platform files, for Java, iOS(swif
 [travis-url]: https://travis-ci.org/crossrails/compiler
 [gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
 [gitter-url]: https://gitter.im/crossrails/compiler?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[coverage-image]:https://coveralls.io/repos/github/crossrails/compiler/badge.svg?branch=master
+[coverage-url]:https://coveralls.io/github/crossrails/compiler?branch=master
