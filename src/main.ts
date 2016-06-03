@@ -9,6 +9,7 @@ let options: CompilerOptions & {logLevel: string, charset: string} = args
     .demand(1)
     .check((argv: args.Argv, aliases: { [key: string]: string[] }) => {
         if(argv._[0] && !argv._[0].endsWith('.js')) throw 'File argument must be a js source file (.js)';
+        return true;
     })
     .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
     .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')
