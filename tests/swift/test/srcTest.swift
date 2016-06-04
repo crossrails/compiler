@@ -135,7 +135,8 @@ class test: XCTestCase {
         XCTAssertNil(optionalNumberConst)
         XCTAssertNil(optionalStringConst)
         XCTAssertNil(optionalNumberArrayConst)
-        XCTAssertNil(optionalAnyConst);
+        XCTAssertNil(optionalNullAnyConst);
+        XCTAssertEqual(optionalNonNullAnyConst, stringConst);
     }
     
     func testVarTypes() {

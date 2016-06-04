@@ -22,7 +22,9 @@ public let optionalStringConst :String? = String?(this[.optionalStringConst], wr
 
 public let optionalNumberArrayConst :[Double]? = [Double]?(this[.optionalNumberArrayConst], wrapped: { [Double]($0, element: Double.init) })
 
-public let optionalAnyConst :Any? = Any?(this[.optionalAnyConst], wrapped: JSValue.infer)
+public let optionalNullAnyConst :Any? = Any?(this[.optionalNullAnyConst], wrapped: { $0.infer() })
+
+public let optionalNonNullAnyConst :Any? = Any?(this[.optionalNonNullAnyConst], wrapped: { $0.infer() })
 
 public var booleanVar :Bool {
     get {
@@ -116,7 +118,7 @@ public var optionalNumberArrayVar :[Double]? {
 
 public var optionalAnyVar :Any? {
     get {
-        return Any?(this[.optionalAnyVar], wrapped: JSValue.infer)
+        return Any?(this[.optionalAnyVar], wrapped: { $0.infer() })
     }
     set {
         this[.optionalAnyVar] = this.valueOf(newValue, wrapped: this.valueOf)
@@ -134,7 +136,8 @@ extension JSProperty {
 	static let optionalNumberConst: JSProperty = "optionalNumberConst"
 	static let optionalStringConst: JSProperty = "optionalStringConst"
 	static let optionalNumberArrayConst: JSProperty = "optionalNumberArrayConst"
-	static let optionalAnyConst: JSProperty = "optionalAnyConst"
+	static let optionalNullAnyConst: JSProperty = "optionalNullAnyConst"
+	static let optionalNonNullAnyConst: JSProperty = "optionalNonNullAnyConst"
 	static let booleanVar: JSProperty = "booleanVar"
 	static let numberVar: JSProperty = "numberVar"
 	static let stringVar: JSProperty = "stringVar"

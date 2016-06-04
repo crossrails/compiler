@@ -45,8 +45,12 @@ export const optionalNumberArrayConst: Array<number>|null = null
 /**
  * @type {?Object}
  */
-export const optionalAnyConst: any|null = null
+export const optionalNullAnyConst: any|null = null
 
+/**
+ * @type {?Object}
+ */
+export const optionalNonNullAnyConst: any|null = stringConst
 
 
 //variables
@@ -74,8 +78,6 @@ export var anyVar: any = "anyVarLiteral"
  * @type {!Array<Array<string>>}
  */
 export var stringArrayArrayVar: Array<Array<string>> = [];
-
-
 
 
 //nullable variables

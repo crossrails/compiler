@@ -52,7 +52,7 @@ VariableDeclaration.prototype.body = function (this: VariableDeclaration) {
 }
 
 AnyType.prototype.returnValue = function(this: AnyType, declaration: VariableDeclaration) {
-    return !this.optional ? `this[.${declaration.name}].infer()` : `Any?(this[.${declaration.name}], wrapped: JSValue.infer)`;    
+    return !this.optional ? `this[.${declaration.name}].infer()` : `Any?(this[.${declaration.name}], wrapped: { $0.infer() })`;    
 }
 
 ArrayType.prototype.returnValue = function(this: ArrayType, declaration: VariableDeclaration) {
