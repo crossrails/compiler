@@ -27,10 +27,10 @@ describe("Compiler", () => {
         let compiler = new Compiler(options, [['language', ['engine1', 'engine2']]]);
         let loadEmitterMethodOnTheCompiler = spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
-        //expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledTimes(1);
+        expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledTimes(1);
         expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledWith('language', 'engine1');
-        //expect(this.emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
-        //expect(this.emitMethodOnTheEmitter).toHaveBeenCalledWith(this.module, jasmine.anything());
+        expect(this.emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
+        expect(this.emitMethodOnTheEmitter).toHaveBeenCalledWith(this.module, jasmine.anything());
     });
     
     it("emits to only to the engine specified in the options", function(this: This) {
@@ -38,10 +38,10 @@ describe("Compiler", () => {
         let compiler = new Compiler(options, [['language', ['engine1', 'engine2']]]);
         let loadEmitterMethodOnTheCompiler = spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
-        //expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledTimes(1);
+        expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledTimes(1);
         expect(loadEmitterMethodOnTheCompiler).toHaveBeenCalledWith('language', 'engine2');
-        //expect(this.emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
-        //expect(this.emitMethodOnTheEmitter).toHaveBeenCalledWith(this.module, jasmine.anything());
+        expect(this.emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
+        expect(this.emitMethodOnTheEmitter).toHaveBeenCalledWith(this.module, jasmine.anything());
     });    
     
     it("passes compiler level options to the emitter", function(this: This) {
