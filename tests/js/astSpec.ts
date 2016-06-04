@@ -55,14 +55,17 @@ describe("Type", () => {
             export let booleans: ReadonlyArray<boolean>;
         `, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
         //let numbers: number[]
-        // expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
-        // expect(this.numberTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
+        expect(this.numberTypeConstructor).toHaveBeenCalledWith(false);
+        expect((sourceFile.declarations[0] as AST.VariableDeclaration).type instanceof ast.ArrayType);
         //let strings: Array<string>
         expect(this.stringTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.stringTypeConstructor).toHaveBeenCalledWith(false);
+        expect((sourceFile.declarations[1] as AST.VariableDeclaration).type instanceof ast.ArrayType);
         //let booleans: ReadonlyArray<boolean>
-        // expect(this.booleanTypeConstructor).toHaveBeenCalledTimes(1);
-        // expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.booleanTypeConstructor).toHaveBeenCalledTimes(1);
+        expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false);
+        expect((sourceFile.declarations[2] as AST.VariableDeclaration).type instanceof ast.ArrayType);
     });    
     
     it("correctly identifies basic types", function(this: This) {

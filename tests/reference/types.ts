@@ -14,7 +14,7 @@ export const stringConst: string = 'stringConstLiteral';
 /**
  * @type {!Array<number>}
  */
-export const numberArrayConst: Array<number> = [1, 2, 3];
+export const numberArrayConst: number[] = [1, 2, 3];
 /**
  * @type {!Array<Array<string>>}
  */

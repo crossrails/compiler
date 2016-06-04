@@ -164,6 +164,8 @@ export abstract class Type {
                     return new NumberType(optional);
                 case ts.SyntaxKind.StringKeyword:
                     return new StringType(optional);
+                case ts.SyntaxKind.ArrayType:
+                    return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional);
                 case ts.SyntaxKind.TypeReference:
                     return Type.fromReference(type as ts.TypeReferenceNode, optional);
                 case ts.SyntaxKind.UnionType:
@@ -181,7 +183,8 @@ export abstract class Type {
         let identifier = reference.typeName as ts.Identifier
         switch(identifier.text) {
             case 'Array':
-                return new ArrayType(reference, optional);
+            case 'ReadonlyArray':
+                return new ArrayType(reference.typeArguments, optional);
             default:
                 throw `Unsupported type reference ${identifier.text}`
         }
@@ -210,11 +213,11 @@ export interface TypeVisitor<R> {
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>
     
-    constructor(type: ts.TypeReferenceNode, optional: boolean) {
+    constructor(typeArgs: ts.TypeNode[] | undefined, optional: boolean) {
         super(optional);
         let typeArguments: Type[] = [];
-        if(type.typeArguments) for (let typeArgument of type.typeArguments) {
-            typeArguments.push(Type.from(typeArgument, false))
+        if(typeArgs) for (let typeArg of typeArgs) {
+            typeArguments.push(Type.from(typeArg, false))
         }
         this.typeArguments = typeArguments;      
     }  
@@ -245,6 +248,7 @@ export class BooleanType extends Type {
 }
 
 export class ArrayType extends GenericType {
+
     accept<R>(visitor: TypeVisitor<R>): R {
         return visitor.visitArrayType(this);
     }    
