@@ -9,7 +9,8 @@
     "test": "jasmine JASMINE_CONFIG_PATH=jasmine.json",
     "build-reference-project": "cd tests/reference && node ../../bin/xrails types.js --swift.outDir=../swift/src --swift.bundleId=io.xrails.src --logLevel=debug",
     "create-code-coverage": "istanbul cover node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json",
-    "upload-code-coverage": "codecov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage"
+    "upload-code-coverage": "codecov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage",
+    "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -24,7 +25,11 @@
     "typescript": "next",
     "typings": "^1.0.4",
     "coveralls": "^2.11.9",
-    "del": "^2.2.0"
+    "del": "^2.2.0",
+    "nyc": "^6.4.4",
+    "mocha": "^2.5.3",
+    "codecov": "^1.0.1",
+    "tsd": "^0.6.5"
   },
   "dependencies": {
     "doctrine": "^1.2.1",
