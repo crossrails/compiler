@@ -21,7 +21,6 @@
     "jasmine": "^2.4.1",
     "jasmine-node": "^2.0.0",
     "rewire": "^2.5.1",
-    "tslint": "^3.10.2",
     "typescript": "next",
     "typings": "^1.0.4",
     "coveralls": "^2.11.9",
