@@ -6,7 +6,7 @@ install:
   - "nvm install $NODE_VERSION"
   - "node --version"
   - "npm install"
-  - "npm test"
+  - "nyc npm test"
   - "npm run swift-wrapper-builder"
   - "npm run build-reference-project"
   - "npm install -g codecov"
