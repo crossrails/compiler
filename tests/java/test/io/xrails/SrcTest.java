@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import static io.xrails.Src.*;
+import static io.xrails.Types.*;
 import static org.junit.Assert.*;
 
 /**
@@ -137,7 +138,7 @@ public class SrcTest {
         assertFalse(getOptionalNumberConst().isPresent());
         assertFalse(getOptionalStringConst().isPresent());
         assertFalse(getOptionalNumberArrayConst().isPresent());
-        assertFalse(getOptionalAnyConst().isPresent());
+        assertFalse(getOptionalNullAnyConst().isPresent());
     }
 
     @Test

@@ -79,7 +79,7 @@ ast.ClassDeclaration.prototype.keyword = function (this: ast.ClassDeclaration): 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
     let output = `    public${this.static?' static':''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}\n`;
     if(!this.constant) {
-        output = `${output}\n    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.signature()} value) ${this.setter()}\n`;    
+        output = `${output}\n    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} value) ${this.setter()}\n`;    
     }
     return output;
 }

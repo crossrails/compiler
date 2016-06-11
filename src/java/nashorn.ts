@@ -117,9 +117,9 @@ ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: Varia
 }
 
 Type.prototype.arrayElementArgumentValue = function(this: Type, optional: boolean = this.optional) {
-    return optional ? `value.get()` : `value`;    
+    return `value`;    
 }
 
 ArrayType.prototype.arrayElementArgumentValue = function(this: ArrayType, optional: boolean = this.optional) {
-    return `${optional ? 'value.get()' : 'value'}, JS.ArrayMirror::new`;    
+    return `value, JS.ArrayMirror::new`;    
 }
