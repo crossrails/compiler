@@ -22,50 +22,50 @@ class test: XCTestCase {
     
     func testSimpleException() {
         do {
-            try throwSimpleError();
-            XCTFail();
+            try throwSimpleError()
+            XCTFail()
         } catch let e as CustomStringConvertible {
-            XCTAssertEqual("Simple error message", e.description);
+            XCTAssertEqual("Simple error message", e.description)
         } catch {
-            XCTFail();
+            XCTFail()
         }
     }
     
     func testSpecialException() {
         do {
-            try throwSpecialError();
-            XCTFail();
+            try throwSpecialError()
+            XCTFail()
         } catch let e as SpecialException {
-            XCTAssertEqual("Special error message", e.message);
+            XCTAssertEqual("Special error message", e.message)
         } catch {
-            XCTFail();
+            XCTFail()
         }
     }
 
-    static var testInterfaceMethodCalled = false;
+    static var testInterfaceMethodCalled = false
     
     class SimpleInterfaceImpl : SimpleInterface {
         func voidNoArgMethod() {
-            testInterfaceMethodCalled = true;
+            testInterfaceMethodCalled = true
         }
     }
 
     func testInterface() {
-        XCTAssertFalse(simpleInterfaceInstanceCalled);
-        simpleInterfaceInstance.voidNoArgMethod();
-        XCTAssert(simpleInterfaceInstanceCalled);
-        acceptSimpleInterface(SimpleInterfaceImpl());
-        XCTAssert(test.testInterfaceMethodCalled);
-        test.testInterfaceMethodCalled = false;
-        simpleInterfaceInstance.voidNoArgMethod();
-        XCTAssert(test.testInterfaceMethodCalled);
+        XCTAssertFalse(simpleInterfaceInstanceCalled)
+        simpleInterfaceInstance.voidNoArgMethod()
+        XCTAssert(simpleInterfaceInstanceCalled)
+        acceptSimpleInterface(SimpleInterfaceImpl())
+        XCTAssert(test.testInterfaceMethodCalled)
+        test.testInterfaceMethodCalled = false
+        simpleInterfaceInstance.voidNoArgMethod()
+        XCTAssert(test.testInterfaceMethodCalled)
     }
     
-    static var testInheritanceMethodCalled = false;
+    static var testInheritanceMethodCalled = false
     
     class SimpleObjectOverride : SimpleObject {
         override func methodToOverride() {
-            testInheritanceMethodCalled = true;
+            testInheritanceMethodCalled = true
         }
     }
     
@@ -76,49 +76,49 @@ class test: XCTestCase {
     }
     
     func testInheritance() {
-        var o = SimpleObject(5);
-        o.callOverriddenMethod();
-        XCTAssert(o.methodToOverrideCalled);
+        var o = SimpleObject(5)
+        o.callOverriddenMethod()
+        XCTAssert(o.methodToOverrideCalled)
         
         o = SimpleObjectOverride(5)
-        o.callOverriddenMethod();
-        XCTAssert(test.testInheritanceMethodCalled);
-        XCTAssertFalse(o.methodToOverrideCalled);
+        o.callOverriddenMethod()
+        XCTAssert(test.testInheritanceMethodCalled)
+        XCTAssertFalse(o.methodToOverrideCalled)
         
         o = SimpleObjectOverrideCallSuper(5)
-        o.methodToOverride();
-        XCTAssert(o.methodToOverrideCalled);
+        o.methodToOverride()
+        XCTAssert(o.methodToOverrideCalled)
     }
     
     func testObjects() {
-        SimpleObject.staticVoidNoArgMethod();
+        SimpleObject.staticVoidNoArgMethod()
         
-        XCTAssertNotNil(simpleObjectInstance);
+        XCTAssertNotNil(simpleObjectInstance)
         
-        XCTAssertEqual(49.0, simpleObjectInstance.numberSingleObjectArgMethod(simpleObjectInstance));
+        XCTAssertEqual(49.0, simpleObjectInstance.numberSingleObjectArgMethod(simpleObjectInstance))
         
-        XCTAssertEqual(14.0, simpleObjectInstance.numberSingleObjectArgMethod(SimpleObject(2)));
+        XCTAssertEqual(14.0, simpleObjectInstance.numberSingleObjectArgMethod(SimpleObject(2)))
         
-        XCTAssertEqual(simpleObjectInstance, simpleObjectInstance);
-        XCTAssert(simpleObjectInstance == simpleObjectInstance.upcastThisToObject());
-        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance);
-        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance.upcastThisToObject());
+        XCTAssertEqual(simpleObjectInstance, simpleObjectInstance)
+        XCTAssert(simpleObjectInstance == simpleObjectInstance.upcastThisToObject())
+        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance)
+        XCTAssert(simpleObjectInstance.upcastThisToObject() == simpleObjectInstance.upcastThisToObject())
     }
     
     func testFunctions() {
-        voidNoArgFunction();
-        XCTAssert(voidNoArgFunctionCalled);
+        voidNoArgFunction()
+        XCTAssert(voidNoArgFunctionCalled)
     
-        XCTAssertEqual("stringNoArgFunctionReturnValue", stringNoArgFunction());
+        XCTAssertEqual("stringNoArgFunctionReturnValue", stringNoArgFunction())
         
-        XCTAssertEqual(25.0, numberMultipleArgFunction(5, b: 5));
-        XCTAssertEqual(-3.0, numberMultipleArgFunction(-2, b: 1.5));
+        XCTAssertEqual(25.0, numberMultipleArgFunction(5, b: 5))
+        XCTAssertEqual(-3.0, numberMultipleArgFunction(-2, b: 1.5))
         
-        XCTAssertEqual("stringNoArgLambdaReturnValue", stringNoArgLambda());
-        XCTAssertEqual(stringNoArgLambda(), stringNoArgLambda());
+        XCTAssertEqual("stringNoArgLambdaReturnValue", stringNoArgLambda())
+        XCTAssertEqual(stringNoArgLambda(), stringNoArgLambda())
         
-        stringNoArgLambda = { "expectedReturnValue" };
-        XCTAssertEqual("expectedReturnValue", stringNoArgLambda());
+        stringNoArgLambda = { "expectedReturnValue" }
+        XCTAssertEqual("expectedReturnValue", stringNoArgLambda())
     }
     
     func testConstTypes() {
@@ -199,12 +199,12 @@ class test: XCTestCase {
     }
 
     func testNoErasureForBasicTypes() {
-        anyVar = booleanConst;
-        XCTAssertEqual(anyVar as? Bool, booleanConst);
+        anyVar = booleanConst
+        XCTAssertEqual(anyVar as? Bool, booleanConst)
     }
     
     func testErasureForNonBasicTypes() {
-        XCTAssert(anyObjectInstance == anyObjectInstance);
+        XCTAssert(anyObjectInstance == anyObjectInstance)
         anyVar = anyObjectInstance
         XCTAssert(anyVar == anyObjectInstance)
     }
@@ -216,11 +216,11 @@ class test: XCTestCase {
     func testUnknownNativeSideObjectDeallocation() {
         var o :AnyObject? = UnknownNativeSideObject()
         weak var ref = o
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNotNil(ref);
-        optionalAnyVar = nil;
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNotNil(ref)
+        optionalAnyVar = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
         XCTAssertNil(ref)
     }
@@ -228,23 +228,23 @@ class test: XCTestCase {
     func testUnknownJSSideObjectDeallocation() {
         var o :AnyObject? = optionalAnyObjectInstance as? AnyObject
         weak var ref = o!
-        XCTAssertNotNil(ref);
+        XCTAssertNotNil(ref)
         optionalAnyObjectInstance = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNil(ref);
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNil(ref)
     }
     
     func testKnownNativeSideObjectDeallocation() {
         var o :AnyObject? = SimpleObject(1)
         weak var ref = o
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNotNil(ref);
-        optionalAnyVar = nil;
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNotNil(ref)
+        optionalAnyVar = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
         XCTAssertNil(ref)
     }
@@ -252,11 +252,11 @@ class test: XCTestCase {
     func testKnownJSSideObjectDeallocation() {
         var o :AnyObject? = simpleInterfaceInstance
         weak var ref = o
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNotNil(ref);
-        optionalAnyVar = nil;
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNotNil(ref)
+        optionalAnyVar = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
         XCTAssertNil(ref)
     }
@@ -264,11 +264,11 @@ class test: XCTestCase {
     func testNativeSideInterfaceDeallocation() {
         var o :AnyObject? = SimpleInterfaceImpl()
         weak var ref = o
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNotNil(ref);
-        optionalAnyVar = nil;
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNotNil(ref)
+        optionalAnyVar = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
         XCTAssertNil(ref)
     }
@@ -276,11 +276,11 @@ class test: XCTestCase {
     func testJSSideInterfaceDeallocation() {
         var o :AnyObject? = simpleInterfaceInstance
         weak var ref = o
-        XCTAssertNotNil(ref);
-        optionalAnyVar = o;
-        o = nil;
-        XCTAssertNotNil(ref);
-        optionalAnyVar = nil;
+        XCTAssertNotNil(ref)
+        optionalAnyVar = o
+        o = nil
+        XCTAssertNotNil(ref)
+        optionalAnyVar = nil
         JSSynchronousGarbageCollectForDebugging(this.context.ref)
         XCTAssertNil(ref)
     }
