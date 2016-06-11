@@ -19,7 +19,7 @@ public class SrcTest {
 
     @Before
     public void setUp() {
-        JS.eval("../src.js");
+        JS.eval("../reference/src.js");
     }
 
     @Test

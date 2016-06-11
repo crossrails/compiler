@@ -13,7 +13,7 @@ export abstract class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
     protected emitModule(module: Module, options: SwiftEmitterOptions): void {
         let writtenModuleFile = false;  
         for(let file of module.files as Array<SourceFile>) {            
-            let filename = `${path.join(options.outDir, path.relative('.', file.path.dir), file.path.name)}.swift`;
+            let filename = `${path.join(options.outDir, path.relative(module.sourceRoot, file.path.dir), file.path.name)}.swift`;
             if(module.name != file.path.name) {
                 this.writeFile(filename, this.file(file.declarations));                
             } else {

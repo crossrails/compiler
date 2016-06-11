@@ -8,6 +8,8 @@ public let numberConst :Double = Double(this[.numberConst])
 
 public let stringConst :String = String(this[.stringConst])
 
+public let numberOrNullArrayConst :[Any] = [Any](this[.numberOrNullArrayConst], element: JSValue.infer)
+
 public let numberArrayConst :[Double] = [Double](this[.numberArrayConst], element: Double.init)
 
 public let stringArrayArrayConst :[[String]] = [[String]](this[.stringArrayArrayConst], element: { [String]($0, element: String.init) })
@@ -129,6 +131,7 @@ extension JSProperty {
 	static let booleanConst: JSProperty = "booleanConst"
 	static let numberConst: JSProperty = "numberConst"
 	static let stringConst: JSProperty = "stringConst"
+	static let numberOrNullArrayConst: JSProperty = "numberOrNullArrayConst"
 	static let numberArrayConst: JSProperty = "numberArrayConst"
 	static let stringArrayArrayConst: JSProperty = "stringArrayArrayConst"
 	static let anyConst: JSProperty = "anyConst"

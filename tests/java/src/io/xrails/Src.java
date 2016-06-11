@@ -1,8 +1,7 @@
 package io.xrails;
 
-import jdk.nashorn.api.scripting.*;
-import jdk.nashorn.internal.runtime.ECMAException;
-import jdk.nashorn.internal.runtime.ScriptObject;
+import jdk.nashorn.api.scripting.NashornException;
+import jdk.nashorn.api.scripting.ScriptObjectMirror;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 
 public class Src {
 
-    static final ScriptObjectMirror global = JS.eval("../src.js");
+    static final ScriptObjectMirror global = JS.eval("../reference/src.js");
 
 //objects
 
@@ -102,8 +101,7 @@ public class Src {
     }
 
     public static Object getAnyConst() {
-        Object value = global.get("anyConst");
-        return value instanceof ScriptObjectMirror ? new JS.Object((ScriptObjectMirror)value) : value;
+        return JS.wrap(global.get("anyConst"), JS.Object::new);
     }
 
     //nullable constants
@@ -127,8 +125,7 @@ public class Src {
     }
 
     public static Optional<Object> getOptionalAnyConst() {
-        ScriptObjectMirror value = (ScriptObjectMirror)global.get("optionalAnyConst");
-        return isNull(value) ? Optional.empty() : Optional.of(new JS.Object(value));
+        return Optional.ofNullable(JS.wrap(global.get("optionalAnyConst"), JS.Object::new));
     }
 
     //variables

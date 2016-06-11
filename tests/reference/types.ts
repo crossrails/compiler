@@ -12,6 +12,10 @@ export const numberConst: number = Number.NaN;
  */
 export const stringConst: string = 'stringConstLiteral';
 /**
+ * @type {!Array<?number>}
+ */
+export const numberOrNullArrayConst: (number|null)[] = [1, null, 3];
+/**
  * @type {!Array<number>}
  */
 export const numberArrayConst: number[] = [1, 2, 3];

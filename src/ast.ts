@@ -7,12 +7,16 @@ import {log} from "./log"
 export abstract class Declaration {       
     readonly name: string; 
     readonly comment: string
-    readonly parent: Declaration|SourceFile;
-    
-    constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
+    readonly parent: TypeDeclaration|SourceFile;
+    readonly protected: boolean;
+    readonly static: boolean;
+
+    constructor(node: ts.Declaration, parent: TypeDeclaration|SourceFile) {
         //make parent non-enumerable to avoid circular reference 
         Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
         this.name = (node.name as ts.Identifier).text;
+        this.protected = (node.flags & ts.NodeFlags.Protected) != 0;
+        this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0;
         this.module.identifiers.add(this.name);
     }
 
@@ -37,7 +41,7 @@ export class VariableDeclaration extends Declaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration, parent: Declaration|SourceFile) {
+    constructor(node: ts.VariableDeclaration | ts.PropertyDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
         if(node.type) {
             this.type = Type.from(node.type, false);
@@ -53,10 +57,36 @@ export class VariableDeclaration extends Declaration {
     }
 }
 
-export class ClassDeclaration extends Declaration {
-    readonly superClass: string | undefined;
-    readonly methods: ReadonlyArray<MethodDeclaration>;
+export abstract class TypeDeclaration extends Declaration {
+    readonly members: ReadonlyArray<Declaration>;
     
+    constructor(node: ts.ClassDeclaration | ts.InterfaceDeclaration | ts.EnumDeclaration, parent: TypeDeclaration|SourceFile) {
+        super(node, parent);
+        let members: Declaration[] = [];
+        for (let member of node.members) {
+            if(!(member.flags & ts.NodeFlags.Private)) {
+                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier).text} of class ${this.name}`, member);                
+            } else switch(member.kind) {
+                case ts.SyntaxKind.PropertyDeclaration:
+                    members.push(new VariableDeclaration(member as ts.PropertyDeclaration, this));
+                    break;         
+                default:
+                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier).text} of class ${this.name}`, member);
+            }            
+        }
+        this.members = members;
+    }
+}
+
+export class ClassDeclaration extends TypeDeclaration {
+    readonly superClass: string | undefined;
+    readonly typeParameters: ReadonlyArray<Type>
+    readonly members: ReadonlyArray<Declaration>;
+    
+    constructor(node: ts.ClassDeclaration, parent: TypeDeclaration|SourceFile) {
+        super(node, parent);
+    }
+
     accept<T>(visitor: DeclarationVisitor) {
         visitor.visitClass(this);
     }
@@ -77,9 +107,9 @@ export class SourceFile {
     readonly module: Module;
     
     constructor(node: ts.SourceFile, module: Module) {
-        // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
-        //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
-        // }, 4));
+        console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
+            return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
+        }, 4));
         this.path = path.parse(node.fileName);
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: Declaration[] = [];
@@ -91,7 +121,10 @@ export class SourceFile {
                     for (let declaration of (statement as ts.VariableStatement).declarationList.declarations) {
                         declarations.push(new VariableDeclaration(declaration, this));
                     }
-                    break;         
+                    break;   
+                case ts.SyntaxKind.ClassDeclaration:
+                    declarations.push(new ClassDeclaration(statement as ts.ClassDeclaration, this));
+                    break;
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[statement.kind]}`, statement);
             }            
@@ -108,6 +141,7 @@ export class Module {
 
     readonly name: string;    
     readonly src: path.ParsedPath;
+    readonly sourceRoot: string;
     readonly files: ReadonlyArray<SourceFile>;
     readonly identifiers: Set<string>;
     
@@ -120,11 +154,13 @@ export class Module {
             log.debug(`Attempting to open sourcemap at ${path.relative('.', `${file}.map`)}`);
             let map = JSON.parse(readFileSync(`${file}.map`, charset));
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
+            this.sourceRoot = map.sourceRoot;
             for (let source of map.sources) {
-                this.addSourceFile(files, path.join(this.src.dir, `${map.sourceRoot}${source}`), charset);
+                this.addSourceFile(files, path.join(this.src.dir, map.sourceRoot, source), charset);
             }
         } catch(error) {
             log.debug(`No sourcemap found`);
+            this.sourceRoot = '.';
             this.addSourceFile(files, file, charset);
         }
         if(files.length == 0) {
@@ -141,6 +177,11 @@ export class Module {
         } else {
             log.info(`No exported declarations found in ${path.relative('.', filename)}`);            
         }
+    }
+
+    get declarations(): ReadonlyArray<Declaration> {
+        return this.files.reduce((declarations: Declaration[], file: SourceFile) => 
+            declarations.concat(file.declarations as Declaration[]), []);
     }
 }
 

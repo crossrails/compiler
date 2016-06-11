@@ -49,11 +49,28 @@ function main(...args: string[]): number {
                 type: 'string'             
             }
         })
+        .options({
+            'java': { 
+                group: 'Java options:',
+                desc: 'Compile source to java (enabled automatically if any java option specified e.g. java.outDir=gen)' 
+            },
+            'java.nashorn': { 
+                group: 'Java options:',
+                desc: 'Compile source to use the Nashorn engine under the hood, requires Java SE/EE [default]',
+            },
+            'java.basePackage': { 
+                group: 'Java options:',
+                desc: 'The base package to root the output structure in',
+                type: 'string',  
+                //required: true            
+            }
+        })
         .options({ 
             'outDir': { 
                 group: 'General options:',
                 desc: 'Redirect output structure to a directory',
                 type: 'string',
+                normalize: true,
                 default: '.'             
             },
             'noEmit': { 
