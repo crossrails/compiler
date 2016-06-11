@@ -180,6 +180,10 @@ public class Src {
         global.setMember("stringArrayArrayVar", JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(value, JS.ArrayMirror::new)));
     }
 
+    public static void setBooleanArrayArrayArrayVar(List<List<List<Boolean>>> value) {
+        global.setMember("booleanArrayArrayArrayVar", JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(value, JS.ArrayMirror::new)));
+    }
+
     ////nullable variables
 
     public static Optional<Boolean> getOptionalBooleanVar() {

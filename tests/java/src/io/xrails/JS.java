@@ -21,16 +21,17 @@ class JS {
     private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine();
     private static final ScriptObjectMirror wrapper;
 
+    static final Map<java.lang.Object, java.lang.Object> heap = new WeakHashMap<>();
+
     static {
         try {
+            heap.put(null, null);
             wrapper = (ScriptObjectMirror)engine.eval(
                     "function(name, obj) { var Type = Java.type(name); return new Type(obj); }");
         } catch (ScriptException e) {
             throw new IllegalStateException(e);
         }
     }
-
-    static final Map<java.lang.Object, java.lang.Object> heap = new WeakHashMap<>();
 
     static ScriptObjectMirror eval(String filename) {
         try {

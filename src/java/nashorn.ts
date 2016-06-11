@@ -24,7 +24,7 @@ declare module "../ast" {
         arrayElementReturnValue(optional?: boolean): string;
         returnValue(declaration: VariableDeclaration): string;
         argumentValue(declaration: VariableDeclaration): string;
-        arrayElementArgumentValue(): string;
+        arrayElementArgumentValue(optional?: boolean): string;
     }
 }
 
@@ -93,24 +93,19 @@ AnyType.prototype.returnValue = function(this: AnyType, declaration: VariableDec
 }
 
 ArrayType.prototype.returnValue = function(this: ArrayType, declaration: VariableDeclaration) {
-    return this.optional ? `${this.signature()}(this[.${declaration.name}], wrapped: ${this.arrayElementReturnValue(false)})` : 
-        `${this.signature()}(this[.${declaration.name}], element: ${this.typeArguments[0].arrayElementReturnValue()})`; 
+    return `JS.wrap(${declaration.mirror()}.get("${declaration.name}"), ${this.typeArguments[0].arrayElementReturnValue()})`;    
 }
 
 Type.prototype.returnValue = function(this: Type, declaration: VariableDeclaration) {
     return `(${this.typeName()})${declaration.mirror()}.get("${declaration.name}")`    
 }
 
-AnyType.prototype.arrayElementReturnValue = function(this: AnyType, optional: boolean = this.optional) {
-    return !optional ? `JSValue.infer` : `{ Any?($0, wrapped: JSValue.infer) }`;    
-}
-
 ArrayType.prototype.arrayElementReturnValue = function(this: ArrayType, optional: boolean = this.optional) {
-    return `{ ${this.signature(optional)}($0, element: ${this.typeArguments[0].arrayElementReturnValue()}) }`;    
+    return `o -> new JS.Array<>(o, ${this.typeArguments[0].arrayElementReturnValue()})`;    
 }
 
 Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean = this.optional) {
-    return !optional ? `${this.signature(optional)}.init` : `{ ${this.signature(optional)}($0, wrapped: ${this.signature(false)}.init) }`;    
+    return `JS.Array::new`;    
 }
 
 Type.prototype.argumentValue = function(this: Type, declaration: VariableDeclaration) {
@@ -118,14 +113,13 @@ Type.prototype.argumentValue = function(this: Type, declaration: VariableDeclara
 }
 
 ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: VariableDeclaration) {
-    return this.optional ? Type.prototype.argumentValue.call(this, declaration) : 
-        `this.valueOf(newValue, element: ${this.typeArguments[0].arrayElementArgumentValue()})`;    
+    return `JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(${this.typeArguments[0].arrayElementArgumentValue(this.optional)}))`;    
 }
 
-Type.prototype.arrayElementArgumentValue = function(this: Type) {
-    return `this.valueOf`;    
+Type.prototype.arrayElementArgumentValue = function(this: Type, optional: boolean = this.optional) {
+    return optional ? `value.get()` : `value`;    
 }
 
-ArrayType.prototype.arrayElementArgumentValue = function(this: ArrayType) {
-    return `{ this.valueOf($0, element: ${this.typeArguments[0].arrayElementArgumentValue()}) }`;    
+ArrayType.prototype.arrayElementArgumentValue = function(this: ArrayType, optional: boolean = this.optional) {
+    return `${optional ? 'value.get()' : 'value'}, JS.ArrayMirror::new`;    
 }
