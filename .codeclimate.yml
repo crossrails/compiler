@@ -24,4 +24,4 @@ ratings:
 exclude_paths:
 - node_modules/
 - tests/
-
+- tests/js/**.js
