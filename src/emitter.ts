@@ -5,6 +5,7 @@ import {writeFileSync} from 'fs';
 
 export interface EmitterOptions {
    outDir?: string
+   exportAll?: boolean
 //    newLine: 'lf'|'crlf'
    noEmit?: boolean
    noEmitWrapper?: boolean

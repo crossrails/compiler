@@ -4,9 +4,12 @@
     "module": "none",
     "noImplicitAny": true,
     "sourceMap": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "outFile": "src.js  "
   },
   "files": [
-    "types.ts"
+    "types.ts",
+    "functions.ts",
+    "objects.ts"
   ]
 }

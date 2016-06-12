@@ -10,7 +10,8 @@
     },
     "java": {
         "engine": "nashorn",
-        "outDir": "java/src/io/xrails"
+        "outDir": "java/src/",
+        "basePackage": "io.xrails"
         //"preserveFolders": true
     }
 }

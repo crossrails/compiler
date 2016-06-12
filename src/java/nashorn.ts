@@ -1,20 +1,7 @@
-import {JavaEmitter} from './java'
-import {Options} from 'yargs';
+import {emitter} from './java'
 import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration} from "../ast"
 
-class NashornEmitter extends JavaEmitter {
-    
-    protected header(isGlobalClass: boolean): string {
-        let lines: string[] = [];
-        lines.push(`import jdk.nashorn.api.scripting.NashornException`);
-        if(isGlobalClass) {
-            lines.push(`static final ScriptObjectMirror global = JS.eval("../reference/src.js");\n`);
-        }
-        return lines.join('\n');        
-    }    
-}
-
-export default new JavaEmitter(); 
+export default emitter;
 
 declare module "../ast" {
     interface Declaration {
@@ -33,7 +20,7 @@ ClassDeclaration.prototype.imports = function (this: ClassDeclaration, isGlobalT
     lines.push(`import java.util.*;`);        
     lines.push(`import jdk.nashorn.api.scripting.*;`);
     if(!isGlobalType) {
-        lines.push(`import static io.xrails.Src.global;`);
+        lines.push(`\nimport static io.xrails.Src.global;`);
     }
     return lines.join('\n');
 }

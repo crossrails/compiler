@@ -28,6 +28,11 @@ function main(...args: string[]): number {
             describe: 'The character set of the input files',
             type: 'string'
         })
+        .option('implicitExport', {
+            default: false,
+            describe: 'Expose all declarations found (by default only those marked with export are exposed)',
+            type: 'boolean'
+        })
         .option('l', {
             alias: 'logLevel',
             default: 'warning',
@@ -87,7 +92,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.outDir or swift.javascriptcore.outDir')
-        .parse<CompilerOptions & {logLevel: string, charset: string}>(args);
+        .parse<CompilerOptions & {logLevel: string, charset: string, implicitExport: boolean}>(args);
 
     log.setLevel(options.logLevel);
 
@@ -105,7 +110,7 @@ function main(...args: string[]): number {
         //todo
         return 1;
     } else {
-        return compiler.compile(new Module(filename, options.charset));
+        return compiler.compile(new Module(filename, options.implicitExport, options.charset));
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));       

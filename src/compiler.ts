@@ -1,5 +1,6 @@
 import {log} from "./log"
 import {Module} from "./ast" 
+import * as ast from "./ast" 
 import {Emitter, EmitterOptions} from "./emitter" 
 
 export interface CompilerOptions {

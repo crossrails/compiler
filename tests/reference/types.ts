@@ -1,107 +1,107 @@
-//export constants
+//constants
 /**
  * @type {!boolean}
  */
-export const booleanConst: boolean = false;
+const booleanConst: boolean = false;
 /**
  * @type {!number}
  */
-export const numberConst: number = Number.NaN;
+const numberConst: number = Number.NaN;
 /**
  * @type {!string}
  */
-export const stringConst: string = 'stringConstLiteral';
+const stringConst: string = 'stringConstLiteral';
 /**
  * @type {!Array<?number>}
  */
-export const numberOrNullArrayConst: (number|null)[] = [1, null, 3];
+const numberOrNullArrayConst: (number|null)[] = [1, null, 3];
 /**
  * @type {!Array<number>}
  */
-export const numberArrayConst: number[] = [1, 2, 3];
+const numberArrayConst: number[] = [1, 2, 3];
 /**
  * @type {!Array<Array<string>>}
  */
-export const stringArrayArrayConst: Array<Array<string>> = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
+const stringArrayArrayConst: Array<Array<string>> = [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9']];
 /**
  * @type {!Object}
  */
-export const anyConst: any = 'anyConstLiteral';
+const anyConst: any = 'anyConstLiteral';
 
 
-//nullable export constants
+//nullable constants
 /**
  * @type {?boolean}
  */
-export const optionalBooleanConst: boolean|null = null
+const optionalBooleanConst: boolean|null = null
 /**
  * @type {?number}
  */
-export const optionalNumberConst: number|null = null
+const optionalNumberConst: number|null = null
 /**
  * @type {?string}
  */
-export const optionalStringConst: string|null = null
+const optionalStringConst: string|null = null
 /**
  * @type {?Array<number>}
  */
-export const optionalNumberArrayConst: Array<number>|null = null
+const optionalNumberArrayConst: Array<number>|null = null
 /**
  * @type {?Object}
  */
-export const optionalNullAnyConst: any|null = null
+const optionalNullAnyConst: any|null = null
 
 /**
  * @type {?Object}
  */
-export const optionalNonNullAnyConst: any|null = stringConst
+const optionalNonNullAnyConst: any|null = stringConst
 
 
 //variables
 /**
  * @type {!boolean}
  */
-export var booleanVar: boolean = true
+var booleanVar: boolean = true
 /**
  * @type {!number}
  */
-export var numberVar: number = 0
+var numberVar: number = 0
 /**
  * @type {!string}
  */
-export var stringVar: string = "stringVarLiteral"
+var stringVar: string = "stringVarLiteral"
 /**
  * @type {!Array<number>}
  */
-export var numberArrayVar: Array<number> = [];
+var numberArrayVar: Array<number> = [];
 /**
  * @type {!Object}
  */
-export var anyVar: any = "anyVarLiteral"
+var anyVar: any = "anyVarLiteral"
 /**
  * @type {!Array<Array<string>>}
  */
-export var stringArrayArrayVar: Array<Array<string>> = [];
+var stringArrayArrayVar: Array<Array<string>> = [];
 
 
 //nullable variables
 /**
  * @type {?boolean}
  */
-export var optionalBooleanVar: boolean|null
+var optionalBooleanVar: boolean|null
 /**
  * @type {?number}
  */
-export var optionalNumberVar: number|null
+var optionalNumberVar: number|null
 /**
  * @type {?string}
  */
-export var optionalStringVar: string|null
+var optionalStringVar: string|null
 /**
  * @type {?Array<number>}
  */
-export var optionalNumberArrayVar: Array<number>|null
+var optionalNumberArrayVar: Array<number>|null
 /**
  * @type {?Object}
  */
-export var optionalAnyVar: any|null
+var optionalAnyVar: any|null

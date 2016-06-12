@@ -9,7 +9,8 @@
 			"cwd": "${workspaceRoot}/tests/reference",
 			"args": [
 				// "--help"
-                "types.js",
+                "src.js",
+				"--implicitExport",
 				"--logLevel=debug",
 				// "--swift.outDir=../swift/src",
 				// "--swift.bundleId=io.xrails.src",				

@@ -27,7 +27,7 @@
             "showOutput": "silent",
             "problemMatcher": "$tsc",            
             "args": [
-                "${workspaceRoot}/node_modules/jasmine/bin/jasmine", "jasmine JASMINE_CONFIG_PATH=jasmine.json"
+                "${workspaceRoot}/node_modules/typescript/lib/tsc", "-p", "${workspaceRoot}/tests/reference"
             ]
         },
         {

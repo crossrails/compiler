@@ -1,7 +1,7 @@
 /**
  * Created by nbransby on 21/02/2016.
  */
-export class SimpleObject {
+class SimpleObject {
     
     private static staticVoidNoArgMethodCalled: boolean
     
@@ -40,24 +40,24 @@ export class SimpleObject {
 /**
  * @type {!SimpleObject}
  */
-export const simpleObjectInstance = new SimpleObject;
+const simpleObjectInstance = new SimpleObject;
 
 /**
  * @type {!Object}
  */
-export const anyObjectInstance = simpleObjectInstance;
+const anyObjectInstance = simpleObjectInstance;
 
 /**
  * @type {?Object}
  */
-export var optionalAnyObjectInstance = new SimpleObject;
+var optionalAnyObjectInstance = new SimpleObject;
 
-export var simpleInterfaceInstanceCalled = false
+var simpleInterfaceInstanceCalled = false
 
 /**
  * @type {!}
  */
-export var simpleInterfaceInstance = {
+var simpleInterfaceInstance = {
     voidNoArgMethod() {
         simpleInterfaceInstanceCalled = true
     }
@@ -66,7 +66,7 @@ export var simpleInterfaceInstance = {
 /**
  * @param a
  */
-export function acceptSimpleInterface(simpleInterface: { voidNoArgMethod(): void }) {
+function acceptSimpleInterface(simpleInterface: { voidNoArgMethod(): void }) {
     simpleInterfaceInstance = simpleInterface;
     simpleInterface.voidNoArgMethod();
 }

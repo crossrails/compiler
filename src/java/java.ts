@@ -3,6 +3,8 @@ import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
 import * as ast from "../ast"
 
+import assert = require('assert');
+
 export interface JavaEmitterOptions extends EmitterOptions {
     nashorn?: EmitterOptions 
     android?: EmitterOptions 
@@ -38,6 +40,8 @@ export class JavaEmitter extends Emitter<JavaEmitterOptions> {
     }
 }
  
+export let emitter = new JavaEmitter(); 
+
 declare module "../ast" {
     interface Declaration {
         emit(): string

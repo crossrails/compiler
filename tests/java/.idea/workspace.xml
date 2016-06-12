@@ -2,10 +2,33 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d9d24ca6-d0bc-445f-9786-e19586172c31" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" afterPath="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/SpecialException.java" afterPath="$PROJECT_DIR$/src/io/xrails/SpecialException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/Src.java" afterPath="$PROJECT_DIR$/src/io/xrails/Src.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/functions.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/functions.js.map" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/objects.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/objects.js.map" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/src.ts" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/types.js" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/../reference/types.js.map" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../.vscode/launch.json" afterPath="$PROJECT_DIR$/../../.vscode/launch.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../.vscode/tasks.json" afterPath="$PROJECT_DIR$/../../.vscode/tasks.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/ast.ts" afterPath="$PROJECT_DIR$/../../src/ast.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/compiler.ts" afterPath="$PROJECT_DIR$/../../src/compiler.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/emitter.ts" afterPath="$PROJECT_DIR$/../../src/emitter.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/java/java.ts" afterPath="$PROJECT_DIR$/../../src/java/java.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/java/nashorn.ts" afterPath="$PROJECT_DIR$/../../src/java/nashorn.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/main.ts" afterPath="$PROJECT_DIR$/../../src/main.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/swift/javascriptcore.ts" afterPath="$PROJECT_DIR$/../../src/swift/javascriptcore.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/Types.java" afterPath="$PROJECT_DIR$/src/io/xrails/Types.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/io/xrails/SrcTest.java" afterPath="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../js/astSpec.ts" afterPath="$PROJECT_DIR$/../js/astSpec.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/functions.ts" afterPath="$PROJECT_DIR$/../reference/functions.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/objects.ts" afterPath="$PROJECT_DIR$/../reference/objects.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/src.js" afterPath="$PROJECT_DIR$/../reference/src.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/src.js.map" afterPath="$PROJECT_DIR$/../reference/src.js.map" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/tsconfig.json" afterPath="$PROJECT_DIR$/../reference/tsconfig.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/types.ts" afterPath="$PROJECT_DIR$/../reference/types.ts" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/xrails.json" afterPath="$PROJECT_DIR$/../reference/xrails.json" />
     </list>
     <ignored path="java.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,7 +57,16 @@
             <state relative-caret-position="396">
               <caret line="12" column="37" selection-start-line="12" selection-start-column="37" selection-end-line="12" selection-end-column="37" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#564#565#0" expanded="false" />
+                <element signature="e#643#644#0" expanded="false" />
+                <element signature="e#1167#1168#0" expanded="false" />
+                <element signature="e#1236#1237#0" expanded="false" />
+                <element signature="e#1282#1283#0" expanded="false" />
+                <element signature="e#1336#1337#0" expanded="false" />
+                <element signature="e#1386#1387#0" expanded="false" />
+                <element signature="e#1457#1458#0" expanded="false" />
+                <element signature="e#1822#1823#0" expanded="false" />
+                <element signature="e#1879#1880#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -43,58 +75,29 @@
       <file leaf-file-name="SpecialException.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/io/xrails/SpecialException.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
+            <state relative-caret-position="297">
               <caret line="15" column="78" selection-start-line="15" selection-start-column="78" selection-end-line="15" selection-end-column="78" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#1126#1127#0" expanded="false" />
+                <element signature="e#1182#1183#0" expanded="false" />
+                <element signature="e#1228#1229#0" expanded="false" />
+                <element signature="e#1271#1272#0" expanded="false" />
+                <element signature="e#1314#1315#0" expanded="false" />
+                <element signature="e#1357#1358#0" expanded="false" />
+                <element signature="e#1412#1413#0" expanded="false" />
+                <element signature="e#1480#1481#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Types.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Types.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/io/xrails/Types.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="105" column="73" selection-start-line="105" selection-start-column="73" selection-end-line="105" selection-end-column="73" />
+            <state relative-caret-position="-964">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#214#215#0" expanded="true" />
-                <element signature="e#272#273#0" expanded="true" />
-                <element signature="e#317#318#0" expanded="true" />
-                <element signature="e#373#374#0" expanded="true" />
-                <element signature="e#418#419#0" expanded="true" />
-                <element signature="e#474#475#0" expanded="true" />
-                <element signature="e#675#676#0" expanded="true" />
-                <element signature="e#752#753#0" expanded="true" />
-                <element signature="e#967#968#0" expanded="true" />
-                <element signature="e#1037#1038#0" expanded="true" />
-                <element signature="e#2050#2051#0" expanded="true" />
-                <element signature="e#2106#2107#0" expanded="true" />
-                <element signature="e#2161#2162#0" expanded="true" />
-                <element signature="e#2214#2215#0" expanded="true" />
-                <element signature="e#2257#2258#0" expanded="true" />
-                <element signature="e#2311#2312#0" expanded="true" />
-                <element signature="e#2364#2365#0" expanded="true" />
-                <element signature="e#2416#2417#0" expanded="true" />
-                <element signature="e#2459#2460#0" expanded="true" />
-                <element signature="e#2513#2514#0" expanded="true" />
-                <element signature="e#2566#2567#0" expanded="true" />
-                <element signature="e#2618#2619#0" expanded="true" />
-                <element signature="e#2672#2673#0" expanded="true" />
-                <element signature="e#2747#2748#0" expanded="true" />
-                <element signature="e#2967#2968#0" expanded="true" />
-                <element signature="e#3035#3036#0" expanded="true" />
-                <element signature="e#3085#3086#0" expanded="true" />
-                <element signature="e#3134#3135#0" expanded="true" />
-                <element signature="e#3731#3732#0" expanded="true" />
-                <element signature="e#3792#3793#0" expanded="true" />
-                <element signature="e#3997#3998#0" expanded="true" />
-                <element signature="e#4057#4058#0" expanded="true" />
-                <element signature="e#4262#4263#0" expanded="true" />
-                <element signature="e#4322#4323#0" expanded="true" />
-                <element signature="e#4907#4908#0" expanded="true" />
-                <element signature="e#4964#4965#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -103,11 +106,25 @@
       <file leaf-file-name="Optional.java" pinned="false" current-in-tab="false">
         <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/Optional.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
+            <state relative-caret-position="7095">
               <caret line="251" column="13" selection-start-line="251" selection-start-column="13" selection-end-line="251" selection-end-column="13" />
               <folding>
-                <element signature="e#8628#8629#0" expanded="true" />
-                <element signature="e#8680#8681#0" expanded="true" />
+                <element signature="e#0#11843#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+                <element signature="e#1678#1679#0" expanded="false" />
+                <element signature="e#1711#1712#0" expanded="false" />
+                <element signature="e#2570#2571#0" expanded="false" />
+                <element signature="e#2628#2629#0" expanded="false" />
+                <element signature="e#2998#2999#0" expanded="false" />
+                <element signature="e#3042#3043#0" expanded="false" />
+                <element signature="e#3486#3487#0" expanded="false" />
+                <element signature="e#3544#3545#0" expanded="false" />
+                <element signature="e#4242#4243#0" expanded="false" />
+                <element signature="e#4278#4279#0" expanded="false" />
+                <element signature="e#9141#9142#0" expanded="false" />
+                <element signature="e#9199#9200#0" expanded="false" />
+                <element signature="e#11157#11158#0" expanded="false" />
+                <element signature="e#11203#11204#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -116,9 +133,12 @@
       <file leaf-file-name="Map.java" pinned="false" current-in-tab="false">
         <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/Map.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1000">
+            <state relative-caret-position="30789">
               <caret line="959" column="13" selection-start-line="959" selection-start-column="13" selection-end-line="959" selection-end-column="13" />
-              <folding />
+              <folding>
+                <element signature="e#0#53227#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -129,8 +149,23 @@
             <state relative-caret-position="6864">
               <caret line="245" column="26" selection-start-line="245" selection-start-column="26" selection-end-line="245" selection-end-column="26" />
               <folding>
-                <element signature="e#8380#8381#0" expanded="true" />
-                <element signature="e#8414#8415#0" expanded="true" />
+                <element signature="e#0#10204#0" expanded="false" />
+                <element signature="e#621#622#0" expanded="false" />
+                <element signature="e#704#705#0" expanded="false" />
+                <element signature="e#1410#1411#0" expanded="false" />
+                <element signature="e#1471#1472#0" expanded="false" />
+                <element signature="e#2786#2787#0" expanded="false" />
+                <element signature="e#2837#2838#0" expanded="false" />
+                <element signature="e#3914#3915#0" expanded="false" />
+                <element signature="e#3960#3961#0" expanded="false" />
+                <element signature="e#4400#4401#0" expanded="false" />
+                <element signature="e#4440#4441#0" expanded="false" />
+                <element signature="e#5014#5015#0" expanded="false" />
+                <element signature="e#5077#5078#0" expanded="false" />
+                <element signature="e#5960#5961#0" expanded="false" />
+                <element signature="e#6014#6015#0" expanded="false" />
+                <element signature="e#8972#8973#0" expanded="false" />
+                <element signature="e#9006#9007#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -139,7 +174,7 @@
       <file leaf-file-name="JS.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/io/xrails/JS.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="33">
+            <state relative-caret-position="561">
               <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -151,11 +186,79 @@
       <file leaf-file-name="WeakHashMap.java" pinned="false" current-in-tab="false">
         <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/WeakHashMap.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2217">
+            <state relative-caret-position="7128">
               <caret line="250" column="20" selection-start-line="250" selection-start-column="16" selection-end-line="250" selection-end-column="20" />
               <folding>
-                <element signature="e#9565#9566#0" expanded="true" />
-                <element signature="e#9632#9633#0" expanded="true" />
+                <element signature="e#0#46882#0" expanded="false" />
+                <element signature="imports" expanded="false" />
+                <element signature="e#7755#7756#0" expanded="false" />
+                <element signature="e#7810#7811#0" expanded="false" />
+                <element signature="e#9341#9342#0" expanded="false" />
+                <element signature="e#9399#9400#0" expanded="false" />
+                <element signature="e#10562#10563#0" expanded="false" />
+                <element signature="e#10615#10616#0" expanded="false" />
+                <element signature="e#10750#10751#0" expanded="false" />
+                <element signature="e#10803#10804#0" expanded="false" />
+                <element signature="e#10983#10984#0" expanded="false" />
+                <element signature="e#11027#11028#0" expanded="false" />
+                <element signature="e#11837#11838#0" expanded="false" />
+                <element signature="e#11874#11875#0" expanded="false" />
+                <element signature="e#13805#13806#0" expanded="false" />
+                <element signature="e#13839#13840#0" expanded="false" />
+                <element signature="e#15363#15364#0" expanded="false" />
+                <element signature="e#15407#15408#0" expanded="false" />
+                <element signature="e#25783#25784#0" expanded="false" />
+                <element signature="e#25847#25848#0" expanded="false" />
+                <element signature="e#25878#25879#0" expanded="false" />
+                <element signature="e#25914#25915#0" expanded="false" />
+                <element signature="e#26770#26771#0" expanded="false" />
+                <element signature="e#26828#26829#0" expanded="false" />
+                <element signature="e#27419#27420#0" expanded="false" />
+                <element signature="e#27479#27480#0" expanded="false" />
+                <element signature="e#29090#29091#0" expanded="false" />
+                <element signature="e#29138#29139#0" expanded="false" />
+                <element signature="e#29227#29228#0" expanded="false" />
+                <element signature="e#29278#29279#0" expanded="false" />
+                <element signature="e#29395#29396#0" expanded="false" />
+                <element signature="e#29437#29438#0" expanded="false" />
+                <element signature="e#30436#30437#0" expanded="false" />
+                <element signature="e#30484#30485#0" expanded="false" />
+                <element signature="e#30513#30514#0" expanded="false" />
+                <element signature="e#30567#30568#0" expanded="false" />
+                <element signature="e#30612#30613#0" expanded="false" />
+                <element signature="e#30657#30658#0" expanded="false" />
+                <element signature="e#30909#30910#0" expanded="false" />
+                <element signature="e#30957#30958#0" expanded="false" />
+                <element signature="e#31004#31005#0" expanded="false" />
+                <element signature="e#31086#31087#0" expanded="false" />
+                <element signature="e#32082#32083#0" expanded="false" />
+                <element signature="e#32132#32133#0" expanded="false" />
+                <element signature="e#32161#32162#0" expanded="false" />
+                <element signature="e#32215#32216#0" expanded="false" />
+                <element signature="e#32260#32261#0" expanded="false" />
+                <element signature="e#32307#32308#0" expanded="false" />
+                <element signature="e#32338#32339#0" expanded="false" />
+                <element signature="e#32386#32387#0" expanded="false" />
+                <element signature="e#32433#32434#0" expanded="false" />
+                <element signature="e#32517#32518#0" expanded="false" />
+                <element signature="e#33602#33603#0" expanded="false" />
+                <element signature="e#33652#33653#0" expanded="false" />
+                <element signature="e#33991#33992#0" expanded="false" />
+                <element signature="e#34038#34039#0" expanded="false" />
+                <element signature="e#34067#34068#0" expanded="false" />
+                <element signature="e#34121#34122#0" expanded="false" />
+                <element signature="e#34152#34153#0" expanded="false" />
+                <element signature="e#34200#34201#0" expanded="false" />
+                <element signature="e#34490#34491#0" expanded="false" />
+                <element signature="e#34541#34542#0" expanded="false" />
+                <element signature="e#34582#34583#0" expanded="false" />
+                <element signature="e#34634#34635#0" expanded="false" />
+                <element signature="e#40558#40559#0" expanded="false" />
+                <element signature="e#40609#40610#0" expanded="false" />
+                <element signature="e#43458#43459#0" expanded="false" />
+                <element signature="e#43490#43491#0" expanded="false" />
+                <element signature="e#46820#46821#0" expanded="false" />
+                <element signature="e#46871#46872#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -167,21 +270,32 @@
             <state relative-caret-position="297">
               <caret line="9" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
               <folding>
-                <element signature="imports" expanded="true" />
+                <element signature="e#1147#1148#0" expanded="false" />
+                <element signature="e#1215#1216#0" expanded="false" />
+                <element signature="e#1580#1581#0" expanded="false" />
+                <element signature="e#1660#1661#0" expanded="false" />
+                <element signature="e#1698#1699#0" expanded="false" />
+                <element signature="e#1774#1775#0" expanded="false" />
+                <element signature="e#1824#1825#0" expanded="false" />
+                <element signature="e#1887#1888#0" expanded="false" />
+                <element signature="e#1933#1934#0" expanded="false" />
+                <element signature="e#1973#1974#0" expanded="false" />
+                <element signature="e#2016#2017#0" expanded="false" />
+                <element signature="e#2056#2057#0" expanded="false" />
+                <element signature="e#2111#2112#0" expanded="false" />
+                <element signature="e#2178#2179#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SrcTest.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SrcTest.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/io/xrails/SrcTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="355">
-              <caret line="179" column="30" selection-start-line="179" selection-start-column="30" selection-end-line="179" selection-end-column="30" />
+            <state relative-caret-position="487">
+              <caret line="141" column="55" selection-start-line="141" selection-start-column="55" selection-end-line="141" selection-end-column="55" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#418#419#0" expanded="true" />
-                <element signature="e#464#465#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -228,9 +342,9 @@
         <option value="$PROJECT_DIR$/src/io/xrails/JS.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/Src.java" />
-        <option value="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/SpecialException.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/Types.java" />
+        <option value="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
       </list>
     </option>
   </component>
@@ -277,310 +391,17 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="PackagesPane">
+        <subPane />
+      </pane>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="java" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rt.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rt.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="util" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rt.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="util" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="function" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="rt.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="internal" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="internal" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="runtime" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="internal" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="codegen" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scripting" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="External Libraries" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ExternalLibrariesNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="&lt; 1.8 &gt;" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.NamedLibraryElementNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="nashorn.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jdk" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -631,11 +452,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane">
-        <subPane />
-      </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -999,21 +815,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Tests - 2016.06.05 at 12h 18m 41s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Tests - 2016.06.07 at 11h 44m 09s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Tests - 2016.06.07 at 11h 45m 06s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Tests - 2016.06.07 at 11h 46m 03s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Tests - 2016.06.07 at 11h 46m 39s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="Tests - 2016.06.10 at 22h 22m 10s.xml">
       <configuration name="Tests" configurationId="JUnit" />
     </history-entry>
@@ -1029,6 +830,21 @@
     <history-entry file="Tests - 2016.06.11 at 19h 43m 41s.xml">
       <configuration name="Tests" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="Tests - 2016.06.12 at 16h 36m 40s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2016.06.12 at 19h 26m 58s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2016.06.12 at 19h 39m 46s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2016.06.12 at 21h 07m 33s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2016.06.12 at 21h 11m 59s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-13" y="-13" width="3026" height="1946" extended-state="6" />
@@ -1042,13 +858,12 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16383494" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2196602" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3059753" sideWeight="0.44121915" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.67939395" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3059753" sideWeight="0.55878085" order="5" side_tool="true" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3059753" sideWeight="0.4387237" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3059753" sideWeight="0.5612763" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="true" content_ui="tabs" />
@@ -1060,6 +875,7 @@
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.67939395" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -1167,26 +983,109 @@
         <state relative-caret-position="6864">
           <caret line="245" column="26" selection-start-line="245" selection-start-column="26" selection-end-line="245" selection-end-column="26" />
           <folding>
-            <element signature="e#8380#8381#0" expanded="true" />
-            <element signature="e#8414#8415#0" expanded="true" />
+            <element signature="e#0#10204#0" expanded="false" />
+            <element signature="e#621#622#0" expanded="false" />
+            <element signature="e#704#705#0" expanded="false" />
+            <element signature="e#1410#1411#0" expanded="false" />
+            <element signature="e#1471#1472#0" expanded="false" />
+            <element signature="e#2786#2787#0" expanded="false" />
+            <element signature="e#2837#2838#0" expanded="false" />
+            <element signature="e#3914#3915#0" expanded="false" />
+            <element signature="e#3960#3961#0" expanded="false" />
+            <element signature="e#4400#4401#0" expanded="false" />
+            <element signature="e#4440#4441#0" expanded="false" />
+            <element signature="e#5014#5015#0" expanded="false" />
+            <element signature="e#5077#5078#0" expanded="false" />
+            <element signature="e#5960#5961#0" expanded="false" />
+            <element signature="e#6014#6015#0" expanded="false" />
+            <element signature="e#8972#8973#0" expanded="false" />
+            <element signature="e#9006#9007#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/WeakHashMap.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2217">
+        <state relative-caret-position="7128">
           <caret line="250" column="20" selection-start-line="250" selection-start-column="16" selection-end-line="250" selection-end-column="20" />
           <folding>
-            <element signature="e#9565#9566#0" expanded="true" />
-            <element signature="e#9632#9633#0" expanded="true" />
+            <element signature="e#0#46882#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#7755#7756#0" expanded="false" />
+            <element signature="e#7810#7811#0" expanded="false" />
+            <element signature="e#9341#9342#0" expanded="false" />
+            <element signature="e#9399#9400#0" expanded="false" />
+            <element signature="e#10562#10563#0" expanded="false" />
+            <element signature="e#10615#10616#0" expanded="false" />
+            <element signature="e#10750#10751#0" expanded="false" />
+            <element signature="e#10803#10804#0" expanded="false" />
+            <element signature="e#10983#10984#0" expanded="false" />
+            <element signature="e#11027#11028#0" expanded="false" />
+            <element signature="e#11837#11838#0" expanded="false" />
+            <element signature="e#11874#11875#0" expanded="false" />
+            <element signature="e#13805#13806#0" expanded="false" />
+            <element signature="e#13839#13840#0" expanded="false" />
+            <element signature="e#15363#15364#0" expanded="false" />
+            <element signature="e#15407#15408#0" expanded="false" />
+            <element signature="e#25783#25784#0" expanded="false" />
+            <element signature="e#25847#25848#0" expanded="false" />
+            <element signature="e#25878#25879#0" expanded="false" />
+            <element signature="e#25914#25915#0" expanded="false" />
+            <element signature="e#26770#26771#0" expanded="false" />
+            <element signature="e#26828#26829#0" expanded="false" />
+            <element signature="e#27419#27420#0" expanded="false" />
+            <element signature="e#27479#27480#0" expanded="false" />
+            <element signature="e#29090#29091#0" expanded="false" />
+            <element signature="e#29138#29139#0" expanded="false" />
+            <element signature="e#29227#29228#0" expanded="false" />
+            <element signature="e#29278#29279#0" expanded="false" />
+            <element signature="e#29395#29396#0" expanded="false" />
+            <element signature="e#29437#29438#0" expanded="false" />
+            <element signature="e#30436#30437#0" expanded="false" />
+            <element signature="e#30484#30485#0" expanded="false" />
+            <element signature="e#30513#30514#0" expanded="false" />
+            <element signature="e#30567#30568#0" expanded="false" />
+            <element signature="e#30612#30613#0" expanded="false" />
+            <element signature="e#30657#30658#0" expanded="false" />
+            <element signature="e#30909#30910#0" expanded="false" />
+            <element signature="e#30957#30958#0" expanded="false" />
+            <element signature="e#31004#31005#0" expanded="false" />
+            <element signature="e#31086#31087#0" expanded="false" />
+            <element signature="e#32082#32083#0" expanded="false" />
+            <element signature="e#32132#32133#0" expanded="false" />
+            <element signature="e#32161#32162#0" expanded="false" />
+            <element signature="e#32215#32216#0" expanded="false" />
+            <element signature="e#32260#32261#0" expanded="false" />
+            <element signature="e#32307#32308#0" expanded="false" />
+            <element signature="e#32338#32339#0" expanded="false" />
+            <element signature="e#32386#32387#0" expanded="false" />
+            <element signature="e#32433#32434#0" expanded="false" />
+            <element signature="e#32517#32518#0" expanded="false" />
+            <element signature="e#33602#33603#0" expanded="false" />
+            <element signature="e#33652#33653#0" expanded="false" />
+            <element signature="e#33991#33992#0" expanded="false" />
+            <element signature="e#34038#34039#0" expanded="false" />
+            <element signature="e#34067#34068#0" expanded="false" />
+            <element signature="e#34121#34122#0" expanded="false" />
+            <element signature="e#34152#34153#0" expanded="false" />
+            <element signature="e#34200#34201#0" expanded="false" />
+            <element signature="e#34490#34491#0" expanded="false" />
+            <element signature="e#34541#34542#0" expanded="false" />
+            <element signature="e#34582#34583#0" expanded="false" />
+            <element signature="e#34634#34635#0" expanded="false" />
+            <element signature="e#40558#40559#0" expanded="false" />
+            <element signature="e#40609#40610#0" expanded="false" />
+            <element signature="e#43458#43459#0" expanded="false" />
+            <element signature="e#43490#43491#0" expanded="false" />
+            <element signature="e#46820#46821#0" expanded="false" />
+            <element signature="e#46871#46872#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/io/xrails/JS.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
+        <state relative-caret-position="561">
           <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1196,20 +1095,37 @@
     </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/Optional.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
+        <state relative-caret-position="7095">
           <caret line="251" column="13" selection-start-line="251" selection-start-column="13" selection-end-line="251" selection-end-column="13" />
           <folding>
-            <element signature="e#8628#8629#0" expanded="true" />
-            <element signature="e#8680#8681#0" expanded="true" />
+            <element signature="e#0#11843#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+            <element signature="e#1678#1679#0" expanded="false" />
+            <element signature="e#1711#1712#0" expanded="false" />
+            <element signature="e#2570#2571#0" expanded="false" />
+            <element signature="e#2628#2629#0" expanded="false" />
+            <element signature="e#2998#2999#0" expanded="false" />
+            <element signature="e#3042#3043#0" expanded="false" />
+            <element signature="e#3486#3487#0" expanded="false" />
+            <element signature="e#3544#3545#0" expanded="false" />
+            <element signature="e#4242#4243#0" expanded="false" />
+            <element signature="e#4278#4279#0" expanded="false" />
+            <element signature="e#9141#9142#0" expanded="false" />
+            <element signature="e#9199#9200#0" expanded="false" />
+            <element signature="e#11157#11158#0" expanded="false" />
+            <element signature="e#11203#11204#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="jar://C:/Program Files/Java/jdk1.8.0_77/src.zip!/java/util/Map.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1000">
+        <state relative-caret-position="30789">
           <caret line="959" column="13" selection-start-line="959" selection-start-column="13" selection-end-line="959" selection-end-column="13" />
-          <folding />
+          <folding>
+            <element signature="e#0#53227#0" expanded="false" />
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1218,7 +1134,20 @@
         <state relative-caret-position="297">
           <caret line="9" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="true" />
+            <element signature="e#1147#1148#0" expanded="false" />
+            <element signature="e#1215#1216#0" expanded="false" />
+            <element signature="e#1580#1581#0" expanded="false" />
+            <element signature="e#1660#1661#0" expanded="false" />
+            <element signature="e#1698#1699#0" expanded="false" />
+            <element signature="e#1774#1775#0" expanded="false" />
+            <element signature="e#1824#1825#0" expanded="false" />
+            <element signature="e#1887#1888#0" expanded="false" />
+            <element signature="e#1933#1934#0" expanded="false" />
+            <element signature="e#1973#1974#0" expanded="false" />
+            <element signature="e#2016#2017#0" expanded="false" />
+            <element signature="e#2056#2057#0" expanded="false" />
+            <element signature="e#2111#2112#0" expanded="false" />
+            <element signature="e#2178#2179#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1228,6 +1157,42 @@
         <state relative-caret-position="396">
           <caret line="12" column="37" selection-start-line="12" selection-start-column="37" selection-end-line="12" selection-end-column="37" />
           <folding>
+            <element signature="e#564#565#0" expanded="false" />
+            <element signature="e#643#644#0" expanded="false" />
+            <element signature="e#1167#1168#0" expanded="false" />
+            <element signature="e#1236#1237#0" expanded="false" />
+            <element signature="e#1282#1283#0" expanded="false" />
+            <element signature="e#1336#1337#0" expanded="false" />
+            <element signature="e#1386#1387#0" expanded="false" />
+            <element signature="e#1457#1458#0" expanded="false" />
+            <element signature="e#1822#1823#0" expanded="false" />
+            <element signature="e#1879#1880#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/io/xrails/SpecialException.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="297">
+          <caret line="15" column="78" selection-start-line="15" selection-start-column="78" selection-end-line="15" selection-end-column="78" />
+          <folding>
+            <element signature="e#1126#1127#0" expanded="false" />
+            <element signature="e#1182#1183#0" expanded="false" />
+            <element signature="e#1228#1229#0" expanded="false" />
+            <element signature="e#1271#1272#0" expanded="false" />
+            <element signature="e#1314#1315#0" expanded="false" />
+            <element signature="e#1357#1358#0" expanded="false" />
+            <element signature="e#1412#1413#0" expanded="false" />
+            <element signature="e#1480#1481#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/io/xrails/Types.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-964">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
@@ -1235,68 +1200,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test/io/xrails/SrcTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="179" column="30" selection-start-line="179" selection-start-column="30" selection-end-line="179" selection-end-column="30" />
+        <state relative-caret-position="487">
+          <caret line="141" column="55" selection-start-line="141" selection-start-column="55" selection-end-line="141" selection-end-column="55" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#418#419#0" expanded="true" />
-            <element signature="e#464#465#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/io/xrails/SpecialException.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="15" column="78" selection-start-line="15" selection-start-column="78" selection-end-line="15" selection-end-column="78" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/io/xrails/Types.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="355">
-          <caret line="105" column="73" selection-start-line="105" selection-start-column="73" selection-end-line="105" selection-end-column="73" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#214#215#0" expanded="true" />
-            <element signature="e#272#273#0" expanded="true" />
-            <element signature="e#317#318#0" expanded="true" />
-            <element signature="e#373#374#0" expanded="true" />
-            <element signature="e#418#419#0" expanded="true" />
-            <element signature="e#474#475#0" expanded="true" />
-            <element signature="e#675#676#0" expanded="true" />
-            <element signature="e#752#753#0" expanded="true" />
-            <element signature="e#967#968#0" expanded="true" />
-            <element signature="e#1037#1038#0" expanded="true" />
-            <element signature="e#2050#2051#0" expanded="true" />
-            <element signature="e#2106#2107#0" expanded="true" />
-            <element signature="e#2161#2162#0" expanded="true" />
-            <element signature="e#2214#2215#0" expanded="true" />
-            <element signature="e#2257#2258#0" expanded="true" />
-            <element signature="e#2311#2312#0" expanded="true" />
-            <element signature="e#2364#2365#0" expanded="true" />
-            <element signature="e#2416#2417#0" expanded="true" />
-            <element signature="e#2459#2460#0" expanded="true" />
-            <element signature="e#2513#2514#0" expanded="true" />
-            <element signature="e#2566#2567#0" expanded="true" />
-            <element signature="e#2618#2619#0" expanded="true" />
-            <element signature="e#2672#2673#0" expanded="true" />
-            <element signature="e#2747#2748#0" expanded="true" />
-            <element signature="e#2967#2968#0" expanded="true" />
-            <element signature="e#3035#3036#0" expanded="true" />
-            <element signature="e#3085#3086#0" expanded="true" />
-            <element signature="e#3134#3135#0" expanded="true" />
-            <element signature="e#3731#3732#0" expanded="true" />
-            <element signature="e#3792#3793#0" expanded="true" />
-            <element signature="e#3997#3998#0" expanded="true" />
-            <element signature="e#4057#4058#0" expanded="true" />
-            <element signature="e#4262#4263#0" expanded="true" />
-            <element signature="e#4322#4323#0" expanded="true" />
-            <element signature="e#4907#4908#0" expanded="true" />
-            <element signature="e#4964#4965#0" expanded="true" />
           </folding>
         </state>
       </provider>

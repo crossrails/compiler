@@ -27,14 +27,6 @@ export abstract class Declaration {
     get sourceFile(): SourceFile {
         return this.parent.sourceFile;
     }
-        
-    abstract accept(visitor: DeclarationVisitor): void;   
-}
-
-export interface DeclarationVisitor {
-    visitVariable(node: VariableDeclaration): void;
-    visitClass(node: ClassDeclaration): void;
-    visitMethod(node: MethodDeclaration): void;
 }
 
 export class VariableDeclaration extends Declaration {
@@ -50,11 +42,7 @@ export class VariableDeclaration extends Declaration {
             this.type = new AnyType(false);
         } 
         this.constant = (node.parent && node.parent.flags & ts.NodeFlags.Const) != 0
-    }
-    
-    accept<T>(visitor: DeclarationVisitor) {
-        visitor.visitVariable(this);
-    }
+    }    
 }
 
 export abstract class TypeDeclaration extends Declaration {
@@ -86,18 +74,10 @@ export class ClassDeclaration extends TypeDeclaration {
     constructor(node: ts.ClassDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
     }
-
-    accept<T>(visitor: DeclarationVisitor) {
-        visitor.visitClass(this);
-    }
 }
 
 export class MethodDeclaration extends Declaration {
     readonly abstract: boolean;
-    
-    accept<T>(visitor: DeclarationVisitor) {
-        visitor.visitMethod(this);
-    }
 }
 
 export class SourceFile {
@@ -106,7 +86,7 @@ export class SourceFile {
     readonly declarations: ReadonlyArray<Declaration>
     readonly module: Module;
     
-    constructor(node: ts.SourceFile, module: Module) {
+    constructor(node: ts.SourceFile, implicitExport: boolean, module: Module) {
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
         // }, 4));
@@ -114,7 +94,7 @@ export class SourceFile {
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: Declaration[] = [];
         for (let statement of node.statements) {
-            if(!(statement.flags & ts.NodeFlags.Export)) {
+            if(!(statement.flags & ts.NodeFlags.Export) && !implicitExport) {
                 log.info(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
             } else switch(statement.kind) {
                 case ts.SyntaxKind.VariableStatement:
@@ -145,7 +125,7 @@ export class Module {
     readonly files: ReadonlyArray<SourceFile>;
     readonly identifiers: Set<string>;
     
-    constructor(file: string, charset: string) {
+    constructor(file: string, implicitExport: boolean, charset: string) {
         this.src = path.parse(file);
         this.name = this.src.name;
         this.identifiers = new Set();
@@ -156,12 +136,12 @@ export class Module {
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             this.sourceRoot = map.sourceRoot;
             for (let source of map.sources) {
-                this.addSourceFile(files, path.join(this.src.dir, map.sourceRoot, source), charset);
+                this.addSourceFile(files, path.join(this.src.dir, map.sourceRoot, source), implicitExport, charset);
             }
         } catch(error) {
             log.debug(`No sourcemap found`);
             this.sourceRoot = '.';
-            this.addSourceFile(files, file, charset);
+            this.addSourceFile(files, file, implicitExport, charset);
         }
         if(files.length == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
@@ -169,9 +149,9 @@ export class Module {
         this.files = files;
     }    
 
-    private addSourceFile(files: SourceFile[], filename: string, charset: string): void {
+    private addSourceFile(files: SourceFile[], filename: string, implicitExport: boolean, charset: string): void {
         log.info(`Parsing ${path.relative('.', filename)}`);
-        let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), this);
+        let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), implicitExport, this);
         if(sourceFile.declarations.length) {
             files.push(sourceFile);
         } else {
@@ -191,9 +171,7 @@ export abstract class Type {
     constructor(optional: boolean) {
         this.optional = optional;
     }
-    
-    abstract accept<R>(visitor: TypeVisitor<R>): R;
-    
+        
     static from(type: ts.TypeNode, optional: boolean): Type {
         try {
             switch(type.kind) {
@@ -243,14 +221,6 @@ export abstract class Type {
     }  
 }  
 
-export interface TypeVisitor<R> {
-    visitAnyType(node: AnyType): R;
-    visitStringType(node: StringType): R;
-    visitNumberType(node: NumberType): R;
-    visitBooleanType(node: BooleanType): R;
-    visitArrayType(node: ArrayType): R;
-}
-
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>
     
@@ -265,32 +235,16 @@ export abstract class GenericType extends Type {
 }       
 
 export class AnyType extends Type {
-    accept<R>(visitor: TypeVisitor<R>): R {
-        return visitor.visitAnyType(this);
-    }
 }
 
 export class StringType extends Type  {
-    accept<R>(visitor: TypeVisitor<R>): R {
-        return visitor.visitStringType(this);
-    }    
 }
 
 export class NumberType extends Type {
-    accept<R>(visitor: TypeVisitor<R>): R {
-        return visitor.visitNumberType(this);
-    }    
 }
 
 export class BooleanType extends Type {
-    accept<R>(visitor: TypeVisitor<R>): R {
-        return visitor.visitBooleanType(this);
-    }    
 }
 
 export class ArrayType extends GenericType {
-
-    accept<R>(visitor: TypeVisitor<R>): R {
-        return visitor.visitArrayType(this);
-    }    
 }

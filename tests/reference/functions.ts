@@ -1,13 +1,13 @@
-export var voidNoArgFunctionCalled = false
+var voidNoArgFunctionCalled = false
 
-export function voidNoArgFunction() {
+function voidNoArgFunction() {
     voidNoArgFunctionCalled = true
 }
 
 /**
  * @returns string
  */
-export function stringNoArgFunction(): string {
+function stringNoArgFunction(): string {
     return "stringNoArgFunctionReturnValue"
 }
 
@@ -16,25 +16,25 @@ export function stringNoArgFunction(): string {
  * @param b: number
  * @returns number
  */
-export function numberMultipleArgFunction(a: number, b: number): number {
+function numberMultipleArgFunction(a: number, b: number): number {
     return a * b;
 }
 
 /**
  * @type {function(): string}
  */
-export var stringNoArgLambda = function(): string {
+var stringNoArgLambda = function(): string {
     return "stringNoArgLambdaReturnValue"
 }
 
 /**
  * @throws Error
  */
-export function throwSimpleError() {
+function throwSimpleError() {
     throw new Error("Simple error message")
 }
 
-export class SpecialError {
+class SpecialError {
 
     constructor(private message: string) {
         this.message = message
@@ -44,6 +44,6 @@ export class SpecialError {
 /**
  * @throws SpecialError
  */
-export function throwSpecialError() {
+function throwSpecialError() {
     throw new SpecialError("Special error message")
 }

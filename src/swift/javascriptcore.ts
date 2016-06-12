@@ -1,5 +1,4 @@
 import {SwiftEmitter} from './swift'
-import {Options} from 'yargs';
 import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration} from "../ast"
 
 class JavaScriptCoreEmitter extends SwiftEmitter {

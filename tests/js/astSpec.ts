@@ -26,13 +26,13 @@ describe("Type", () => {
     });
 
     it("erases to any on intersection types", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false);
     });  
     
     it("erases to any on unsupported union types", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false);
     });    
@@ -43,7 +43,7 @@ describe("Type", () => {
             export let b: null | any;
             export let c: any | undefined;
             export let d: undefined | any;
-        `, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(4);
         expect(this.anyTypeConstructor).not.toHaveBeenCalledWith(false);
     });
@@ -53,7 +53,7 @@ describe("Type", () => {
             export let numbers: number[];
             export let strings: Array<string>;
             export let booleans: ReadonlyArray<boolean>;
-        `, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         //let numbers: number[]
         expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.numberTypeConstructor).toHaveBeenCalledWith(false);
@@ -74,7 +74,7 @@ describe("Type", () => {
             export let b: boolean;
             export let n: number;
             export let a: any;
-        `, ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         //let s: string
         expect(this.stringTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.stringTypeConstructor).toHaveBeenCalledWith(false);
@@ -105,12 +105,12 @@ describe("VariableDeclaration", () => {
     });
     
     it("has an any type when missing type information", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.typeOfMethod).toHaveBeenCalledTimes(1);
     });
 });
@@ -127,12 +127,12 @@ describe("SourceFile", () => {
     });
     
     it("does not create non exported declarations", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "let declaration", ts.ScriptTarget.ES6, true), {} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "let declaration", ts.ScriptTarget.ES6, true), false, {} as any);
         expect(this.variableDeclarationConstructor).not.toHaveBeenCalled();
     });
 
     it("creates variable declarations for each declaration in a variable statement", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let a1, a2; export let b1;", ts.ScriptTarget.ES6, true), {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let a1, a2; export let b1;", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
         expect(this.variableDeclarationConstructor).toHaveBeenCalledTimes(3);
     });
 });
@@ -152,7 +152,7 @@ describe("Module", () => {
     it("throws file not found when module source file does not exist", function(this: This) {
         this.readFileMethod.and.callThrough();
         try {
-            let module = new ast.Module("missingfile.js", "utf8");
+            let module = new ast.Module("missingfile.js", false, "utf8");
             fail("Did not throw exception");
         } catch(error) {
             expect(error.code).toBe('ENOENT');
@@ -164,7 +164,7 @@ describe("Module", () => {
             if(file == 'src.js.map') throw new Error();
             return "";    
         });
-        let module = new ast.Module("src.js", "utf8");
+        let module = new ast.Module("src.js", false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1)
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("src.js", "", jasmine.anything(), jasmine.anything());
     });
@@ -173,7 +173,7 @@ describe("Module", () => {
         this.readFileMethod.and.callFake((file: string) => {
             return file != 'transpiled.js.map' ? '' : '{"sourceRoot": "", "sources": ["source1.ts", "source2.ts"]}';    
         });
-        let module = new ast.Module("transpiled.js", "utf8");
+        let module = new ast.Module("transpiled.js", false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(2)
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("source1.ts", "", jasmine.anything(), jasmine.anything());
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("source2.ts", "", jasmine.anything(), jasmine.anything());
@@ -185,7 +185,7 @@ describe("Module", () => {
             if(file == 'src.js.map') throw new Error();
             return "export let declaration";    
         });
-        let module = new ast.Module("src.js", "utf8");
+        let module = new ast.Module("src.js", false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1);
         expect(module.files.length).toBe(1);
         expect(module.files[0].path.base).toBe("src.js");
@@ -197,7 +197,7 @@ describe("Module", () => {
             if(file == 'src.js.map') throw new Error();
             return "let declaration";    
         });
-        let module = new ast.Module("src.js", "utf8");
+        let module = new ast.Module("src.js", false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1);
         expect(module.files.length).toBe(0);
     });

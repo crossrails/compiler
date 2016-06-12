@@ -139,6 +139,7 @@ public class SrcTest {
         assertFalse(getOptionalStringConst().isPresent());
         assertFalse(getOptionalNumberArrayConst().isPresent());
         assertFalse(getOptionalNullAnyConst().isPresent());
+        assertEquals(getOptionalNonNullAnyConst().get(), getStringConst());
     }
 
     @Test
