@@ -16,8 +16,8 @@ install:
   - "npm install -g codecov"
   - "npm run create-code-coverage"
   - "npm run upload-code-coverage"
-after_success:
-  - codeclimate-test-reporter < coverage/lcov.info
+  - "npm install -g codeclimate-test-reporter"
+  - "CODECLIMATE_REPO_TOKEN=786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3 codeclimate-test-reporter < coverage/lcov.info"
 language: objective-c
 osx_image: xcode7.3
 xcode_project: tests/swift/swift.xcodeproj
