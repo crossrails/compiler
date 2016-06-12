@@ -15,8 +15,12 @@ ratings:
 exclude_paths:
 - node_modules/
 - tests/
+- bin/
+- coverage/
+- typings/
+- .idea/
 - "**.js"
 - "**.json"
-- bin/
 - "**.swift"
 - "**.xml"
+- "**.md"
