@@ -46,7 +46,7 @@ describe("Main", () => {
             );
             fail("did not fail");
         } catch(e) {
-            expect(e).toMatch('must be a js source file')
+            expect(e).toMatch('must be a javascript source file')
             expect(this.writeFileMethod).not.toHaveBeenCalled()
         }
     });

@@ -10,7 +10,7 @@ function main(...args: string[]): number {
         .usage('Usage: $0 [file.js] [options]')
         .demand(1)
         .check((argv: yargs.Argv, aliases: { [key: string]: string[] }) => {
-            return !argv._[0] || argv._[0].endsWith('.js') ? true : 'File argument must be a js source file (.js)';
+            return !argv._[0] || argv._[0].endsWith('.js') ? true : 'File argument must be a javascript source file (.js)';
         })
         .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
         .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')

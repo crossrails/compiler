@@ -107,9 +107,9 @@ export class SourceFile {
     readonly module: Module;
     
     constructor(node: ts.SourceFile, module: Module) {
-        console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
-            return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
-        }, 4));
+        // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
+        //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
+        // }, 4));
         this.path = path.parse(node.fileName);
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: Declaration[] = [];

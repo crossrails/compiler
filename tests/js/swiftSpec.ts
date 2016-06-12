@@ -35,7 +35,7 @@ describe("SwiftEmitter", () => {
     });
     
     it("writes a module file when one not present in the module source files", function(this: This) {
-        let module: any = {files: [{path: {dir: ".", name: "sourcefile"}, declarations: []}], name: "module", identifiers: new Set()};
+        let module: any = {files: [{path: {dir: ".", name: "sourcefile"}, declarations: []}], name: "module", sourceRoot: '.', identifiers: new Set()};
         this.emitter.emit(module, {outDir: "."} as any);
         expect(this.headerMethodOnTheEmitter).toHaveBeenCalledTimes(2);
         expect(this.footerMethodOnTheEmitter).toHaveBeenCalledTimes(2);
@@ -51,7 +51,7 @@ describe("SwiftEmitter", () => {
     });
         
     it("merges a source file with the module file if names match", function(this: This) {
-        let module: any = {files: [], name: "module", identifiers: new Set(), src: {dir: ".", name: "src.js"}};
+        let module: any = {files: [], name: "module", identifiers: new Set(), sourceRoot: '.', src: {dir: ".", name: "src.js"}};
         module.files[0] = {path: {dir: ".", name: "module"}, declarations:[], module: module};
         this.emitter.emit(module, {outDir: "."} as any);
         expect(this.writeFileMethodOnTheEmitter).toHaveBeenCalledTimes(1);
