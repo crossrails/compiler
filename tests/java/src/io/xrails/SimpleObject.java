@@ -6,7 +6,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static io.xrails.Types.global;
+import static io.xrails.Src.global;
 
 /**
  * Created by nbransby on 05/03/2016.

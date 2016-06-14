@@ -5,12 +5,10 @@ import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
+import static io.xrails.HandwrittenSrc.*;
 import static io.xrails.Src.*;
-import static io.xrails.Types.*;
 import static org.junit.Assert.*;
 
 /**
