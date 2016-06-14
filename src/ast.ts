@@ -29,6 +29,24 @@ export abstract class Declaration {
     }
 }
 
+export class FunctionDeclaration extends Declaration {
+    readonly abstract: boolean;
+    readonly typeParameters: ReadonlyArray<Type>
+    readonly parameters: ReadonlyArray<VariableDeclaration>
+    readonly returnType: Type;
+
+    constructor(node: ts.FunctionDeclaration | ts.MethodDeclaration, parent: TypeDeclaration|SourceFile) {
+        super(node, parent);
+        if(node.type) {
+            this.returnType = Type.from(node.type, false);
+        } else {
+            log.warn(`Return type information missing, resorting to Any`, node);
+            this.returnType = new AnyType(false);
+        } 
+        this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
+    }    
+}
+
 export class VariableDeclaration extends Declaration {
     readonly type: Type;
     readonly constant: boolean;
@@ -58,6 +76,9 @@ export abstract class TypeDeclaration extends Declaration {
                 case ts.SyntaxKind.PropertyDeclaration:
                     members.push(new VariableDeclaration(member as ts.PropertyDeclaration, this));
                     break;         
+                case ts.SyntaxKind.MethodDeclaration:
+                    members.push(new FunctionDeclaration(member as ts.MethodDeclaration, this));
+                    break;                
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
             }            
@@ -83,10 +104,6 @@ export class ClassDeclaration extends TypeDeclaration {
     }
 }
 
-export class MethodDeclaration extends Declaration {
-    readonly abstract: boolean;
-}
-
 export class SourceFile {
     readonly path: path.ParsedPath;    
     readonly comment: string;  
@@ -109,6 +126,9 @@ export class SourceFile {
                         declarations.push(new VariableDeclaration(declaration, this));
                     }
                     break;   
+                case ts.SyntaxKind.FunctionDeclaration:
+                    declarations.push(new FunctionDeclaration(statement as ts.FunctionDeclaration, this));
+                    break;                
                 case ts.SyntaxKind.ClassDeclaration:
                     declarations.push(new ClassDeclaration(statement as ts.ClassDeclaration, this));
                     break;

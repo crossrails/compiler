@@ -51,6 +51,9 @@ declare module "../ast" {
         header(isGlobalType?: boolean): string
         footer(): string
     }
+    interface FunctionDeclaration {
+        body(): string
+    }
     interface VariableDeclaration {
         getter(): string
         setter(): string
@@ -87,6 +90,11 @@ ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration
     if(!this.constant) {
         output = `${output}\n    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} value) ${this.setter()}\n`;    
     }
+    return output;
+}
+
+ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
+    let output = `    public${this.static?' static':''} ${this.returnType.signature()} ${this.name}() ${this.body()}\n`;
     return output;
 }
 

@@ -1,5 +1,5 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration} from "../ast"
+import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration} from "../ast"
 
 export default emitter;
 
@@ -86,6 +86,12 @@ VariableDeclaration.prototype.getter = function (this: VariableDeclaration) {
 VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
     return `{
         global.setMember("${this.name}", ${this.type.argumentValue(this)});
+    }`;        
+}
+
+FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
+    return `{
+        return;
     }`;        
 }
 

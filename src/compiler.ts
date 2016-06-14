@@ -53,7 +53,7 @@ export class Compiler {
     private emit<T extends EmitterOptions>(module: Module, language: string, engine: string, options: T & CompilerOptions) {
         let engineOptions = Object.assign({}, options, options[engine])
         let emitter: Emitter<T> = this.loadEmitter(language, engine);
-        log.info(`Emitting source for engine ${engine} to ${engineOptions.outDir}`);
+        log.info(`Emitting ${language} source for ${engine} engine to ${engineOptions.outDir}`);
         emitter.emit(module, engineOptions);                        
     }
 }
