@@ -12,7 +12,7 @@ describe("Main", () => {
             
     it("successfully compiles the reference project", function(this: This) {
         let exitCode = require('../../src/main')(
-            './tests/reference/types.js', 
+            './tests/reference/src.js', 
             '--swift'
         );
         expect(exitCode).toBe(0);
@@ -22,7 +22,7 @@ describe("Main", () => {
 
     it("fails when no output languages given", function(this: This) {
         let exitCode = require('../../src/main')(
-            './tests/reference/types.js' 
+            './tests/reference/src.js' 
         );
         expect(exitCode).toBe(1);
         expect(this.writeFileMethod).not.toHaveBeenCalled();

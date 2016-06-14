@@ -5,7 +5,7 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "outFile": "src.js  "
+    "outFile": "src.js"
   },
   "files": [
     "types.ts",

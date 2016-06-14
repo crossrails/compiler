@@ -3,8 +3,6 @@ import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
 import * as ast from "../ast"
 
-import assert = require('assert');
-
 export interface JavaEmitterOptions extends EmitterOptions {
     nashorn?: EmitterOptions 
     android?: EmitterOptions 
@@ -20,7 +18,7 @@ export class JavaEmitter extends Emitter<JavaEmitterOptions> {
         let types: ast.TypeDeclaration[] = module.declarations.filter(d => d instanceof ast.TypeDeclaration) as ast.TypeDeclaration[];
         let writtenModuleFile = false;  
         for(let type of types) {               
-            let filename = `${path.join(srcRoot, path.relative(srcRoot, type.sourceFile.path.dir), type.name)}.java`;
+            let filename = path.join(srcRoot, type.sourceFile.path.dir, `${type.name}.java`);
             if(filename == moduleFilename) {
                 writtenModuleFile = true;
                 type = Object.create(type, {

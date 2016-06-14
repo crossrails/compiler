@@ -52,14 +52,14 @@ export abstract class TypeDeclaration extends Declaration {
         super(node, parent);
         let members: Declaration[] = [];
         for (let member of node.members) {
-            if(!(member.flags & ts.NodeFlags.Private)) {
-                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier).text} of class ${this.name}`, member);                
+            if(member.flags & ts.NodeFlags.Private) {
+                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
             } else switch(member.kind) {
                 case ts.SyntaxKind.PropertyDeclaration:
                     members.push(new VariableDeclaration(member as ts.PropertyDeclaration, this));
                     break;         
                 default:
-                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier).text} of class ${this.name}`, member);
+                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
             }            
         }
         this.members = members;
@@ -139,6 +139,9 @@ export class Module {
                 this.addSourceFile(files, path.join(this.src.dir, map.sourceRoot, source), implicitExport, charset);
             }
         } catch(error) {
+            if(error.code != 'ENOENT') {
+                throw error;
+            }
             log.debug(`No sourcemap found`);
             this.sourceRoot = '.';
             this.addSourceFile(files, file, implicitExport, charset);
