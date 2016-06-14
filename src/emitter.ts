@@ -4,7 +4,7 @@ import {Options} from 'yargs';
 import {writeFileSync} from 'fs';
 
 export interface EmitterOptions {
-   outDir?: string
+   outDir: string
    exportAll?: boolean
 //    newLine: 'lf'|'crlf'
    noEmit?: boolean

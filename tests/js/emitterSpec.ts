@@ -20,12 +20,12 @@ describe("Emitter", () => {
     });
     
     it("writeFile emits when noEmit is not present", function(this: This) {
-        this.emitter.emit({} as Module, {});
+        this.emitter.emit({} as Module, {outDir: '.'});
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1)
     });
 
     it("writeFile does not emit when noEmit is present", function(this: This) {
-        this.emitter.emit({} as Module, {'noEmit': true});
+        this.emitter.emit({} as Module, {noEmit: true, outDir: '.'});
         expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 });

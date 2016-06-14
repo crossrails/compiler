@@ -12,20 +12,20 @@ export interface JavaEmitterOptions extends EmitterOptions {
 export class JavaEmitter extends Emitter<JavaEmitterOptions> {
         
     protected emitModule(module: ast.Module, options: JavaEmitterOptions): void {
-        let srcRoot = path.join(options.outDir, module.sourceRoot, options.basePackage.replace('.', path.sep));
-        let moduleFilename = path.join(srcRoot, `${module.name.charAt(0).toUpperCase()}${module.name.slice(1)}.java`);
+        let outDir = path.join(options.outDir, module.sourceRoot, options.basePackage.replace('.', path.sep));
+        let moduleFilename = path.join(outDir, `${module.name.charAt(0).toUpperCase()}${module.name.slice(1)}.java`);
         let globals = module.declarations.filter(d => !(d instanceof ast.TypeDeclaration));
         let types: ast.TypeDeclaration[] = module.declarations.filter(d => d instanceof ast.TypeDeclaration) as ast.TypeDeclaration[];
         let writtenModuleFile = false;  
         for(let type of types) {               
-            let filename = path.join(srcRoot, type.sourceFile.path.dir, `${type.name}.java`);
+            let filename = path.join(outDir, path.relative(module.sourceRoot, type.sourceFile.path.dir), `${type.name}.java`);
             if(filename == moduleFilename) {
                 writtenModuleFile = true;
                 type = Object.create(type, {
                     members: { value: type.members.concat(globals) }
                 });
             }                
-            let packageName = path.relative(type.module.sourceRoot, type.sourceFile.path.dir).replace(path.sep, '.');
+            let packageName = path.relative(options.outDir, path.dirname(filename)).replace(path.sep, '.');
             this.writeFile(filename, `package ${packageName};\n\n${type.emit(filename == moduleFilename)}`);
         }        
         if(!writtenModuleFile) {

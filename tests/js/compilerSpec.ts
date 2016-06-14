@@ -15,7 +15,7 @@ describe("Compiler", () => {
     });
     
     it("errors when no output languages specified", function(this: This) {
-        let compiler = new Compiler({}, [['language', ['engine']]]);
+        let compiler = new Compiler({outDir: '.'}, [['language', ['engine']]]);
         let loadEmitterMethodOnTheCompiler = spyOn(compiler, 'loadEmitter');
         expect(compiler.compile(this.module)).toBeGreaterThan(0);
         expect(loadEmitterMethodOnTheCompiler).not.toHaveBeenCalled();
@@ -23,7 +23,7 @@ describe("Compiler", () => {
     });
         
     it("defaults to first engine if none specified in options", function(this: This) {
-        let options = {'language': {}};
+        let options = {outDir: '.', 'language': {}};
         let compiler = new Compiler(options, [['language', ['engine1', 'engine2']]]);
         let loadEmitterMethodOnTheCompiler = spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -34,7 +34,7 @@ describe("Compiler", () => {
     });
     
     it("emits to only to the engine specified in the options", function(this: This) {
-        let options = {'language': {'engine2': {}}};
+        let options = {outDir: '.', 'language': {'engine2': {}}};
         let compiler = new Compiler(options, [['language', ['engine1', 'engine2']]]);
         let loadEmitterMethodOnTheCompiler = spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -45,7 +45,7 @@ describe("Compiler", () => {
     });    
     
     it("passes compiler level options to the emitter", function(this: This) {
-        let options = {'language': {}, 'complierOption': {}};
+        let options = {outDir: '.', 'language': {}, 'complierOption': {}};
         let compiler = new Compiler(options, [['language', ['engine']]]);
         spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -53,7 +53,7 @@ describe("Compiler", () => {
     }); 
     
     it("passes language level options to the emitter", function(this: This) {
-        let options = {'language': {'languageOption': {}}};
+        let options = {outDir: '.', 'language': {'languageOption': {}}};
         let compiler = new Compiler(options, [['language', ['engine']]]);
         spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -61,7 +61,7 @@ describe("Compiler", () => {
     });
          
     it("passes engine level options to the emitter", function(this: This) {
-        let options = {'language': {'engine': {'engineOption': {}}}};
+        let options = {outDir: '.', 'language': {'engine': {'engineOption': {}}}};
         let compiler = new Compiler(options, [['language', ['engine']]]);
         spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -69,7 +69,7 @@ describe("Compiler", () => {
     });
         
     it("overwrites compiler level options with language level options", function(this: This) {
-        let options = {'language': {'option': {'languageLevel': {}}}, 'option': {'compilerLevel': {}}};
+        let options = {outDir: '.', 'language': {'option': {'languageLevel': {}}}, 'option': {'compilerLevel': {}}};
         let compiler = new Compiler(options, [['language', ['engine']]]);
         spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);
@@ -77,7 +77,7 @@ describe("Compiler", () => {
     });   
     
     it("overwrites language level options with engine level options", function(this: This) {
-        let options = {'language': {'engine': {'option': {'engineLevel': {}}}, 'option': {'languageLevel': {}}}, 'option': {'compilerLevel': {}}};
+        let options = {outDir: '.', 'language': {'engine': {'option': {'engineLevel': {}}}, 'option': {'languageLevel': {}}}, 'option': {'compilerLevel': {}}};
         let compiler = new Compiler(options, [['language', ['engine']]]);
         spyOn(compiler, 'loadEmitter').and.returnValue({emit: this.emitMethodOnTheEmitter});
         expect(compiler.compile(this.module)).toBe(0);

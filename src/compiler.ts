@@ -4,7 +4,8 @@ import * as ast from "./ast"
 import {Emitter, EmitterOptions} from "./emitter" 
 
 export interface CompilerOptions {
-   [option :string] :CompilerOptions
+    outDir: string
+    [option: string]: any
 }
 
 export class Compiler {
@@ -45,7 +46,7 @@ export class Compiler {
         return false;
     }
     
-    protected loadEmitter<T>(language: string, engine: string): Emitter<T> {
+    protected loadEmitter<T extends EmitterOptions>(language: string, engine: string): Emitter<T> {
         return require(`./${language}/${engine}`).default;        
     }
     
