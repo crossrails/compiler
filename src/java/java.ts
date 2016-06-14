@@ -78,6 +78,10 @@ ast.ClassDeclaration.prototype.keyword = function (this: ast.ClassDeclaration): 
     return "class";
 }
 
+ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclaration): string {
+    return "interface";
+}
+
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
     let output = `    public${this.static?' static':''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}\n`;
     if(!this.constant) {

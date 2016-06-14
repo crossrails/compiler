@@ -66,10 +66,17 @@ export abstract class TypeDeclaration extends Declaration {
     }
 }
 
+export class InterfaceDeclaration extends TypeDeclaration {
+    readonly typeParameters: ReadonlyArray<Type>
+    
+    constructor(node: ts.InterfaceDeclaration, parent: TypeDeclaration|SourceFile) {
+        super(node, parent);
+    }
+}
+
 export class ClassDeclaration extends TypeDeclaration {
     readonly superClass: string | undefined;
     readonly typeParameters: ReadonlyArray<Type>
-    readonly members: ReadonlyArray<Declaration>;
     
     constructor(node: ts.ClassDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
@@ -104,6 +111,9 @@ export class SourceFile {
                     break;   
                 case ts.SyntaxKind.ClassDeclaration:
                     declarations.push(new ClassDeclaration(statement as ts.ClassDeclaration, this));
+                    break;
+                case ts.SyntaxKind.InterfaceDeclaration:
+                    declarations.push(new InterfaceDeclaration(statement as ts.InterfaceDeclaration, this));
                     break;
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[statement.kind]}`, statement);

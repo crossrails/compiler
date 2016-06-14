@@ -1,5 +1,5 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration} from "../ast"
+import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration} from "../ast"
 
 export default emitter;
 
@@ -13,6 +13,20 @@ declare module "../ast" {
         argumentValue(declaration: VariableDeclaration): string;
         arrayElementArgumentValue(optional?: boolean): string;
     }
+}
+
+InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
+    let lines: string[] = [];
+    lines.push(`import java.util.*;`);        
+    return lines.join('\n');
+}
+
+InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
+    return '';
+}
+
+InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
+    return '';
 }
 
 ClassDeclaration.prototype.imports = function (this: ClassDeclaration, isGlobalType?: boolean) {

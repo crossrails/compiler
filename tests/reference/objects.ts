@@ -54,10 +54,14 @@ var optionalAnyObjectInstance: any|undefined = new SimpleObject;
 
 var simpleInterfaceInstanceCalled: boolean = false
 
+interface SimpleInterface {
+    voidNoArgMethod(): void
+}
+
 /**
  * @type {!}
  */
-var simpleInterfaceInstance: { voidNoArgMethod(): void } = {
+var simpleInterfaceInstance: SimpleInterface = {
     voidNoArgMethod() {
         simpleInterfaceInstanceCalled = true
     }
@@ -66,7 +70,7 @@ var simpleInterfaceInstance: { voidNoArgMethod(): void } = {
 /**
  * @param a
  */
-function acceptSimpleInterface(simpleInterface: { voidNoArgMethod(): void }) {
+function acceptSimpleInterface(simpleInterface: SimpleInterface) {
     simpleInterfaceInstance = simpleInterface;
     simpleInterface.voidNoArgMethod();
 }
