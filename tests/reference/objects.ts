@@ -57,7 +57,7 @@ var simpleInterfaceInstanceCalled: boolean = false
 /**
  * @type {!}
  */
-var simpleInterfaceInstance = {
+var simpleInterfaceInstance: { voidNoArgMethod(): void } = {
     voidNoArgMethod() {
         simpleInterfaceInstanceCalled = true
     }

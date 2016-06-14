@@ -16,8 +16,8 @@ describe("Main", () => {
             '--swift'
         );
         expect(exitCode).toBe(0);
-        expect(this.writeFileMethod).toHaveBeenCalledTimes(1)
-        expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/tests[\\\/]reference[\\\/]types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
+        expect(this.writeFileMethod).toHaveBeenCalledTimes(4)
+        expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/tests[\\\/]reference[\\\/]src\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
     });
 
     it("fails when no output languages given", function(this: This) {

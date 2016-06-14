@@ -161,7 +161,7 @@ describe("Module", () => {
 
     it("parses the supplied file if source map not found", function(this: This) {
         this.readFileMethod.and.callFake((file: string) => {
-            if(file == 'src.js.map') throw new Error();
+            if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "";    
         });
         let module = new ast.Module("src.js", false, "utf8");
@@ -182,7 +182,7 @@ describe("Module", () => {
     it("retains a source file if it contains exported declarations", function(this: This) {
         this.createSourceFileMethod.and.callThrough();
         this.readFileMethod.and.callFake((file: string) => {
-            if(file == 'src.js.map') throw new Error();
+            if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "export let declaration";    
         });
         let module = new ast.Module("src.js", false, "utf8");
@@ -194,7 +194,7 @@ describe("Module", () => {
     it("does not retain a source file if it does not contains exported declarations", function(this: This) {
         this.createSourceFileMethod.and.callThrough();
         this.readFileMethod.and.callFake((file: string) => {
-            if(file == 'src.js.map') throw new Error();
+            if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "let declaration";    
         });
         let module = new ast.Module("src.js", false, "utf8");

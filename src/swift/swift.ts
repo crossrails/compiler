@@ -1,7 +1,7 @@
 import * as path from 'path';
 import {log} from "../log"
 import {EmitterOptions, Emitter} from "../emitter" 
-import {Module, SourceFile, Type, AnyType, ArrayType, BooleanType, StringType, NumberType, Declaration, VariableDeclaration} from "../ast"
+import {Module, SourceFile, Type, AnyType, ArrayType, BooleanType, StringType, NumberType, Declaration, VariableDeclaration, ClassDeclaration} from "../ast"
 
 export interface SwiftEmitterOptions extends EmitterOptions {
     javascriptcore?: EmitterOptions 
@@ -57,6 +57,10 @@ declare module "../ast" {
     interface Type {
         signature(optional?: boolean): string;
     }
+}
+
+ClassDeclaration.prototype.definition = function (this: ClassDeclaration): string {
+    return "";
 }
 
 VariableDeclaration.prototype.definition = function (this: VariableDeclaration): string {

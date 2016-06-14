@@ -1,5 +1,5 @@
 import {SwiftEmitter} from './swift'
-import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration} from "../ast"
+import {Module, SourceFile, Type, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration} from "../ast"
 
 class JavaScriptCoreEmitter extends SwiftEmitter {
     
@@ -48,6 +48,10 @@ VariableDeclaration.prototype.body = function (this: VariableDeclaration) {
         this[.${this.name}] = ${this.type.argumentValue(this)}
     }
 }`        
+}
+
+ClassDeclaration.prototype.body = function (this: ClassDeclaration): string {
+    return "";
 }
 
 AnyType.prototype.returnValue = function(this: AnyType, declaration: VariableDeclaration) {
