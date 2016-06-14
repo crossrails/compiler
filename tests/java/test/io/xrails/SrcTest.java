@@ -128,6 +128,7 @@ public class SrcTest {
         assertEquals(Arrays.asList(1, 2, 3), getNumberArrayConst());
         assertEquals(Arrays.asList(Arrays.asList("1", "2", "3"), Arrays.asList("4", "5", "6"), Arrays.asList("7", "8", "9")), getStringArrayArrayConst());
         assertEquals("anyConstLiteral", getAnyConst());
+        assertEquals(Arrays.asList(1, null, 3), getNumberOrNullArrayConst());
     }
 
     @Test

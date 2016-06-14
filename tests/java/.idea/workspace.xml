@@ -2,19 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d9d24ca6-d0bc-445f-9786-e19586172c31" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/io/xrails/Types.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/io/xrails/Src.java" afterPath="$PROJECT_DIR$/src/io/xrails/HandwrittenSrc.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/ast.ts" afterPath="$PROJECT_DIR$/../../src/ast.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../src/java/java.ts" afterPath="$PROJECT_DIR$/../../src/java/java.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" afterPath="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/io/xrails/SpecialException.java" afterPath="$PROJECT_DIR$/src/io/xrails/SpecialException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/io/xrails/SrcTest.java" afterPath="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../js/mainSpec.ts" afterPath="$PROJECT_DIR$/../js/mainSpec.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/functions.ts" afterPath="$PROJECT_DIR$/../reference/functions.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/objects.ts" afterPath="$PROJECT_DIR$/../reference/objects.ts" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/tsconfig.json" afterPath="$PROJECT_DIR$/../reference/tsconfig.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../reference/types.ts" afterPath="$PROJECT_DIR$/../reference/types.ts" />
     </list>
     <ignored path="java.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -49,11 +37,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Src.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Src.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/io/xrails/Src.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2125">
-              <caret line="162" column="72" selection-start-line="162" selection-start-column="72" selection-end-line="162" selection-end-column="72" />
+            <state relative-caret-position="271">
+              <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
                 <element signature="e#5030#5031#0" expanded="true" />
                 <element signature="e#5099#5100#0" expanded="true" />
@@ -325,11 +313,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SrcTest.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SrcTest.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/io/xrails/SrcTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="192">
-              <caret line="115" column="64" selection-start-line="115" selection-start-column="64" selection-end-line="115" selection-end-column="64" />
+            <state relative-caret-position="493">
+              <caret line="31" column="5" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -378,10 +366,10 @@
         <option value="$PROJECT_DIR$/src/io/xrails/JS.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/Types.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/SpecialException.java" />
-        <option value="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/SimpleObject.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/HandwrittenSrc.java" />
         <option value="$PROJECT_DIR$/src/io/xrails/Src.java" />
+        <option value="$PROJECT_DIR$/test/io/xrails/SrcTest.java" />
       </list>
     </option>
   </component>
@@ -852,9 +840,6 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Tests - 2016.06.10 at 22h 24m 12s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
-    </history-entry>
     <history-entry file="Tests - 2016.06.11 at 14h 28m 02s.xml">
       <configuration name="Tests" configurationId="JUnit" />
     </history-entry>
@@ -882,6 +867,9 @@
     <history-entry file="Tests - 2016.06.14 at 17h 25m 26s.xml">
       <configuration name="Tests" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="Tests - 2016.06.14 at 19h 02m 47s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="2576" height="1056" extended-state="6" />
@@ -895,7 +883,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19955407" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19955407" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1295,16 +1283,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test/io/xrails/SrcTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="192">
-          <caret line="115" column="64" selection-start-line="115" selection-start-column="64" selection-end-line="115" selection-end-column="64" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/io/xrails/HandwrittenSrc.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="192">
@@ -1317,8 +1295,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/io/xrails/Src.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2125">
-          <caret line="162" column="72" selection-start-line="162" selection-start-column="72" selection-end-line="162" selection-end-column="72" />
+        <state relative-caret-position="271">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding>
             <element signature="e#5030#5031#0" expanded="true" />
             <element signature="e#5099#5100#0" expanded="true" />
@@ -1328,6 +1306,16 @@
             <element signature="e#5354#5355#0" expanded="true" />
             <element signature="e#5405#5406#0" expanded="true" />
             <element signature="e#5484#5485#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/io/xrails/SrcTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="493">
+          <caret line="31" column="5" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
