@@ -1,4 +1,4 @@
-var voidNoArgFunctionCalled = false
+var voidNoArgFunctionCalled: boolean = false
 
 function voidNoArgFunction() {
     voidNoArgFunctionCalled = true
@@ -23,9 +23,8 @@ function numberMultipleArgFunction(a: number, b: number): number {
 /**
  * @type {function(): string}
  */
-var stringNoArgLambda = function(): string {
-    return "stringNoArgLambdaReturnValue"
-}
+var stringNoArgLambda: () => string = () => "stringNoArgLambdaReturnValue";
+
 
 /**
  * @throws Error

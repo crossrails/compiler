@@ -14,7 +14,7 @@ const stringConst: string = 'stringConstLiteral';
 /**
  * @type {!Array<?number>}
  */
-const numberOrNullArrayConst: (number|null)[] = [1, null, 3];
+const numberOrNullArrayConst: Array<number|null> = [1, null, 3];
 /**
  * @type {!Array<number>}
  */

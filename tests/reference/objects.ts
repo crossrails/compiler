@@ -40,19 +40,19 @@ class SimpleObject {
 /**
  * @type {!SimpleObject}
  */
-const simpleObjectInstance = new SimpleObject;
+const simpleObjectInstance: SimpleObject = new SimpleObject;
 
 /**
  * @type {!Object}
  */
-const anyObjectInstance = simpleObjectInstance;
+const anyObjectInstance: any = simpleObjectInstance;
 
 /**
  * @type {?Object}
  */
-var optionalAnyObjectInstance = new SimpleObject;
+var optionalAnyObjectInstance: any|undefined = new SimpleObject;
 
-var simpleInterfaceInstanceCalled = false
+var simpleInterfaceInstanceCalled: boolean = false
 
 /**
  * @type {!}
