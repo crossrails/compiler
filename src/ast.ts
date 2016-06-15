@@ -6,18 +6,12 @@ import {log} from "./log"
 
 export abstract class Declaration {       
     readonly name: string; 
-    readonly comment: string
-    readonly parent: TypeDeclaration|SourceFile;
-    readonly protected: boolean;
-    readonly static: boolean;
+    readonly parent: FunctionDeclaration|TypeDeclaration|SourceFile;
 
-    constructor(node: ts.Declaration, parent: TypeDeclaration|SourceFile) {
+    constructor(node: ts.Declaration, parent: FunctionDeclaration|TypeDeclaration|SourceFile) {
         //make parent non-enumerable to avoid circular reference 
         Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
         this.name = (node.name as ts.Identifier).text;
-        this.protected = (node.flags & ts.NodeFlags.Protected) != 0;
-        this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0;
-        this.module.identifiers.add(this.name);
     }
 
     get module(): Module {
@@ -29,10 +23,23 @@ export abstract class Declaration {
     }
 }
 
-export class FunctionDeclaration extends Declaration {
+export abstract class MemberDeclaration extends Declaration {       
+    readonly comment: string
+    readonly protected: boolean;
+    readonly static: boolean;
+
+    constructor(node: ts.Declaration, parent: TypeDeclaration|SourceFile) {
+        super(node, parent);
+        this.protected = (node.flags & ts.NodeFlags.Protected) != 0;
+        this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0;
+        this.module.identifiers.add(this.name);
+    }
+}
+
+export class FunctionDeclaration extends MemberDeclaration {
     readonly abstract: boolean;
     readonly typeParameters: ReadonlyArray<Type>
-    readonly parameters: ReadonlyArray<VariableDeclaration>
+    readonly parameters: ReadonlyArray<ParameterDeclaration>
     readonly returnType: Type;
 
     constructor(node: ts.SignatureDeclaration, parent: TypeDeclaration|SourceFile) {
@@ -43,6 +50,11 @@ export class FunctionDeclaration extends Declaration {
             log.warn(`Return type information missing, resorting to Any`, node);
             this.returnType = new AnyType(false);
         } 
+        let parameters: ParameterDeclaration[] = [];
+        for(let parameter of node.parameters) {
+            parameters.push(new ParameterDeclaration(parameter, this));
+        }
+        this.parameters = parameters;
         this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
     }
 
@@ -51,7 +63,7 @@ export class FunctionDeclaration extends Declaration {
     }
 }
 
-export class VariableDeclaration extends Declaration {
+export class VariableDeclaration extends MemberDeclaration {
     readonly type: Type;
     readonly constant: boolean;
     
@@ -67,12 +79,26 @@ export class VariableDeclaration extends Declaration {
     }    
 }
 
-export abstract class TypeDeclaration extends Declaration {
-    readonly members: ReadonlyArray<Declaration>;
+export class ParameterDeclaration extends Declaration {
+    readonly type: Type;
+    
+    constructor(node: ts.ParameterDeclaration, parent: FunctionDeclaration) {
+        super(node, parent);
+        if(node.type) {
+            this.type = Type.from(node.type, false);
+        } else {
+            log.warn(`Type information missing, resorting to Any`, node);
+            this.type = new AnyType(false);
+        } 
+    }    
+}
+
+export abstract class TypeDeclaration extends MemberDeclaration {
+    readonly members: ReadonlyArray<MemberDeclaration>;
     
     constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
-        let members: Declaration[] = [];
+        let members: MemberDeclaration[] = [];
         for (let member of node.members) {
             if(member.flags & ts.NodeFlags.Private) {
                 log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
@@ -114,7 +140,7 @@ export class ClassDeclaration extends TypeDeclaration {
 export class SourceFile {
     readonly path: path.ParsedPath;    
     readonly comment: string;  
-    readonly declarations: ReadonlyArray<Declaration>
+    readonly declarations: ReadonlyArray<MemberDeclaration>
     readonly module: Module;
     
     constructor(node: ts.SourceFile, implicitExport: boolean, module: Module) {
@@ -123,7 +149,7 @@ export class SourceFile {
         // }, 4));
         this.path = path.parse(node.fileName);
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
-        let declarations: Declaration[] = [];
+        let declarations: MemberDeclaration[] = [];
         for (let statement of node.statements) {
             if(!(statement.flags & ts.NodeFlags.Export) && !implicitExport) {
                 log.info(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
@@ -199,9 +225,9 @@ export class Module {
         }
     }
 
-    get declarations(): ReadonlyArray<Declaration> {
-        return this.files.reduce((declarations: Declaration[], file: SourceFile) => 
-            declarations.concat(file.declarations as Declaration[]), []);
+    get declarations(): ReadonlyArray<MemberDeclaration> {
+        return this.files.reduce((declarations: MemberDeclaration[], file: SourceFile) => 
+            declarations.concat(file.declarations as MemberDeclaration[]), []);
     }
 }
 

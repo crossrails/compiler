@@ -65,16 +65,17 @@ declare module "../ast" {
 }
 
 ast.TypeDeclaration.prototype.emit = function (this: ast.TypeDeclaration, isGlobalType?: boolean): string {
-    let lines: string[] = [];
-    lines.push(`${this.imports(isGlobalType)}\n`);
-    lines.push(`${this.keyword()} ${this.name} {\n`);
-    lines.push(this.header(isGlobalType));
-    for(let member of this.members as Array<ast.Declaration>) {
-        lines.push(`${member.emit()}`);
-    }
-    lines.push(this.footer());
-    lines.push(`}`);
-    return lines.filter((l) => l.length > 0).join('\n');
+    return `
+${this.imports(isGlobalType)}
+
+${this.keyword()} ${this.name} {
+
+${this.header(isGlobalType)}
+
+${this.members.reduce((out, member) => `${out}${member.emit()}\n`, '')}
+${this.footer()}
+}
+    `.replace(/\n{3}/g, '\n').trim();
 }
 
 ast.ClassDeclaration.prototype.keyword = function (this: ast.ClassDeclaration): string {
@@ -86,15 +87,19 @@ ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclar
 }
 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
-    let output = `    public${this.static?' static':''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}\n`;
-    if(!this.constant) {
-        output = `${output}\n    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} value) ${this.setter()}\n`;    
-    }
-    return output;
+    return `
+    public${this.static?' static':''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}
+${this.constant ? '' : `
+    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} value) ${this.setter()}
+`}`.substr(1);
+}
+
+ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {
+    return `${this.type.typeName()} ${this.name}`;
 }
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
-    return `    ${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public'}${this.static ? ' static' : this.abstract ? ' abstract' : ''} ${this.returnType.signature()} ${this.name}()${this.hasBody ? ` ${this.body()}` : ';'}\n`;
+    return `    ${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public'}${this.static ? ' static' : this.abstract ? ' abstract' : ''} ${this.returnType.signature()} ${this.name}(${this.parameters.map(p => p.emit()).join(', ')})${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
 ast.Type.prototype.signature = function(this: ast.Type, optional: boolean = this.optional): string {

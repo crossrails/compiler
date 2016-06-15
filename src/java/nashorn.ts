@@ -1,25 +1,23 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration} from "../ast"
 
 export default emitter;
 
 declare module "../ast" {
-    interface Declaration {
+    interface MemberDeclaration {
         mirror(): string
         accessor(): string
     }
     interface Type {
         arrayElementReturnValue(optional?: boolean): string;
-        returnValue(declaration: Declaration): string;
-        argumentValue(declaration: Declaration): string;
+        returnValue(declaration: MemberDeclaration): string;
+        argumentValue(declaration: MemberDeclaration): string;
         arrayElementArgumentValue(optional?: boolean): string;
     }
 }
 
-InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
-    let lines: string[] = [];
-    lines.push(`import java.util.*;`);        
-    return lines.join('\n');
+InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration, isGlobalType?: boolean) {      
+    return `import java.util.*;`
 }
 
 InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
@@ -31,32 +29,28 @@ InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, is
 }
 
 ClassDeclaration.prototype.imports = function (this: ClassDeclaration, isGlobalType?: boolean) {
-    let lines: string[] = [];
-    lines.push(`import java.util.*;`);        
-    lines.push(`import jdk.nashorn.api.scripting.*;`);
-    if(!isGlobalType) {
-        lines.push(`\nimport static io.xrails.Src.global;`);
-    }
-    return lines.join('\n');
+    return `
+import java.util.*;
+import jdk.nashorn.api.scripting.*;${
+    isGlobalType ? '' : `\n
+import static io.xrails.Src.global;`
+    }`;
 }
 
 ClassDeclaration.prototype.header = function (this: ClassDeclaration, isGlobalType?: boolean) {
-    let lines: string[] = [];
-    if(isGlobalType) {
-        lines.push(`    static final ScriptObjectMirror global = JS.eval("../reference/src.js");\n`);
-    }       
-    if(this.members.some((d: Declaration) => d.parent != d.sourceFile)) {
-        lines.push(`    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`);
-    }       
-    if(this.members.some((d: Declaration) => !d.static)) { 
-        lines.push(`    private final ScriptObjectMirror mirror;`);
-        lines.push(`    private final JSObject proxy;\n`);
-    }
-    return lines.join('\n');
+    return `
+${!isGlobalType ? '' : `
+    static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
+}${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
+    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
+}${!this.members.some(m => !m.static) ? '' : `
+    private final ScriptObjectMirror mirror;
+    private final JSObject proxy;`
+}`.substr(1);    
 }
 
 ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalType?: boolean) {
-    return !this.members.some((d: Declaration) => !d.static) ? '' : `
+    return !this.members.some(m => !m.static) ? '' : `
     @Override
     public String toString() {
         return mirror.toString();
@@ -73,7 +67,7 @@ ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalTy
     }`;
 }
 
-Declaration.prototype.mirror = function (this: Declaration) {
+MemberDeclaration.prototype.mirror = function (this: MemberDeclaration) {
     return this.parent == this.sourceFile ? 'global' : this.static ? 'classMirror' : 'mirror';        
 }
 
@@ -95,7 +89,7 @@ VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
 }
 
 FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
-    return `${this.mirror()}.callMember("${this.name}")`
+    return `${this.mirror()}.callMember(${[`"${this.name}"`].concat(this.parameters.map(p => p.name)).join(', ')})`;
 }
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
@@ -104,15 +98,15 @@ FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): strin
     }`;        
 }
 
-AnyType.prototype.returnValue = function(this: AnyType, declaration: Declaration) {
+AnyType.prototype.returnValue = function(this: AnyType, declaration: MemberDeclaration) {
     return `JS.wrap(${declaration.accessor()}, JS.Object::new)`;    
 }
 
-ArrayType.prototype.returnValue = function(this: ArrayType, declaration: Declaration) {
+ArrayType.prototype.returnValue = function(this: ArrayType, declaration: MemberDeclaration) {
     return `JS.wrap(${declaration.accessor()}, ${this.typeArguments[0].arrayElementReturnValue()})`;    
 }
 
-Type.prototype.returnValue = function(this: Type, declaration: Declaration) {
+Type.prototype.returnValue = function(this: Type, declaration: MemberDeclaration) {
     return `(${this.typeName()})${declaration.accessor()}`;    
 }
 
@@ -124,11 +118,11 @@ Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean 
     return `JS.Array::new`;    
 }
 
-Type.prototype.argumentValue = function(this: Type, declaration: VariableDeclaration) {
+Type.prototype.argumentValue = function(this: Type, declaration: MemberDeclaration) {
     return `value`;    
 }
 
-ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: VariableDeclaration) {
+ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: MemberDeclaration) {
     return `JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(${this.typeArguments[0].arrayElementArgumentValue(this.optional)}))`;    
 }
 
