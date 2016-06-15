@@ -4,6 +4,6 @@ import java.util.*;
 
 interface SimpleInterface {
 
-
+     void voidNoArgMethod();
 
 }

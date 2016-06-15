@@ -35,7 +35,7 @@ export class FunctionDeclaration extends Declaration {
     readonly parameters: ReadonlyArray<VariableDeclaration>
     readonly returnType: Type;
 
-    constructor(node: ts.FunctionDeclaration | ts.MethodDeclaration, parent: TypeDeclaration|SourceFile) {
+    constructor(node: ts.SignatureDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
         if(node.type) {
             this.returnType = Type.from(node.type, false);
@@ -44,14 +44,18 @@ export class FunctionDeclaration extends Declaration {
             this.returnType = new AnyType(false);
         } 
         this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
-    }    
+    }
+
+    get hasBody(): boolean {
+        return !(this.abstract || this.parent instanceof InterfaceDeclaration);
+    }
 }
 
 export class VariableDeclaration extends Declaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration | ts.PropertyDeclaration, parent: TypeDeclaration|SourceFile) {
+    constructor(node: ts.VariableDeclaration|ts.PropertyDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
         if(node.type) {
             this.type = Type.from(node.type, false);
@@ -66,7 +70,7 @@ export class VariableDeclaration extends Declaration {
 export abstract class TypeDeclaration extends Declaration {
     readonly members: ReadonlyArray<Declaration>;
     
-    constructor(node: ts.ClassDeclaration | ts.InterfaceDeclaration | ts.EnumDeclaration, parent: TypeDeclaration|SourceFile) {
+    constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, parent: TypeDeclaration|SourceFile) {
         super(node, parent);
         let members: Declaration[] = [];
         for (let member of node.members) {
@@ -76,6 +80,9 @@ export abstract class TypeDeclaration extends Declaration {
                 case ts.SyntaxKind.PropertyDeclaration:
                     members.push(new VariableDeclaration(member as ts.PropertyDeclaration, this));
                     break;         
+                case ts.SyntaxKind.MethodSignature:
+                    members.push(new FunctionDeclaration(member as ts.MethodSignature, this));
+                    break;                
                 case ts.SyntaxKind.MethodDeclaration:
                     members.push(new FunctionDeclaration(member as ts.MethodDeclaration, this));
                     break;                
@@ -96,7 +103,7 @@ export class InterfaceDeclaration extends TypeDeclaration {
 }
 
 export class ClassDeclaration extends TypeDeclaration {
-    readonly superClass: string | undefined;
+    readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
     constructor(node: ts.ClassDeclaration, parent: TypeDeclaration|SourceFile) {
@@ -208,6 +215,8 @@ export abstract class Type {
     static from(type: ts.TypeNode, optional: boolean): Type {
         try {
             switch(type.kind) {
+                case ts.SyntaxKind.VoidKeyword:
+                    return VoidType.Instance;
                 case ts.SyntaxKind.AnyKeyword:
                     return new AnyType(optional);
                 case ts.SyntaxKind.BooleanKeyword:
@@ -266,6 +275,14 @@ export abstract class GenericType extends Type {
         this.typeArguments = typeArguments;      
     }  
 }       
+
+export class VoidType extends Type {
+    static Instance = new VoidType()
+
+    private constructor() {
+        super(false);
+    }
+}
 
 export class AnyType extends Type {
 }

@@ -74,7 +74,7 @@ ast.TypeDeclaration.prototype.emit = function (this: ast.TypeDeclaration, isGlob
     }
     lines.push(this.footer());
     lines.push(`}`);
-    return lines.join('\n');
+    return lines.filter((l) => l.length > 0).join('\n');
 }
 
 ast.ClassDeclaration.prototype.keyword = function (this: ast.ClassDeclaration): string {
@@ -94,12 +94,15 @@ ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration
 }
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
-    let output = `    public${this.static?' static':''} ${this.returnType.signature()} ${this.name}() ${this.body()}\n`;
-    return output;
+    return `    ${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public'}${this.static ? ' static' : this.abstract ? ' abstract' : ''} ${this.returnType.signature()} ${this.name}()${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
 ast.Type.prototype.signature = function(this: ast.Type, optional: boolean = this.optional): string {
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
+}
+
+ast.VoidType.prototype.typeName = function(this: ast.VoidType): string {
+    return 'void';  
 }
 
 ast.AnyType.prototype.typeName = function(this: ast.AnyType): string {
