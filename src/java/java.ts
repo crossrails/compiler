@@ -102,6 +102,10 @@ ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration
     return `    ${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public'}${this.static ? ' static' : this.abstract ? ' abstract' : ''} ${this.returnType.signature()} ${this.name}(${this.parameters.map(p => p.emit()).join(', ')})${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
+ast.ConstructorDeclaration.prototype.emit = function (this: ast.ConstructorDeclaration): string {
+    return `    public ${this.parent.name}(${this.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
+}
+
 ast.Type.prototype.signature = function(this: ast.Type, optional: boolean = this.optional): string {
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
 }

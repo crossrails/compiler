@@ -17,7 +17,9 @@ export abstract class Declaration {
     constructor(node: ts.Declaration, parent: FunctionDeclaration|TypeDeclaration|SourceFile) {
         //make parent non-enumerable to avoid circular reference 
         Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
-        this.name = (node.name as ts.Identifier).text;
+        if(node.name) {
+            this.name = (node.name as ts.Identifier).text;
+        }
     }
 
     get module(): Module {
@@ -38,7 +40,9 @@ export abstract class MemberDeclaration extends Declaration {
         super(node, parent);
         this.protected = (node.flags & ts.NodeFlags.Protected) != 0;
         this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0;
-        context.identifiers.add(this.name);
+        if(node.name) {
+            context.identifiers.add(this.name);
+        }
     }
 }
 
@@ -66,6 +70,20 @@ export class FunctionDeclaration extends MemberDeclaration {
 
     get hasBody(): boolean {
         return !(this.abstract || this.parent instanceof InterfaceDeclaration);
+    }
+}
+
+export class ConstructorDeclaration extends FunctionDeclaration {
+    constructor(node: ts.ConstructorDeclaration, parent: TypeDeclaration, context: Context) {
+        super(node, parent, context);
+    }
+
+    get name(): string {
+        throw new Error('Accessing name of constructor')
+    }
+
+    get parent(): TypeDeclaration {
+        return super.parent as TypeDeclaration;
     }
 }
 
@@ -117,6 +135,9 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                     break;                
                 case ts.SyntaxKind.MethodDeclaration:
                     members.push(new FunctionDeclaration(member as ts.MethodDeclaration, this, context));
+                    break;                
+                case ts.SyntaxKind.Constructor:
+                    members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, this, context));
                     break;                
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);

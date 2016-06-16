@@ -1,5 +1,5 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration} from "../ast"
 
 export default emitter;
 
@@ -33,6 +33,7 @@ InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, is
 ClassDeclaration.prototype.imports = function (this: ClassDeclaration, isGlobalType?: boolean) {
     return `
 import java.util.*;
+import java.util.function.*;
 import jdk.nashorn.api.scripting.*;${
     isGlobalType ? '' : `\n
 import static io.xrails.Src.global;`
@@ -47,8 +48,15 @@ ${!isGlobalType ? '' : `
     private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.members.some(m => !m.static) ? '' : `
     private final ScriptObjectMirror mirror;
-    private final JSObject proxy;`
-}`.substr(1);    
+    private final JSObject proxy;
+
+    ${this.name}(ScriptObjectMirror mirror) { 
+        this.mirror = mirror; 
+        this.proxy = mirror; 
+        JS.heap.put(this, proxy);
+    }
+
+`}`.substr(1);    
 }
 
 ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalType?: boolean) {
@@ -60,7 +68,7 @@ ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalTy
 
     @Override
     public int hashCode() {
-        return mirror.hashCode();
+            return mirror.hashCode();
     }
 
     @Override
@@ -98,6 +106,23 @@ FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): strin
     return `{
         ${this.returnType instanceof VoidType ? this.accessor() : `return ${this.returnType.returnValue()}`};
     }`;        
+}
+
+ConstructorDeclaration.prototype.body = function (this: ConstructorDeclaration): string {
+    return `{
+        mirror = (ScriptObjectMirror)classMirror.newObject(${this.parameters.map(p => p.type.argumentValue()).join(', ')}); 
+        proxy = getClass() == ${this.parent.name}.class ? mirror : new JS.AbstractMirror(mirror) { 
+            @Override 
+            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
+${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
+                builder.accept("${m.name}", args -> ${m.returnType instanceof VoidType ? 
+                    `{ ${m.name}(${m.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
+                    `${m.name}(${m.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
+                });`).join('').substr(1)} 
+            } 
+        }; 
+        JS.heap.put(this, proxy); 
+    }\n`;        
 }
 
 AnyType.prototype.returnValue = function(this: AnyType) {
