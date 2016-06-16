@@ -11,11 +11,11 @@ class JavaScriptCoreEmitter extends SwiftEmitter {
         return `${declaration.definition()} ${declaration.body()}`;
     }
 
-    protected footer(identifiers?: Set<string>): string {
+    protected footer(identifiers?: ReadonlyArray<string>): string {
         let lines: string[] = [];
         if(identifiers) {
             lines.push('extension JSProperty {')
-            for(let identifier of identifiers!) {
+            for(let identifier of identifiers! as Array<string>) {
                 lines.push(`\tstatic let ${identifier}: JSProperty = "${identifier}"`);
             }
             lines.push('}\n')
@@ -32,20 +32,20 @@ declare module "../ast" {
     }
     interface Type {
         arrayElementReturnValue(optional?: boolean): string;
-        returnValue(declaration: VariableDeclaration): string;
-        argumentValue(declaration: VariableDeclaration): string;
+        returnValue(): string;
+        argumentValue(): string;
         arrayElementArgumentValue(): string;
     }
 }
 
 VariableDeclaration.prototype.body = function (this: VariableDeclaration) {
-    return this.constant ? `= ${this.type.returnValue(this)}` : 
+    return this.constant ? `= ${this.type.returnValue()}` : 
 `{
     get {
-        return ${this.type.returnValue(this)}
+        return ${this.type.returnValue()}
     }
     set {
-        this[.${this.name}] = ${this.type.argumentValue(this)}
+        this[.${this.name}] = ${this.type.argumentValue()}
     }
 }`        
 }
@@ -54,18 +54,18 @@ ClassDeclaration.prototype.body = function (this: ClassDeclaration): string {
     return "";
 }
 
-AnyType.prototype.returnValue = function(this: AnyType, declaration: VariableDeclaration) {
-    return !this.optional ? `this[.${declaration.name}].infer()` : `Any?(this[.${declaration.name}], wrapped: { $0.infer() })`;    
+AnyType.prototype.returnValue = function(this: AnyType) {
+    return !this.optional ? `this[.${this.parent.name}].infer()` : `Any?(this[.${this.parent.name}], wrapped: { $0.infer() })`;    
 }
 
-ArrayType.prototype.returnValue = function(this: ArrayType, declaration: VariableDeclaration) {
-    return this.optional ? `${this.signature()}(this[.${declaration.name}], wrapped: ${this.arrayElementReturnValue(false)})` : 
-        `${this.signature()}(this[.${declaration.name}], element: ${this.typeArguments[0].arrayElementReturnValue()})`; 
+ArrayType.prototype.returnValue = function(this: ArrayType) {
+    return this.optional ? `${this.signature()}(this[.${this.parent.name}], wrapped: ${this.arrayElementReturnValue(false)})` : 
+        `${this.signature()}(this[.${this.parent.name}], element: ${this.typeArguments[0].arrayElementReturnValue()})`; 
 }
 
-Type.prototype.returnValue = function(this: Type, declaration: VariableDeclaration) {
-    return !this.optional ? `${this.signature()}(this[.${declaration.name}])` : 
-        `${this.signature()}(this[.${declaration.name}], wrapped: ${this.signature(false)}.init)`;    
+Type.prototype.returnValue = function(this: Type) {
+    return !this.optional ? `${this.signature()}(this[.${this.parent.name}])` : 
+        `${this.signature()}(this[.${this.parent.name}], wrapped: ${this.signature(false)}.init)`;    
 }
 
 AnyType.prototype.arrayElementReturnValue = function(this: AnyType, optional: boolean = this.optional) {
@@ -80,12 +80,12 @@ Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean 
     return !optional ? `${this.signature(optional)}.init` : `{ ${this.signature(optional)}($0, wrapped: ${this.signature(false)}.init) }`;    
 }
 
-Type.prototype.argumentValue = function(this: Type, declaration: VariableDeclaration) {
+Type.prototype.argumentValue = function(this: Type) {
     return `this.valueOf(newValue${this.optional ? `, wrapped: ${this.arrayElementArgumentValue()})` : `)`}`;    
 }
 
-ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: VariableDeclaration) {
-    return this.optional ? Type.prototype.argumentValue.call(this, declaration) : 
+ArrayType.prototype.argumentValue = function(this: ArrayType) {
+    return this.optional ? Type.prototype.argumentValue.call(this, this.parent) : 
         `this.valueOf(newValue, element: ${this.typeArguments[0].arrayElementArgumentValue()})`;    
 }
 

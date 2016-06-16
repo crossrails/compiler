@@ -31,7 +31,7 @@ export abstract class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
         return `NSBundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`; 
     }
     
-    private file(declarations: ReadonlyArray<Declaration>, identifiers?: Set<string>, resourcePath?: string): string {
+    private file(declarations: ReadonlyArray<Declaration>, identifiers?: ReadonlyArray<string>, resourcePath?: string): string {
         let lines: string[] = [];
         lines.push('import Foundation\n');
         lines.push(this.header(resourcePath));
@@ -44,7 +44,7 @@ export abstract class SwiftEmitter extends Emitter<SwiftEmitterOptions> {
     
     protected abstract header(resourcePath?: string): string;
     
-    protected abstract footer(identifiers?: Set<string>): string;
+    protected abstract footer(identifiers?: ReadonlyArray<string>): string;
     
     protected abstract declaration(declaration: Declaration): string;
     

@@ -26,15 +26,15 @@ describe("Type", () => {
     });
 
     it("erases to any on intersection types", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true,), false, {} as any, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });  
     
     it("erases to any on unsupported union types", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });    
 
     it("correctly identifies optional types", function(this: This) {
@@ -43,7 +43,7 @@ describe("Type", () => {
             export let b: null | any;
             export let c: any | undefined;
             export let d: undefined | any;
-        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(4);
         expect(this.anyTypeConstructor).not.toHaveBeenCalledWith(false);
     });
@@ -53,18 +53,18 @@ describe("Type", () => {
             export let numbers: number[];
             export let strings: Array<string>;
             export let booleans: ReadonlyArray<boolean>;
-        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         //let numbers: number[]
         expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.numberTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.numberTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'numbers'}));
         expect((sourceFile.declarations[0] as AST.VariableDeclaration).type instanceof ast.ArrayType);
         //let strings: Array<string>
         expect(this.stringTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.stringTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.stringTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'strings'}));
         expect((sourceFile.declarations[1] as AST.VariableDeclaration).type instanceof ast.ArrayType);
         //let booleans: ReadonlyArray<boolean>
         expect(this.booleanTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'booleans'}));
         expect((sourceFile.declarations[2] as AST.VariableDeclaration).type instanceof ast.ArrayType);
     });    
     
@@ -74,19 +74,19 @@ describe("Type", () => {
             export let b: boolean;
             export let n: number;
             export let a: any;
-        `, ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        `, ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         //let s: string
         expect(this.stringTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.stringTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.stringTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
         //let b: boolean
         expect(this.booleanTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.booleanTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'b'}));
         //let n: number
         expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.numberTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.numberTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'n'}));
         // let a: any
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
-        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false);
+        expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'a'}));
     });
 });
 
@@ -105,12 +105,12 @@ describe("VariableDeclaration", () => {
     });
     
     it("has an any type when missing type information", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.typeOfMethod).toHaveBeenCalledTimes(1);
     });
 });
@@ -127,12 +127,12 @@ describe("SourceFile", () => {
     });
     
     it("does not create non exported declarations", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "let declaration", ts.ScriptTarget.ES6, true), false, {} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {} as any);
         expect(this.variableDeclarationConstructor).not.toHaveBeenCalled();
     });
 
     it("creates variable declarations for each declaration in a variable statement", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let a1, a2; export let b1;", ts.ScriptTarget.ES6, true), false, {identifiers: new Set()} as any);
+        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let a1, a2; export let b1;", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.variableDeclarationConstructor).toHaveBeenCalledTimes(3);
     });
 });

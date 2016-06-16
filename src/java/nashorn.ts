@@ -1,17 +1,19 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration} from "../ast"
 
 export default emitter;
 
 declare module "../ast" {
+    interface Declaration {
+        accessor(): string
+    }    
     interface MemberDeclaration {
         mirror(): string
-        accessor(): string
     }
     interface Type {
         arrayElementReturnValue(optional?: boolean): string;
-        returnValue(declaration: MemberDeclaration): string;
-        argumentValue(declaration: MemberDeclaration): string;
+        returnValue(): string;
+        argumentValue(): string;
         arrayElementArgumentValue(optional?: boolean): string;
     }
 }
@@ -76,7 +78,7 @@ VariableDeclaration.prototype.accessor = function (this: VariableDeclaration) {
 }
 
 VariableDeclaration.prototype.getter = function (this: VariableDeclaration) {
-    let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.returnValue(this)})` : this.type.returnValue(this);
+    let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.returnValue()})` : this.type.returnValue();
     return `{
         return ${returnValue};
     }`;        
@@ -84,30 +86,34 @@ VariableDeclaration.prototype.getter = function (this: VariableDeclaration) {
 
 VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
     return `{
-        ${this.mirror()}.setMember("${this.name}", ${this.type.argumentValue(this)});
+        ${this.mirror()}.setMember("${this.name}", ${this.type.argumentValue()});
     }`;        
 }
 
 FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
-    return `${this.mirror()}.callMember(${[`"${this.name}"`].concat(this.parameters.map(p => p.name)).join(', ')})`;
+    return `${this.mirror()}.callMember(${[`"${this.name}"`].concat(this.parameters.map(p => p.type.argumentValue())).join(', ')})`;
 }
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
     return `{
-        ${this.returnType instanceof VoidType ? this.accessor() : `return ${this.returnType.returnValue(this)}`};
+        ${this.returnType instanceof VoidType ? this.accessor() : `return ${this.returnType.returnValue()}`};
     }`;        
 }
 
-AnyType.prototype.returnValue = function(this: AnyType, declaration: MemberDeclaration) {
-    return `JS.wrap(${declaration.accessor()}, JS.Object::new)`;    
+AnyType.prototype.returnValue = function(this: AnyType) {
+    return `JS.wrap(${this.parent.accessor()}, JS.Object::new)`;    
 }
 
-ArrayType.prototype.returnValue = function(this: ArrayType, declaration: MemberDeclaration) {
-    return `JS.wrap(${declaration.accessor()}, ${this.typeArguments[0].arrayElementReturnValue()})`;    
+DeclaredType.prototype.returnValue = function(this: DeclaredType) {
+    return `JS.wrap(${this.parent.accessor()}, ${this.name}${this.declaration instanceof InterfaceDeclaration ? '.class' : '::new'})`;    
 }
 
-Type.prototype.returnValue = function(this: Type, declaration: MemberDeclaration) {
-    return `(${this.typeName()})${declaration.accessor()}`;    
+ArrayType.prototype.returnValue = function(this: ArrayType) {
+    return `JS.wrap(${this.parent.accessor()}, ${this.typeArguments[0].arrayElementReturnValue()})`;    
+}
+
+Type.prototype.returnValue = function(this: Type) {
+    return `(${this.typeName()})${this.parent.accessor()}`;    
 }
 
 ArrayType.prototype.arrayElementReturnValue = function(this: ArrayType, optional: boolean = this.optional) {
@@ -118,18 +124,22 @@ Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean 
     return `JS.Array::new`;    
 }
 
-Type.prototype.argumentValue = function(this: Type, declaration: MemberDeclaration) {
-    return `value`;    
+Type.prototype.argumentValue = function(this: Type) {
+    return this.parent.name;    
 }
 
-ArrayType.prototype.argumentValue = function(this: ArrayType, declaration: MemberDeclaration) {
-    return `JS.heap.computeIfAbsent(value, o -> new JS.ArrayMirror<>(${this.typeArguments[0].arrayElementArgumentValue(this.optional)}))`;    
+DeclaredType.prototype.argumentValue = function(this: DeclaredType) {
+    return this.declaration instanceof InterfaceDeclaration ? this.parent.name : `JS.heap.get(${this.parent.name})`;    
+}
+
+ArrayType.prototype.argumentValue = function(this: ArrayType) {
+    return `JS.heap.computeIfAbsent(${this.parent.name}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].arrayElementArgumentValue(this.optional)}))`;    
 }
 
 Type.prototype.arrayElementArgumentValue = function(this: Type, optional: boolean = this.optional) {
-    return `value`;    
+    return this.parent.name;    
 }
 
 ArrayType.prototype.arrayElementArgumentValue = function(this: ArrayType, optional: boolean = this.optional) {
-    return `value, JS.ArrayMirror::new`;    
+    return `${this.parent.name}, JS.ArrayMirror::new`;    
 }

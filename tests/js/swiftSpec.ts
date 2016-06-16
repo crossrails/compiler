@@ -7,7 +7,7 @@ class MockEmitter extends SwiftEmitter {
         return '';        
     }
     
-    protected footer(identifiers?: Set<string>): string {
+    protected footer(identifiers?: ReadonlyArray<string>): string {
         return '';        
     }
     
