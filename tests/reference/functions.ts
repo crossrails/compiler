@@ -1,6 +1,6 @@
 var voidNoArgFunctionCalled: boolean = false
 
-function voidNoArgFunction() {
+function voidNoArgFunction(): void {
     voidNoArgFunctionCalled = true
 }
 
@@ -29,7 +29,7 @@ var stringNoArgLambda: () => string = () => "stringNoArgLambdaReturnValue";
 /**
  * @throws Error
  */
-function throwSimpleError() {
+function throwSimpleError(): void {
     throw new Error("Simple error message")
 }
 
@@ -43,6 +43,6 @@ class SpecialError {
 /**
  * @throws SpecialError
  */
-function throwSpecialError() {
+function throwSpecialError(): void {
     throw new SpecialError("Special error message")
 }

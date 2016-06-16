@@ -8,15 +8,15 @@ class SimpleObject {
     private readonly value: number
     private methodToOverrideCalled: boolean
 
-    static staticVoidNoArgMethod() {
-        this.staticVoidNoArgMethodCalled = true
-    }
-    
     constructor(v?: number) {
         this.value = v ? v : 7
         this.methodToOverrideCalled = false
     }
 
+    static staticVoidNoArgMethod(): void {
+        this.staticVoidNoArgMethodCalled = true
+    }
+    
     numberSingleObjectArgMethod(a: SimpleObject): number {
         return a.value * this.value;
     }
@@ -62,7 +62,7 @@ interface SimpleInterface {
  * @type {!}
  */
 var simpleInterfaceInstance: SimpleInterface = {
-    voidNoArgMethod() {
+    voidNoArgMethod(): void {
         simpleInterfaceInstanceCalled = true
     }
 };
@@ -70,7 +70,7 @@ var simpleInterfaceInstance: SimpleInterface = {
 /**
  * @param a
  */
-function acceptSimpleInterface(simpleInterface: SimpleInterface) {
+function acceptSimpleInterface(simpleInterface: SimpleInterface): void {
     simpleInterfaceInstance = simpleInterface;
     simpleInterface.voidNoArgMethod();
 }
