@@ -3,10 +3,10 @@
  */
 class SimpleObject {
     
-    private static staticVoidNoArgMethodCalled: boolean
+    static staticVoidNoArgMethodCalled: boolean
     
     private readonly value: number
-    private methodToOverrideCalled: boolean
+    methodToOverrideCalled: boolean
 
     constructor(v?: number) {
         this.value = v ? v : 7

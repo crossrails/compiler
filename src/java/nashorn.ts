@@ -68,7 +68,7 @@ ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalTy
 
     @Override
     public int hashCode() {
-            return mirror.hashCode();
+        return mirror.hashCode();
     }
 
     @Override
@@ -99,7 +99,8 @@ VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
 }
 
 FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
-    return `${this.mirror()}.callMember(${[`"${this.name}"`].concat(this.parameters.map(p => p.type.argumentValue())).join(', ')})`;
+    let args = this.parameters.map(p => p.type.argumentValue());
+    return this.static ? `${this.mirror()}.callMember(${[`"${this.name}"`, ...args].join(', ')})` : `((JSObject)mirror.getMember("${this.name}")).call(${[`proxy`, ...args].join(', ')})`;
 }
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
