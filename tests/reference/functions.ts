@@ -27,7 +27,7 @@ var stringNoArgLambda: () => string = () => "stringNoArgLambdaReturnValue";
 
 
 /**
- * @throws Error
+ * @throws {Error}
  */
 function throwSimpleError(): void {
     throw new Error("Simple error message")
@@ -41,7 +41,7 @@ class SpecialError {
 }
 
 /**
- * @throws SpecialError
+ * @throws {SpecialError}
  */
 function throwSpecialError(): void {
     throw new SpecialError("Special error message")

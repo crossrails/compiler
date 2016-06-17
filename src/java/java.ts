@@ -99,7 +99,9 @@ ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclarati
 }
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
-    return `    ${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public'}${this.static ? ' static' : this.abstract ? ' abstract' : ''} ${this.returnType.signature()} ${this.name}(${this.parameters.map(p => p.emit()).join(', ')})${this.hasBody ? ` ${this.body()}` : ';'}\n`;
+    let modifiers = `${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}`;
+    let throwsClause = this.thrownTypes.length ? ` throws ${this.thrownTypes.map(t => t instanceof ast.AnyType ? 'Exception' : t.typeName()).join(', ')}` : '';  
+    return `    ${modifiers}${this.returnType.signature()} ${this.name}(${this.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
 ast.ConstructorDeclaration.prototype.emit = function (this: ast.ConstructorDeclaration): string {
@@ -132,4 +134,8 @@ ast.NumberType.prototype.typeName = function(this: ast.NumberType): string {
 
 ast.ArrayType.prototype.typeName = function(this: ast.ArrayType): string {
     return `List<${this.typeArguments[0].signature()}>`;    
+}
+
+ast.ErrorType.prototype.typeName = function(this: ast.ErrorType): string {
+    return 'Exception';  
 }

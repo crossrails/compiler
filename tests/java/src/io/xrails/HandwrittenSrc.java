@@ -24,10 +24,6 @@ public class HandwrittenSrc {
         global.setMember("stringNoArgLambda", cb);
     }
 
-    public static void throwSimpleError() throws Exception {
-        global.callMember("throwSimpleError");
-    }
-
     public static void throwSpecialError() throws SpecialException {
         try {
             global.callMember("throwSpecialError");

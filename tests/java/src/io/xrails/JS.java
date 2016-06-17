@@ -53,31 +53,6 @@ class JS {
         return (T)object;
     }
 
-    static class Error extends Exception {
-
-        private final JSObject mirror;
-
-        Error(JSObject mirror) {
-            super(mirror.getMember("message").toString());
-            this.mirror = mirror;
-        }
-
-        @Override
-        public String toString() {
-            return mirror.toString();
-        }
-
-        @Override
-        public int hashCode() {
-            return mirror.hashCode();
-        }
-
-        @Override
-        public boolean equals(java.lang.Object obj) {
-            return mirror.equals(JS.heap.getOrDefault(obj, obj));
-        }
-    }
-
     static class ArrayMirror<E> extends AbstractJSObject implements List<E> {
 
         private final List<E> list;

@@ -26,31 +26,31 @@ export class Log {
         return this._errorCount;
     }
 
-    public debug(message: any, node?: ts.Node) {
-        this.log(Log.Level.DEBUG, message, node);
+    public debug(message: any, node?: ts.Node, line: number = 0) {
+        this.log(Log.Level.DEBUG, message, node, line);
     }
     
-    public info(message: any, node?: ts.Node) {
-        this.log(Log.Level.INFO, message, node);
+    public info(message: any, node?: ts.Node, line: number = 0) {
+        this.log(Log.Level.INFO, message, node, line);
     }
     
-    public warn(message: any, node?: ts.Node) {
-        this.log(Log.Level.WARNING, message, node);
+    public warn(message: any, node?: ts.Node, line: number = 0) {
+        this.log(Log.Level.WARNING, message, node, line);
         this._warningCount++;
     }
     
-    public error(message: any, node?: ts.Node) {
-        this.log(Log.Level.ERROR, message, node);
+    public error(message: any, node?: ts.Node, line: number = 0) {
+        this.log(Log.Level.ERROR, message, node, line);
         this._errorCount++;
     }
     
-    public log(level: Log.Level, message: any   , node?: ts.Node) {
+    public log(level: Log.Level, message: any, node?: ts.Node, line: number = 0) {
         if(level >= this.level) {
             if(node) {
                 let file = node.getSourceFile();
                 let path = Path.relative('.', file.fileName);
                 let pos = file.getLineAndCharacterOfPosition(node.pos);
-                message = `${path}(${pos.line+1},${pos.character+1}): ${message}`;
+                message = `${path}(${pos.line+line+1},${pos.character+1}): ${message}`;
             }
             message = `${Log.Level[level]}: ${message}`;
             console.log(message);    

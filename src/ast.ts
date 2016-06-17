@@ -1,13 +1,53 @@
 import {readFileSync} from 'fs';
 import * as path from 'path';
-//import * as doctrine from 'doctrine';
+import * as assert from 'assert';
+import * as doctrine from 'doctrine';
 import * as ts from "typescript";
 import {log} from "./log"
 
 interface Context {
-    readonly queue: Array<() => void>
-    readonly declaredTypes: Map<string, TypeDeclaration>
+    readonly queue: Array<() => void>;
+    readonly declaredTypes: Map<string, TypeDeclaration>;
     readonly identifiers: Set<string>;
+}
+
+namespace Comment {
+    export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
+    export namespace Tag {
+        export type Type = doctrine.Type & {node: ts.Node}
+    }
+}
+
+class Comment {
+
+    private readonly tags: Map<string, Comment.Tag[]> = new Map();
+
+    readonly description: string = '';
+
+    constructor(node: ts.Node) {
+        let text = node.getFullText();
+        let comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
+        if(comment) {
+            let parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
+            this.description = parsed.description;
+            for(let tag of parsed.tags) {
+                tag['node'] = node;
+                if(tag.type) {
+                    tag.type['node'] = node;
+                }
+                this.tags.set(tag.title, [tag as Comment.Tag, ...(this.tags.get(tag.title) || [])]);
+            }
+        }
+    }
+
+    isTagged(title: string, value?: string): boolean {
+        let tags = this.tags.get(title);
+        return tags != undefined && (!value || tags.some(tag => tag[title] == value));
+    }
+
+    tagsNamed(title: string): Comment.Tag[] {
+        return this.tags.get(title) || [];
+    }
 }
 
 export abstract class Declaration {       
@@ -36,10 +76,10 @@ export abstract class MemberDeclaration extends Declaration {
     readonly protected: boolean;
     readonly static: boolean;
 
-    constructor(node: ts.Declaration, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.Declaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, parent);
-        this.protected = (node.flags & ts.NodeFlags.Protected) != 0;
-        this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0;
+        this.protected = (node.flags & ts.NodeFlags.Protected) != 0 || comment.isTagged('protected') || comment.isTagged('access', 'protected');
+        this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
         if(node.name) {
             context.identifiers.add(this.name);
         }
@@ -51,20 +91,26 @@ export class FunctionDeclaration extends MemberDeclaration {
     readonly typeParameters: ReadonlyArray<Type>
     readonly parameters: ReadonlyArray<ParameterDeclaration>
     readonly returnType: Type;
+    readonly thrownTypes: Type[];
 
-    constructor(node: ts.SignatureDeclaration, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
         if(node.type) {
             this.returnType = Type.from(node.type, false, this, context);
         } else {
-            log.warn(`Return type information missing, resorting to Any`, node);
-            this.returnType = new AnyType(false, this);
+            log.warn(`Return type information missing, assuming void`, node);
+            this.returnType = new VoidType(this);
         } 
         let parameters: ParameterDeclaration[] = [];
         for(let parameter of node.parameters) {
             parameters.push(new ParameterDeclaration(parameter, this, context));
         }
         this.parameters = parameters;
+        let thrownTypes: Type[] = [];
+        for(let tag of comment.tagsNamed('throws')) {
+            thrownTypes.push(tag.type ? Type.fromComment(tag.type, this, context) : new AnyType(false, this))
+        }
+        this.thrownTypes = thrownTypes;
         this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
     }
 
@@ -74,8 +120,8 @@ export class FunctionDeclaration extends MemberDeclaration {
 }
 
 export class ConstructorDeclaration extends FunctionDeclaration {
-    constructor(node: ts.ConstructorDeclaration, parent: TypeDeclaration, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.ConstructorDeclaration, comment: Comment, parent: TypeDeclaration, context: Context) {
+        super(node, comment, parent, context);
     }
 
     get name(): string {
@@ -91,8 +137,8 @@ export class VariableDeclaration extends MemberDeclaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration|ts.PropertyDeclaration, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.VariableDeclaration|ts.PropertyDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
         } else {
@@ -120,24 +166,25 @@ export class ParameterDeclaration extends Declaration {
 export abstract class TypeDeclaration extends MemberDeclaration {
     readonly members: ReadonlyArray<MemberDeclaration>;
     
-    constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
         let members: MemberDeclaration[] = [];
         for (let member of node.members) {
-            if(member.flags & ts.NodeFlags.Private) {
+            let comment = new Comment(member);
+            if(member.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private')) {
                 log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
             } else switch(member.kind) {
                 case ts.SyntaxKind.PropertyDeclaration:
-                    members.push(new VariableDeclaration(member as ts.PropertyDeclaration, this, context));
+                    members.push(new VariableDeclaration(member as ts.PropertyDeclaration, comment, this, context));
                     break;         
                 case ts.SyntaxKind.MethodSignature:
-                    members.push(new FunctionDeclaration(member as ts.MethodSignature, this, context));
+                    members.push(new FunctionDeclaration(member as ts.MethodSignature, comment, this, context));
                     break;                
                 case ts.SyntaxKind.MethodDeclaration:
-                    members.push(new FunctionDeclaration(member as ts.MethodDeclaration, this, context));
+                    members.push(new FunctionDeclaration(member as ts.MethodDeclaration, comment, this, context));
                     break;                
                 case ts.SyntaxKind.Constructor:
-                    members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, this, context));
+                    members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, comment, this, context));
                     break;                
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
@@ -151,8 +198,8 @@ export abstract class TypeDeclaration extends MemberDeclaration {
 export class InterfaceDeclaration extends TypeDeclaration {
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(node: ts.InterfaceDeclaration, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.InterfaceDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
     }
 }
 
@@ -160,8 +207,8 @@ export class ClassDeclaration extends TypeDeclaration {
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(node: ts.ClassDeclaration, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, parent, context);
+    constructor(node: ts.ClassDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
     }
 }
 
@@ -179,22 +226,23 @@ export class SourceFile {
         Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         let declarations: MemberDeclaration[] = [];
         for (let statement of node.statements) {
-            if(!(statement.flags & ts.NodeFlags.Export) && !implicitExport) {
+            let comment = new Comment(statement);
+            if(!implicitExport && !(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
                 log.info(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
             } else switch(statement.kind) {
                 case ts.SyntaxKind.VariableStatement:
                     for (let declaration of (statement as ts.VariableStatement).declarationList.declarations) {
-                        declarations.push(new VariableDeclaration(declaration, this, context));
+                        declarations.push(new VariableDeclaration(declaration, comment, this, context));
                     }
                     break;   
                 case ts.SyntaxKind.FunctionDeclaration:
-                    declarations.push(new FunctionDeclaration(statement as ts.FunctionDeclaration, this, context));
+                    declarations.push(new FunctionDeclaration(statement as ts.FunctionDeclaration, comment, this, context));
                     break;                
                 case ts.SyntaxKind.ClassDeclaration:
-                    declarations.push(new ClassDeclaration(statement as ts.ClassDeclaration, this, context));
+                    declarations.push(new ClassDeclaration(statement as ts.ClassDeclaration, comment, this, context));
                     break;
                 case ts.SyntaxKind.InterfaceDeclaration:
-                    declarations.push(new InterfaceDeclaration(statement as ts.InterfaceDeclaration, this, context));
+                    declarations.push(new InterfaceDeclaration(statement as ts.InterfaceDeclaration, comment, this, context));
                     break;
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[statement.kind]}`, statement);
@@ -270,12 +318,31 @@ export abstract class Type {
         this.optional = optional;
         this.parent = parent;
     }
+
+    static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
+        switch(type.type) {
+            case 'NameExpression':
+                switch(type.name) {
+                    case 'boolean':
+                        return new BooleanType(false, parent);
+                    case 'number':
+                        return new NumberType(false, parent);
+                    case 'string':
+                        return new StringType(false, parent);
+                    case 'Error':
+                        return new ErrorType(false, parent);
+                    default:
+                        return new DeclaredType(type, false, parent, context);
+                }
+        }
+        return new AnyType(false, parent);
+    }
         
     static from(type: ts.TypeNode, optional: boolean, parent: Declaration, context: Context): Type {
         try {
             switch(type.kind) {
                 case ts.SyntaxKind.VoidKeyword:
-                    return new VoidType(optional, parent);
+                    return new VoidType(parent);
                 case ts.SyntaxKind.AnyKeyword:
                     return new AnyType(optional, parent);
                 case ts.SyntaxKind.BooleanKeyword:
@@ -339,16 +406,30 @@ export class DeclaredType extends GenericType {
     private typeDeclaration?: TypeDeclaration;
     readonly name: string
 
-    constructor(node: ts.TypeReferenceNode, optional: boolean, parent: Declaration, context: Context) {
-        super(node.typeArguments, optional, parent, context);
-        this.name = (node.typeName as ts.Identifier).text;  
+    constructor(type: ts.TypeReferenceNode | Comment.Tag.Type, optional: boolean, parent: Declaration, context: Context) {
+        if(DeclaredType.isTypeReferenceNode(type)) {
+            super(type.typeArguments, optional, parent, context);
+            this.name = (type.typeName as ts.Identifier).text;  
+        } else {
+            super([], optional, parent, context);
+            this.name = type.name!;
+        }    
         context.queue.push(() => {
             this.typeDeclaration = context.declaredTypes.get(this.name);
             if(!this.typeDeclaration) {
-                log.error(`Cannot find type ${this.name}`, node);
+                let msg = `Cannot find type ${this.name}`;
+                if(DeclaredType.isTypeReferenceNode(type)) {
+                    log.error(msg, type);
+                } else {
+                    log.error(msg, type.node, type.lineNumber);
+                }
             }
-        })    
+        })
     }     
+
+    static isTypeReferenceNode(type: ts.TypeReferenceNode | Comment.Tag.Type): type is ts.TypeReferenceNode {
+        return (type as ts.TypeReferenceNode).typeName !== undefined;
+    }
 
     get declaration(): TypeDeclaration|undefined {
         return this.typeDeclaration;
@@ -360,6 +441,13 @@ export class DeclaredType extends GenericType {
 }
 
 export class VoidType extends Type {
+    constructor(parent: Declaration) {
+        super(false, parent);
+    }
+}
+
+export class ErrorType extends Type {
+
 }
 
 export class AnyType extends Type {

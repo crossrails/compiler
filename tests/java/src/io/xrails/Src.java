@@ -168,6 +168,10 @@ public class Src {
         return (Number)global.callMember("numberMultipleArgFunction", a, b);
     }
 
+    public static void throwSimpleError() throws Exception {
+        global.callMember("throwSimpleError");
+    }
+    
     public static SimpleObject getSimpleObjectInstance() {
         return JS.wrap(global.get("simpleObjectInstance"), SimpleObject::new);
     }
