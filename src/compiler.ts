@@ -23,9 +23,9 @@ export class Compiler {
         }
         if(!emittedOutput) {
             log.error(`No output languages specified use --${[...this.languages.keys()].join(' or --')}`);
-            return 1;
         }       
-        return 0;
+        console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.errorCount == 1 ? '' : 's'}`)
+        return log.errorCount;
     }
     
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {

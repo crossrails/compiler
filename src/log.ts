@@ -2,6 +2,9 @@ import * as ts from "typescript";
 import * as Path from 'path';
 
 export class Log {
+    private _warningCount = 0
+    private _errorCount = 0;
+
     public level: Log.Level = Log.Level.WARNING;
     
     public setLevel(level: string) {
@@ -15,6 +18,14 @@ export class Log {
         this.warn(`Unknown log level '${level}', level remaining unchanged at ${Log.Level[this.level]}`);        
     }
 
+    public get warningCount() {
+        return this._warningCount;
+    }
+
+    public get errorCount() {
+        return this._errorCount;
+    }
+
     public debug(message: any, node?: ts.Node) {
         this.log(Log.Level.DEBUG, message, node);
     }
@@ -25,10 +36,12 @@ export class Log {
     
     public warn(message: any, node?: ts.Node) {
         this.log(Log.Level.WARNING, message, node);
+        this._warningCount++;
     }
     
     public error(message: any, node?: ts.Node) {
         this.log(Log.Level.ERROR, message, node);
+        this._errorCount++;
     }
     
     public log(level: Log.Level, message: any   , node?: ts.Node) {

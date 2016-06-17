@@ -88,9 +88,9 @@ ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclar
 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
     return `
-    public${this.static?' static':''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}
+    public${this.static ?' static' : ''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}
 ${this.constant ? '' : `
-    public${this.static?' static':''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} ${this.name}) ${this.setter()}
+    public${this.static ?' static' : ''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} ${this.name}) ${this.setter()}
 `}`.substr(1);
 }
 
