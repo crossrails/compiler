@@ -1,9 +1,10 @@
 package io.xrails;
 
 import java.util.*;
+import java.util.function.*;
 import jdk.nashorn.api.scripting.*;
 
-class Src {
+public class Src {
 
     static final ScriptObjectMirror global = JS.eval("../reference/src.js");
 
@@ -155,8 +156,8 @@ class Src {
         global.setMember("voidNoArgFunctionCalled", voidNoArgFunctionCalled);
     }
 
-    public static Object voidNoArgFunction() {
-        return JS.wrap(global.callMember("voidNoArgFunction"), JS.Object::new);
+    public static void voidNoArgFunction() {
+        global.callMember("voidNoArgFunction");
     }
 
     public static String stringNoArgFunction() {
@@ -165,22 +166,6 @@ class Src {
 
     public static Number numberMultipleArgFunction(Number a, Number b) {
         return (Number)global.callMember("numberMultipleArgFunction", a, b);
-    }
-
-    public static Object getStringNoArgLambda() {
-        return JS.wrap(global.get("stringNoArgLambda"), JS.Object::new);
-    }
-
-    public static void setStringNoArgLambda(Object stringNoArgLambda) {
-        global.setMember("stringNoArgLambda", stringNoArgLambda);
-    }
-
-    public static Object throwSimpleError() {
-        return JS.wrap(global.callMember("throwSimpleError"), JS.Object::new);
-    }
-
-    public static Object throwSpecialError() {
-        return JS.wrap(global.callMember("throwSpecialError"), JS.Object::new);
     }
 
     public static SimpleObject getSimpleObjectInstance() {
@@ -215,8 +200,8 @@ class Src {
         global.setMember("simpleInterfaceInstance", simpleInterfaceInstance);
     }
 
-    public static Object acceptSimpleInterface(SimpleInterface simpleInterface) {
-        return JS.wrap(global.callMember("acceptSimpleInterface", simpleInterface), JS.Object::new);
+    public static void acceptSimpleInterface(SimpleInterface simpleInterface) {
+        global.callMember("acceptSimpleInterface", simpleInterface);
     }
 
 }

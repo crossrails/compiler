@@ -14,33 +14,7 @@ import static io.xrails.Src.global;
 
 public class HandwrittenSrc {
 
-//objects
-
-    public static SimpleObject getSimpleObjectInstance() {
-        return JS.wrap(global.get("simpleObjectInstance"), SimpleObject::new);
-    }
-
-    public static SimpleInterface getSimpleInterfaceInstance() {
-        return JS.wrap(global.get("simpleInterfaceInstance"), SimpleInterface.class);
-    }
-
-    public static void acceptSimpleInterface(SimpleInterface simpleInterface) {
-        global.callMember("acceptSimpleInterface", simpleInterface);
-    }
-
 //functions
-
-    public static void voidNoArgFunction() {
-        global.callMember("voidNoArgFunction");
-    }
-
-    public static String stringNoArgFunction() {
-        return (String)global.callMember("stringNoArgFunction");
-    }
-
-    public static Number numberMultipleArgFunction(Number a, Number b) {
-        return (Number)global.callMember("numberMultipleArgFunction", a, b);
-    }
 
     public static Supplier<String> getStringNoArgLambda() {
         return JS.wrap(global.get("stringNoArgLambda"), Supplier.class);

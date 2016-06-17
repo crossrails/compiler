@@ -68,7 +68,7 @@ ast.TypeDeclaration.prototype.emit = function (this: ast.TypeDeclaration, isGlob
     return `
 ${this.imports(isGlobalType)}
 
-${this.keyword()} ${this.name} {
+public ${this.keyword()} ${this.name} {
 
 ${this.header(isGlobalType)}
 

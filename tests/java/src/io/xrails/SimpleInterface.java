@@ -2,7 +2,7 @@ package io.xrails;
 
 import java.util.*;
 
-interface SimpleInterface {
+public interface SimpleInterface {
 
      void voidNoArgMethod();
 
