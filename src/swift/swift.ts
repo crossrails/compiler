@@ -55,7 +55,7 @@ declare module "../ast" {
         definition(): string
     }
     interface Type {
-        signature(optional?: boolean): string;
+        typeSignature(optional?: boolean): string;
     }
 }
 
@@ -64,25 +64,25 @@ ClassDeclaration.prototype.definition = function (this: ClassDeclaration): strin
 }
 
 VariableDeclaration.prototype.definition = function (this: VariableDeclaration): string {
-    return `public ${this.constant ? 'let' : 'var'} ${this.name} :${this.type.signature()}`;
+    return `public ${this.constant ? 'let' : 'var'} ${this.name} :${this.type.typeSignature()}`;
 }
 
-AnyType.prototype.signature = function(this: AnyType, optional: boolean = this.optional): string {
+AnyType.prototype.typeSignature = function(this: AnyType, optional: boolean = this.optional): string {
     return `Any${optional ? '?' : ''}`;    
 }
 
-BooleanType.prototype.signature = function(this: BooleanType, optional: boolean = this.optional): string {
+BooleanType.prototype.typeSignature = function(this: BooleanType, optional: boolean = this.optional): string {
     return `Bool${optional ? '?' : ''}`;    
 }
 
-StringType.prototype.signature = function(this: StringType, optional: boolean = this.optional): string {
+StringType.prototype.typeSignature = function(this: StringType, optional: boolean = this.optional): string {
     return `String${optional ? '?' : ''}`;    
 }
 
-NumberType.prototype.signature = function(this: NumberType, optional: boolean = this.optional): string {
+NumberType.prototype.typeSignature = function(this: NumberType, optional: boolean = this.optional): string {
     return `Double${optional ? '?' : ''}`;    
 }
 
-ArrayType.prototype.signature = function(this: ArrayType, optional: boolean = this.optional): string {
-    return `[${this.typeArguments[0].signature()}]${optional ? '?' : ''}`;    
+ArrayType.prototype.typeSignature = function(this: ArrayType, optional: boolean = this.optional): string {
+    return `[${this.typeArguments[0].typeSignature()}]${optional ? '?' : ''}`;    
 }

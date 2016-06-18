@@ -1,5 +1,5 @@
 import {emitter} from './java'
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 
 export default emitter;
 
@@ -104,14 +104,14 @@ VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
 }
 
 FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
-    let args = this.parameters.map(p => p.type.argumentValue());
+    let args = this.signature.parameters.map(p => p.type.argumentValue());
     return this.static ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
 }
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
-    let body = `${this.returnType instanceof VoidType ? this.accessor() : `return ${this.returnType.returnValue()}`};`;
+    let body = `${this.signature.returnType instanceof VoidType ? this.accessor() : `return ${this.signature.returnType.returnValue()}`};`;
     //todo muliple throw types
-    let thrownDeclaredTypes: DeclaredType[] = this.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
+    let thrownDeclaredTypes: DeclaredType[] = this.signature.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
     if(thrownDeclaredTypes.length) {
         body = `try {
             ${body}
@@ -136,19 +136,23 @@ FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): strin
 
 ConstructorDeclaration.prototype.body = function (this: ConstructorDeclaration): string {
     return `{
-        prototype = (ScriptObjectMirror)classMirror.newObject(${this.parameters.map(p => p.type.argumentValue()).join(', ')}); 
+        prototype = (ScriptObjectMirror)classMirror.newObject(${this.signature.parameters.map(p => p.type.argumentValue()).join(', ')}); 
         mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
             @Override 
             void build(BiConsumer<String, Function<Object[], Object>> builder) { 
 ${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
-                builder.accept("${m.declarationName()}", args -> ${m.returnType instanceof VoidType ? 
-                    `{ ${m.declarationName()}(${m.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
-                    `${m.declarationName()}(${m.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
+                builder.accept("${m.declarationName()}", args -> ${m.signature.returnType instanceof VoidType ? 
+                    `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
+                    `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
                 });`).join('').substr(1)} 
             } 
         }; 
         JS.heap.put(this, mirror); 
     }\n`;        
+}
+
+FunctionType.prototype.returnValue = function(this: FunctionType) {
+    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}.class)`;    
 }
 
 AnyType.prototype.returnValue = function(this: AnyType) {

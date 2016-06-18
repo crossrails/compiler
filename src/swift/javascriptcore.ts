@@ -59,13 +59,13 @@ AnyType.prototype.returnValue = function(this: AnyType) {
 }
 
 ArrayType.prototype.returnValue = function(this: ArrayType) {
-    return this.optional ? `${this.signature()}(this[.${this.parent.name}], wrapped: ${this.arrayElementReturnValue(false)})` : 
-        `${this.signature()}(this[.${this.parent.name}], element: ${this.typeArguments[0].arrayElementReturnValue()})`; 
+    return this.optional ? `${this.typeSignature()}(this[.${this.parent.name}], wrapped: ${this.arrayElementReturnValue(false)})` : 
+        `${this.typeSignature()}(this[.${this.parent.name}], element: ${this.typeArguments[0].arrayElementReturnValue()})`; 
 }
 
 Type.prototype.returnValue = function(this: Type) {
-    return !this.optional ? `${this.signature()}(this[.${this.parent.name}])` : 
-        `${this.signature()}(this[.${this.parent.name}], wrapped: ${this.signature(false)}.init)`;    
+    return !this.optional ? `${this.typeSignature()}(this[.${this.parent.name}])` : 
+        `${this.typeSignature()}(this[.${this.parent.name}], wrapped: ${this.typeSignature(false)}.init)`;    
 }
 
 AnyType.prototype.arrayElementReturnValue = function(this: AnyType, optional: boolean = this.optional) {
@@ -73,11 +73,11 @@ AnyType.prototype.arrayElementReturnValue = function(this: AnyType, optional: bo
 }
 
 ArrayType.prototype.arrayElementReturnValue = function(this: ArrayType, optional: boolean = this.optional) {
-    return `{ ${this.signature(optional)}($0, element: ${this.typeArguments[0].arrayElementReturnValue()}) }`;    
+    return `{ ${this.typeSignature(optional)}($0, element: ${this.typeArguments[0].arrayElementReturnValue()}) }`;    
 }
 
 Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean = this.optional) {
-    return !optional ? `${this.signature(optional)}.init` : `{ ${this.signature(optional)}($0, wrapped: ${this.signature(false)}.init) }`;    
+    return !optional ? `${this.typeSignature(optional)}.init` : `{ ${this.typeSignature(optional)}($0, wrapped: ${this.typeSignature(false)}.init) }`;    
 }
 
 Type.prototype.argumentValue = function(this: Type) {

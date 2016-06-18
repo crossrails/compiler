@@ -52,9 +52,9 @@ class Comment {
 
 export abstract class Declaration {       
     readonly name: string; 
-    readonly parent: FunctionDeclaration|TypeDeclaration|SourceFile;
+    readonly parent: Declaration|SourceFile;
 
-    constructor(node: ts.Declaration, parent: FunctionDeclaration|TypeDeclaration|SourceFile) {
+    constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
         //make parent non-enumerable to avoid circular reference 
         Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
         if(node.name) {
@@ -86,37 +86,45 @@ export abstract class MemberDeclaration extends Declaration {
     }
 }
 
-export class FunctionDeclaration extends MemberDeclaration {
-    readonly abstract: boolean;
-    readonly typeParameters: ReadonlyArray<Type>
+export class FunctionSignature {
     readonly parameters: ReadonlyArray<ParameterDeclaration>
     readonly returnType: Type;
     readonly thrownTypes: Type[];
 
-    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
-        super(node, comment, parent, context);
+    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: Declaration, context: Context) {
         if(node.type) {
-            this.returnType = Type.from(node.type, false, this, context);
+            this.returnType = Type.from(node.type, false, parent, context);
         } else if(this.constructor.name === 'FunctionDeclaration') {
             log.warn(`Return type information missing, assuming void`, node);
-            this.returnType = new VoidType(this);
+            this.returnType = new VoidType(parent);
         } 
         let parameters: ParameterDeclaration[] = [];
         for(let parameter of node.parameters) {
-            parameters.push(new ParameterDeclaration(parameter, this, context));
+            parameters.push(new ParameterDeclaration(parameter, parent, context));
         }
         this.parameters = parameters;
         let thrownTypes: Type[] = [];
         for(let tag of comment.tagsNamed('throws')) {
             if(!tag.type) {
-                thrownTypes.push(new AnyType(false, this))
+                thrownTypes.push(new AnyType(false, parent))
             } else {
-                thrownTypes.push(Type.fromComment(tag.type, this, context))
+                thrownTypes.push(Type.fromComment(tag.type, parent, context))
                 context.thrownTypes.add(tag.type.name!);
             }
         }
         this.thrownTypes = thrownTypes;
-        this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
+    }
+}
+
+export class FunctionDeclaration extends MemberDeclaration {
+    readonly abstract: boolean
+    readonly signature: FunctionSignature
+    readonly typeParameters: ReadonlyArray<Type>
+
+    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+        super(node, comment, parent, context);
+        this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0;
+        this.signature = new FunctionSignature(node, comment, this, context);
     }
 
     get hasBody(): boolean {
@@ -157,7 +165,7 @@ export class VariableDeclaration extends MemberDeclaration {
 export class ParameterDeclaration extends Declaration {
     readonly type: Type;
     
-    constructor(node: ts.ParameterDeclaration, parent: FunctionDeclaration, context: Context) {
+    constructor(node: ts.ParameterDeclaration, parent: Declaration, context: Context) {
         super(node, parent);
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
@@ -363,9 +371,11 @@ export abstract class Type {
                 case ts.SyntaxKind.NumberKeyword:
                     return new NumberType(optional, parent);
                 case ts.SyntaxKind.StringKeyword:
-                    return new StringType(optional,parent);
+                    return new StringType(optional, parent);
                 case ts.SyntaxKind.ArrayType:
                     return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional, parent, context);
+                case ts.SyntaxKind.FunctionType:
+                    return new FunctionType(type as ts.FunctionTypeNode, optional, parent, context);
                 case ts.SyntaxKind.TypeReference:
                     return Type.fromReference(type as ts.TypeReferenceNode, optional, parent, context);
                 case ts.SyntaxKind.UnionType:
@@ -401,6 +411,22 @@ export abstract class Type {
         throw `Unsupported type union, only unions between null or undefined and a single type supported`
     }  
 }  
+
+export class FunctionType extends Type {
+    private _signature: FunctionSignature
+    
+    constructor(type: ts.FunctionTypeNode, optional: boolean, parent: Declaration, context: Context) {
+        super(optional, parent);
+        context.queue.push(() => {
+            //todo support @callback tags
+            this._signature = new FunctionSignature(type, new Comment(type), parent, context);
+        });
+    }  
+
+    get signature() {
+        return this._signature;
+    }
+}       
 
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>

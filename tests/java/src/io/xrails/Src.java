@@ -168,6 +168,14 @@ public class Src {
         return (Number)global.callMember("numberMultipleArgFunction", a, b);
     }
 
+    public static Supplier<String> getStringNoArgLambda() {
+        return JS.wrap(global.get("stringNoArgLambda"), Supplier.class);
+    }
+
+    public static void setStringNoArgLambda(Supplier<String> stringNoArgLambda) {
+        global.setMember("stringNoArgLambda", stringNoArgLambda);
+    }
+
     public static void throwSimpleError() throws Exception {
         global.callMember("throwSimpleError");
     }

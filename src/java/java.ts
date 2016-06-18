@@ -63,7 +63,7 @@ declare module "../ast" {
     }
     interface Type {
         typeName(): string;
-        signature(optional?: boolean): string;
+        typeSignature(optional?: boolean): string;
     }
 }
 
@@ -107,9 +107,9 @@ ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclar
 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
     return `
-    public${this.static ?' static' : ''} ${this.type.signature()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter()}
+    public${this.static ?' static' : ''} ${this.type.typeSignature()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter()}
 ${this.constant ? '' : `
-    public${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.typeName()} ${this.declarationName()}) ${this.setter()}
+    public${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.typeSignature(false)} ${this.declarationName()}) ${this.setter()}
 `}`.substr(1);
 }
 
@@ -119,16 +119,25 @@ ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclarati
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
     let modifiers = `${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}`;
-    let throwsClause = this.thrownTypes.length ? ` throws ${Array.from(this.thrownTypes.reduce((set, t) => set.add(t instanceof ast.DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : '';  
-    return `    ${modifiers}${this.returnType.signature()} ${this.declarationName()}(${this.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
+    let throwsClause = this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof ast.DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : '';  
+    return `    ${modifiers}${this.signature.returnType.typeSignature()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
 ast.ConstructorDeclaration.prototype.emit = function (this: ast.ConstructorDeclaration): string {
-    return `    public ${this.parent.declarationName()}(${this.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
+    return `    public ${this.parent.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
 }
 
-ast.Type.prototype.signature = function(this: ast.Type, optional: boolean = this.optional): string {
+ast.Type.prototype.typeSignature = function(this: ast.Type, optional: boolean = this.optional): string {
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
+}
+
+ast.FunctionType.prototype.typeSignature = function(this: ast.FunctionType, optional: boolean = this.optional): string {
+    let typeArguments = this.signature.parameters.map(p => p.type);
+    if(!(this.signature.returnType instanceof ast.VoidType)) {
+        typeArguments = [this.signature.returnType, ...typeArguments];
+    }
+    let typeSignature = `${this.typeName()}${typeArguments.length == 0 ? '' : `<${typeArguments.map(a => a.typeSignature()).join(', ')}>`}`;
+    return optional ? `Optional<${typeSignature}>` : typeSignature;    
 }
 
 ast.DeclaredType.prototype.typeName = function(this: ast.DeclaredType): string {
@@ -156,9 +165,23 @@ ast.NumberType.prototype.typeName = function(this: ast.NumberType): string {
 }
 
 ast.ArrayType.prototype.typeName = function(this: ast.ArrayType): string {
-    return `List<${this.typeArguments[0].signature()}>`;    
+    return `List<${this.typeArguments[0].typeSignature()}>`;    
 }
 
 ast.ErrorType.prototype.typeName = function(this: ast.ErrorType): string {
     return 'Exception';  
+}
+
+ast.FunctionType.prototype.typeName = function(this: ast.FunctionType): string {
+    let isVoid = this.signature.returnType instanceof ast.VoidType;
+    switch(this.signature.parameters.length) {
+        case 0:
+            return isVoid ? 'Runnable' : `Supplier`;
+        case 1:
+            return isVoid ? `Consumer` : `Function`;
+        case 2: 
+            return isVoid ? `BiConsumer` : `BiFunction`;
+        default:
+            throw new Error('Currently unsupported function type');
+    }  
 }
