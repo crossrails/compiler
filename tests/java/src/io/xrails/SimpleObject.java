@@ -10,13 +10,13 @@ public class SimpleObject {
 
     private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("SimpleObject");
 
-    private final ScriptObjectMirror mirror;
-    private final JSObject proxy;
+    private final ScriptObjectMirror prototype;
+    private final JSObject mirror;
 
     SimpleObject(ScriptObjectMirror mirror) { 
+        this.prototype = mirror; 
         this.mirror = mirror; 
-        this.proxy = mirror; 
-        JS.heap.put(this, proxy);
+        JS.heap.put(this, mirror);
     }
 
     public static Boolean getStaticVoidNoArgMethodCalled() {
@@ -28,16 +28,16 @@ public class SimpleObject {
     }
 
     public Boolean getMethodToOverrideCalled() {
-        return (Boolean)mirror.get("methodToOverrideCalled");
+        return (Boolean)prototype.get("methodToOverrideCalled");
     }
 
     public void setMethodToOverrideCalled(Boolean methodToOverrideCalled) {
-        mirror.setMember("methodToOverrideCalled", methodToOverrideCalled);
+        prototype.setMember("methodToOverrideCalled", methodToOverrideCalled);
     }
 
     public SimpleObject(Number v) {
-        mirror = (ScriptObjectMirror)classMirror.newObject(v); 
-        proxy = getClass() == SimpleObject.class ? mirror : new JS.AbstractMirror(mirror) { 
+        prototype = (ScriptObjectMirror)classMirror.newObject(v); 
+        mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
             @Override 
             void build(BiConsumer<String, Function<Object[], Object>> builder) { 
                 builder.accept("numberSingleObjectArgMethod", args -> numberSingleObjectArgMethod((SimpleObject)args[0]));
@@ -46,7 +46,7 @@ public class SimpleObject {
                 builder.accept("upcastThisToObject", args -> upcastThisToObject()); 
             } 
         }; 
-        JS.heap.put(this, proxy); 
+        JS.heap.put(this, mirror); 
     }
 
     public static void staticVoidNoArgMethod() {
@@ -54,20 +54,21 @@ public class SimpleObject {
     }
 
     public Number numberSingleObjectArgMethod(SimpleObject a) {
-        return (Number)((JSObject)mirror.getMember("numberSingleObjectArgMethod")).call(proxy, JS.heap.get(a));
+        return (Number)((JSObject)prototype.getMember("numberSingleObjectArgMethod")).call(mirror, JS.heap.get(a));
     }
 
     public void callOverriddenMethod() {
-        ((JSObject)mirror.getMember("callOverriddenMethod")).call(proxy);
+        ((JSObject)prototype.getMember("callOverriddenMethod")).call(mirror);
     }
 
     public void methodToOverride() {
-        ((JSObject)mirror.getMember("methodToOverride")).call(proxy);
+        ((JSObject)prototype.getMember("methodToOverride")).call(mirror);
     }
 
     public Object upcastThisToObject() {
-        return JS.wrap(((JSObject)mirror.getMember("upcastThisToObject")).call(proxy), JS.Object::new);
+        return JS.wrap(((JSObject)prototype.getMember("upcastThisToObject")).call(mirror), JS.Object::new);
     }
+
 
     @Override
     public String toString() {
@@ -81,6 +82,6 @@ public class SimpleObject {
 
     @Override
     public boolean equals(Object obj) {
-        return proxy.equals(JS.heap.getOrDefault(obj, obj));
+        return mirror.equals(JS.heap.getOrDefault(obj, obj));
     }
 }

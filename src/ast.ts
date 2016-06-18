@@ -7,7 +7,8 @@ import {log} from "./log"
 
 interface Context {
     readonly queue: Array<() => void>;
-    readonly declaredTypes: Map<string, TypeDeclaration>;
+    readonly typeDeclarations: Map<string, TypeDeclaration>;
+    readonly thrownTypes: Set<string>;
     readonly identifiers: Set<string>;
 }
 
@@ -19,7 +20,6 @@ namespace Comment {
 }
 
 class Comment {
-
     private readonly tags: Map<string, Comment.Tag[]> = new Map();
 
     readonly description: string = '';
@@ -97,7 +97,7 @@ export class FunctionDeclaration extends MemberDeclaration {
         super(node, comment, parent, context);
         if(node.type) {
             this.returnType = Type.from(node.type, false, this, context);
-        } else {
+        } else if(this.constructor.name === 'FunctionDeclaration') {
             log.warn(`Return type information missing, assuming void`, node);
             this.returnType = new VoidType(this);
         } 
@@ -108,7 +108,12 @@ export class FunctionDeclaration extends MemberDeclaration {
         this.parameters = parameters;
         let thrownTypes: Type[] = [];
         for(let tag of comment.tagsNamed('throws')) {
-            thrownTypes.push(tag.type ? Type.fromComment(tag.type, this, context) : new AnyType(false, this))
+            if(!tag.type) {
+                thrownTypes.push(new AnyType(false, this))
+            } else {
+                thrownTypes.push(Type.fromComment(tag.type, this, context))
+                context.thrownTypes.add(tag.type.name!);
+            }
         }
         this.thrownTypes = thrownTypes;
         this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0
@@ -191,7 +196,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
             }            
         }
         this.members = members;
-        context.declaredTypes.set(this.name, this);
+        context.typeDeclarations.set(this.name, this);
     }
 }
 
@@ -204,11 +209,19 @@ export class InterfaceDeclaration extends TypeDeclaration {
 }
 
 export class ClassDeclaration extends TypeDeclaration {
+    private _isThrown: boolean;
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
     constructor(node: ts.ClassDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
+        context.queue.push(() => {
+            this._isThrown = context.thrownTypes.has(this.name); 
+        });
+    }
+
+    get isThrown(): boolean {
+        return this._isThrown
     }
 }
 
@@ -268,7 +281,7 @@ export class Module {
         this.src = path.parse(file);
         this.name = this.src.name;
         let files: SourceFile[] = [];
-        let context: Context = {queue: [], declaredTypes: new Map(), identifiers: new Set()};
+        let context: Context = {queue: [], typeDeclarations: new Map(), thrownTypes: new Set(), identifiers: new Set()};
         try {
             log.debug(`Attempting to open sourcemap at ${path.relative('.', `${file}.map`)}`);
             let map = JSON.parse(readFileSync(`${file}.map`, charset));
@@ -403,7 +416,7 @@ export abstract class GenericType extends Type {
 }       
 
 export class DeclaredType extends GenericType {
-    private typeDeclaration?: TypeDeclaration;
+    private _declaration?: TypeDeclaration;
     readonly name: string
 
     constructor(type: ts.TypeReferenceNode | Comment.Tag.Type, optional: boolean, parent: Declaration, context: Context) {
@@ -415,8 +428,8 @@ export class DeclaredType extends GenericType {
             this.name = type.name!;
         }    
         context.queue.push(() => {
-            this.typeDeclaration = context.declaredTypes.get(this.name);
-            if(!this.typeDeclaration) {
+            this._declaration = context.typeDeclarations.get(this.name);
+            if(!this._declaration) {
                 let msg = `Cannot find type ${this.name}`;
                 if(DeclaredType.isTypeReferenceNode(type)) {
                     log.error(msg, type);
@@ -432,11 +445,7 @@ export class DeclaredType extends GenericType {
     }
 
     get declaration(): TypeDeclaration|undefined {
-        return this.typeDeclaration;
-    }
-
-    typeName(): string {
-        return this.name;
+        return this._declaration;
     }
 }
 

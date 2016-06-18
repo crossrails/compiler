@@ -24,11 +24,4 @@ public class HandwrittenSrc {
         global.setMember("stringNoArgLambda", cb);
     }
 
-    public static void throwSpecialError() throws SpecialException {
-        try {
-            global.callMember("throwSpecialError");
-        } catch (NashornException e) {
-            throw new SpecialException((ScriptObjectMirror)e.getEcmaError());
-        }
-    }
 }

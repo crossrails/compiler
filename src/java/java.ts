@@ -18,7 +18,7 @@ export class JavaEmitter extends Emitter<JavaEmitterOptions> {
         let types: ast.TypeDeclaration[] = module.declarations.filter(d => d instanceof ast.TypeDeclaration) as ast.TypeDeclaration[];
         let writtenModuleFile = false;  
         for(let type of types) {               
-            let filename = path.join(outDir, path.relative(module.sourceRoot, type.sourceFile.path.dir), `${type.name}.java`);
+            let filename = path.join(outDir, path.relative(module.sourceRoot, type.sourceFile.path.dir), `${type.declarationName()}.java`);
             if(filename == moduleFilename) {
                 writtenModuleFile = true;
                 type = Object.create(type, {
@@ -43,13 +43,16 @@ export let emitter = new JavaEmitter();
 declare module "../ast" {
     interface Declaration {
         emit(): string
+        declarationName(): string
     }
     interface TypeDeclaration {
+        typeName(): string
         emit(isGlobalType?: boolean): string
         keyword(): string
         imports(isGlobalType?: boolean): string
         header(isGlobalType?: boolean): string
         footer(): string
+        heritage(): string
     }
     interface FunctionDeclaration {
         body(): string
@@ -64,11 +67,23 @@ declare module "../ast" {
     }
 }
 
+ast.Declaration.prototype.declarationName = function (this: ast.Declaration): string {
+    return this.name;
+}
+
+ast.ClassDeclaration.prototype.declarationName = function (this: ast.ClassDeclaration): string {
+    return this.isThrown && this.name.endsWith('Error') ? `${this.name.slice(0, -5)}Exception` : this.name;
+}
+
+ast.TypeDeclaration.prototype.heritage = function (this: ast.TypeDeclaration): string {
+    return '';
+}
+
 ast.TypeDeclaration.prototype.emit = function (this: ast.TypeDeclaration, isGlobalType?: boolean): string {
     return `
 ${this.imports(isGlobalType)}
 
-public ${this.keyword()} ${this.name} {
+public ${this.keyword()} ${this.declarationName()}${this.heritage()} {
 
 ${this.header(isGlobalType)}
 
@@ -82,34 +97,42 @@ ast.ClassDeclaration.prototype.keyword = function (this: ast.ClassDeclaration): 
     return "class";
 }
 
+ast.ClassDeclaration.prototype.heritage = function (this: ast.ClassDeclaration): string {
+    return this.isThrown ? ' extends Exception' : '';
+}
+
 ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclaration): string {
     return "interface";
 }
 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
     return `
-    public${this.static ?' static' : ''} ${this.type.signature()} get${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}() ${this.getter()}
+    public${this.static ?' static' : ''} ${this.type.signature()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter()}
 ${this.constant ? '' : `
-    public${this.static ?' static' : ''} void set${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}(${this.type.typeName()} ${this.name}) ${this.setter()}
+    public${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.typeName()} ${this.declarationName()}) ${this.setter()}
 `}`.substr(1);
 }
 
 ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.type.typeName()} ${this.name}`;
+    return `${this.type.typeName()} ${this.declarationName()}`;
 }
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
     let modifiers = `${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}`;
     let throwsClause = this.thrownTypes.length ? ` throws ${this.thrownTypes.map(t => t instanceof ast.AnyType ? 'Exception' : t.typeName()).join(', ')}` : '';  
-    return `    ${modifiers}${this.returnType.signature()} ${this.name}(${this.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
+    return `    ${modifiers}${this.returnType.signature()} ${this.declarationName()}(${this.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 
 ast.ConstructorDeclaration.prototype.emit = function (this: ast.ConstructorDeclaration): string {
-    return `    public ${this.parent.name}(${this.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
+    return `    public ${this.parent.declarationName()}(${this.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
 }
 
 ast.Type.prototype.signature = function(this: ast.Type, optional: boolean = this.optional): string {
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
+}
+
+ast.DeclaredType.prototype.typeName = function(this: ast.DeclaredType): string {
+    return this.declaration ? this.declaration.declarationName() : this.name;
 }
 
 ast.VoidType.prototype.typeName = function(this: ast.VoidType): string {

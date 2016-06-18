@@ -171,7 +171,15 @@ public class Src {
     public static void throwSimpleError() throws Exception {
         global.callMember("throwSimpleError");
     }
-    
+
+    public static void throwSpecialError() throws SpecialException {
+        try {
+            global.callMember("throwSpecialError");
+        } catch (NashornException e) {
+            throw new SpecialException((ScriptObjectMirror)e.getEcmaError());
+        }
+    }
+
     public static SimpleObject getSimpleObjectInstance() {
         return JS.wrap(global.get("simpleObjectInstance"), SimpleObject::new);
     }
