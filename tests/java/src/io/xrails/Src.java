@@ -176,7 +176,16 @@ public class Src {
         try {
             global.callMember("throwSpecialError");
         } catch (NashornException e) {
-            throw new SpecialException((ScriptObjectMirror)e.getEcmaError());
+            ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
+            Object constructor = mirror.get("constructor");
+            if(constructor instanceof  ScriptObjectMirror) {
+                Object name = ((ScriptObjectMirror)constructor).get("name");
+                if(name instanceof String) switch ((String)name) {
+                    case "SpecialError":
+                        throw new SpecialException((ScriptObjectMirror)e.getEcmaError());
+                }
+            }
+            throw e;
         }
     }
 

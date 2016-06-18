@@ -45,7 +45,7 @@ ClassDeclaration.prototype.header = function (this: ClassDeclaration, isGlobalTy
 ${!isGlobalType ? '' : `
     static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
 }${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
-    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.declarationName()}");\n`.substr(1)
+    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.members.some(m => !m.static) ? '' : `
     private final ScriptObjectMirror prototype;
     private final JSObject mirror;
@@ -110,12 +110,23 @@ FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): s
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
     let body = `${this.returnType instanceof VoidType ? this.accessor() : `return ${this.returnType.returnValue()}`};`;
-    //TODO muliple throw types
-    if(this.thrownTypes.length && this.thrownTypes[0] instanceof DeclaredType) {
+    //todo muliple throw types
+    let thrownDeclaredTypes: DeclaredType[] = this.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
+    if(thrownDeclaredTypes.length) {
         body = `try {
             ${body}
         } catch (NashornException e) {
-            throw new ${this.thrownTypes[0].typeName()}((ScriptObjectMirror)e.getEcmaError());
+            ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
+            Object constructor = mirror.get("constructor");
+            if(constructor instanceof  ScriptObjectMirror) {
+                Object name = ((ScriptObjectMirror)constructor).get("name");
+                if(name instanceof String) switch ((String)name) {${
+                    thrownDeclaredTypes.reduce((out, type) => `
+                    ${out}case "${type.name}":
+                        throw new ${type.typeName()}((ScriptObjectMirror)e.getEcmaError());`, '')}
+                }
+            }
+            throw e;
         }`; 
     }
     return `{

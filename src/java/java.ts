@@ -119,7 +119,7 @@ ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclarati
 
 ast.FunctionDeclaration.prototype.emit = function (this: ast.FunctionDeclaration): string {
     let modifiers = `${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}`;
-    let throwsClause = this.thrownTypes.length ? ` throws ${this.thrownTypes.map(t => t instanceof ast.AnyType ? 'Exception' : t.typeName()).join(', ')}` : '';  
+    let throwsClause = this.thrownTypes.length ? ` throws ${Array.from(this.thrownTypes.reduce((set, t) => set.add(t instanceof ast.DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : '';  
     return `    ${modifiers}${this.returnType.signature()} ${this.declarationName()}(${this.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
 }
 

@@ -8,7 +8,7 @@ import static io.xrails.Src.global;
 
 public class SpecialException extends Exception {
 
-    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("SpecialException");
+    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("SpecialError");
 
     private final ScriptObjectMirror prototype;
     private final JSObject mirror;
