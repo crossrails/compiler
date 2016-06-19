@@ -1,7 +1,5 @@
-import {emitter} from './java'
 import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
-
-export default emitter;
+import "./java"
 
 declare module "../ast" {
     interface Declaration {

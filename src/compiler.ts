@@ -1,10 +1,13 @@
 import {log} from "./log"
 import {Module} from "./ast" 
-import * as ast from "./ast" 
-import {Emitter, EmitterOptions} from "./emitter" 
+import {writeFileSync} from 'fs';
 
 export interface CompilerOptions {
-    outDir: string
+   outDir: string
+   exportAll?: boolean
+//    newLine: 'lf'|'crlf'
+   noEmit?: boolean
+   noEmitWrapper?: boolean
     [option: string]: any
 }
 
@@ -46,14 +49,54 @@ export class Compiler {
         return false;
     }
     
-    protected loadEmitter<T extends EmitterOptions>(language: string, engine: string): Emitter<T> {
-        return require(`./${language}/${engine}`).default;        
+    private emit(module: Module, language: string, engine: string, options: CompilerOptions) {
+        let engineOptions = Object.assign({}, options, options[engine])
+        log.info(`Emitting ${language} source for ${engine} engine to ${engineOptions.outDir}`);
+        require(`./${language}/${engine}`);        
+        module.emit(engineOptions, (filename, data) => {
+            if(engineOptions.noEmit) {
+                log.info(`Skipping emit of file ${filename}`);
+            } else {
+                log.info(`Emitting file ${filename}`);
+                writeFileSync(filename, data);            
+            }
+        });
+    }
+}
+
+declare module "./ast" {
+
+    interface Module {
+        emit(options: CompilerOptions, writeFile: (filename: string, data: string) => void): void
+    }
+
+    interface Declaration {
+        emit(): string
+        declarationName(): string
+    }
+
+    interface TypeDeclaration {
+        typeName(): string
+        emit(isGlobalType?: boolean): string
+        keyword(): string
+        imports(isGlobalType?: boolean): string
+        header(isGlobalType?: boolean): string
+        footer(): string
+        heritage(): string
+    }
+
+    interface FunctionDeclaration {
+        body(): string
+    }
+
+    interface VariableDeclaration {
+        getter(): string
+        setter(): string
+    }
+
+    interface Type {
+        typeName(): string;
+        typeSignature(optional?: boolean): string;
     }
     
-    private emit<T extends EmitterOptions>(module: Module, language: string, engine: string, options: T & CompilerOptions) {
-        let engineOptions = Object.assign({}, options, options[engine])
-        let emitter: Emitter<T> = this.loadEmitter(language, engine);
-        log.info(`Emitting ${language} source for ${engine} engine to ${engineOptions.outDir}`);
-        emitter.emit(module, engineOptions);                        
-    }
 }

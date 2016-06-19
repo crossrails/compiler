@@ -1,71 +1,39 @@
 import * as path from 'path';
-import {log} from "../log"
-import {EmitterOptions, Emitter} from "../emitter" 
 import * as ast from "../ast"
+import {log} from "../log"
+import {CompilerOptions} from "../compiler" 
 
-export interface JavaEmitterOptions extends EmitterOptions {
-    nashorn?: EmitterOptions 
-    android?: EmitterOptions 
+export interface JavaOptions extends CompilerOptions {
+    nashorn?: CompilerOptions 
+    android?: CompilerOptions 
     basePackage: string
 }
-
-export class JavaEmitter extends Emitter<JavaEmitterOptions> {
-        
-    protected emitModule(module: ast.Module, options: JavaEmitterOptions): void {
-        let outDir = path.join(options.outDir, module.sourceRoot, options.basePackage.replace('.', path.sep));
-        let moduleFilename = path.join(outDir, `${module.name.charAt(0).toUpperCase()}${module.name.slice(1)}.java`);
-        let globals = module.declarations.filter(d => !(d instanceof ast.TypeDeclaration));
-        let types: ast.TypeDeclaration[] = module.declarations.filter(d => d instanceof ast.TypeDeclaration) as ast.TypeDeclaration[];
-        let writtenModuleFile = false;  
-        for(let type of types) {               
-            let filename = path.join(outDir, path.relative(module.sourceRoot, type.sourceFile.path.dir), `${type.declarationName()}.java`);
-            if(filename == moduleFilename) {
-                writtenModuleFile = true;
-                type = Object.create(type, {
-                    members: { value: type.members.concat(globals) }
-                });
-            }                
-            let packageName = path.relative(options.outDir, path.dirname(filename)).replace(path.sep, '.');
-            this.writeFile(filename, `package ${packageName};\n\n${type.emit(filename == moduleFilename)}`);
-        }        
-        if(!writtenModuleFile) {
-            let type: ast.ClassDeclaration = Object.create(ast.ClassDeclaration.prototype, {
-                name: { value: `${module.name.charAt(0).toUpperCase()}${module.name.slice(1)}` },
-                members: { value: globals }
-            });
-            this.writeFile(moduleFilename, `package ${options.basePackage};\n\n${type.emit(true)}`);
-        }
-    }
-}
  
-export let emitter = new JavaEmitter(); 
-
-declare module "../ast" {
-    interface Declaration {
-        emit(): string
-        declarationName(): string
+ast.Module.prototype.emit = function (this: ast.Module, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
+    let outDir = path.join(options.outDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
+    let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
+    let globals = this.declarations.filter(d => !(d instanceof ast.TypeDeclaration));
+    let types: ast.TypeDeclaration[] = this.declarations.filter(d => d instanceof ast.TypeDeclaration) as ast.TypeDeclaration[];
+    let writtenModuleFile = false;  
+    for(let type of types) {               
+        let filename = path.join(outDir, path.relative(this.sourceRoot, type.sourceFile.path.dir), `${type.declarationName()}.java`);
+        if(filename == moduleFilename) {
+            writtenModuleFile = true;
+            type = Object.create(type, {
+                members: { value: type.members.concat(globals) }
+            });
+        }                
+        let packageName = path.relative(options.outDir, path.dirname(filename)).replace(path.sep, '.');
+        writeFile(filename, `package ${packageName};\n\n${type.emit(filename == moduleFilename)}`);
+    }        
+    if(!writtenModuleFile) {
+        let type: ast.ClassDeclaration = Object.create(ast.ClassDeclaration.prototype, {
+            name: { value: `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}` },
+            members: { value: globals }
+        });
+        writeFile(moduleFilename, `package ${options.basePackage};\n\n${type.emit(true)}`);
     }
-    interface TypeDeclaration {
-        typeName(): string
-        emit(isGlobalType?: boolean): string
-        keyword(): string
-        imports(isGlobalType?: boolean): string
-        header(isGlobalType?: boolean): string
-        footer(): string
-        heritage(): string
-    }
-    interface FunctionDeclaration {
-        body(): string
-    }
-    interface VariableDeclaration {
-        getter(): string
-        setter(): string
-    }
-    interface Type {
-        typeName(): string;
-        typeSignature(optional?: boolean): string;
-    }
-}
+} 
 
 ast.Declaration.prototype.declarationName = function (this: ast.Declaration): string {
     return this.name;

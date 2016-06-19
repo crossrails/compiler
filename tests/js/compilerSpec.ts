@@ -1,6 +1,5 @@
 import {Module} from "../../src/ast"
-import {Emitter, EmitterOptions} from "../../src/emitter"
-import {Compiler} from "../../src/compiler"
+import {Compiler, CompilerOptions} from "../../src/compiler"
 
 describe("Compiler", () => {
     
