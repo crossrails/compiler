@@ -1,6 +1,7 @@
 import {log} from "./log"
 import {Module} from "./ast" 
 import {writeFileSync} from 'fs';
+import {undecorate} from './decorator';
 
 export interface CompilerOptions {
    outDir: string
@@ -30,7 +31,7 @@ export class Compiler {
         console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.errorCount == 1 ? '' : 's'}`)
         return log.errorCount;
     }
-    
+
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
         if(this.options[language]) {
             let options = Object.assign({}, this.options, this.options[language]);
@@ -61,42 +62,7 @@ export class Compiler {
                 writeFileSync(filename, data);            
             }
         });
-    }
+        undecorate();
+    }    
 }
 
-declare module "./ast" {
-
-    interface Module {
-        emit(options: CompilerOptions, writeFile: (filename: string, data: string) => void): void
-    }
-
-    interface Declaration {
-        emit(): string
-        declarationName(): string
-    }
-
-    interface TypeDeclaration {
-        typeName(): string
-        emit(isGlobalType?: boolean): string
-        keyword(): string
-        imports(isGlobalType?: boolean): string
-        header(isGlobalType?: boolean): string
-        footer(): string
-        heritage(): string
-    }
-
-    interface FunctionDeclaration {
-        body(): string
-    }
-
-    interface VariableDeclaration {
-        getter(): string
-        setter(): string
-    }
-
-    interface Type {
-        typeName(): string;
-        typeSignature(optional?: boolean): string;
-    }
-    
-}

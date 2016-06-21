@@ -1,5 +1,6 @@
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 import "./java"
+
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 
 declare module "../ast" {
     interface Declaration {
@@ -16,31 +17,31 @@ declare module "../ast" {
     }
 }
 
-InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration, isGlobalType?: boolean) {      
+InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration) {      
     return `import java.util.*;`
 }
 
-InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
+InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration) {
     return '';
 }
 
-InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, isGlobalType?: boolean) {
+InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration) {
     return '';
 }
 
-ClassDeclaration.prototype.imports = function (this: ClassDeclaration, isGlobalType?: boolean) {
+ClassDeclaration.prototype.imports = function (this: ClassDeclaration) {
     return `
 import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;${
-    isGlobalType ? '' : `\n
+    this.sourceFile.isModuleFile ? '' : `\n
 import static io.xrails.Src.global;`
     }`;
 }
 
-ClassDeclaration.prototype.header = function (this: ClassDeclaration, isGlobalType?: boolean) {
+ClassDeclaration.prototype.header = function (this: ClassDeclaration) {
     return `
-${!isGlobalType ? '' : `
+${!this.sourceFile.isModuleFile ? '' : `
     static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
 }${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
     private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
@@ -57,7 +58,7 @@ ${!isGlobalType ? '' : `
 `}`.substr(1);    
 }
 
-ClassDeclaration.prototype.footer = function (this: ClassDeclaration, isGlobalType?: boolean) {
+ClassDeclaration.prototype.footer = function (this: ClassDeclaration) {
     return !this.members.some(m => !m.static) ? '' : `
 ${!this.isThrown ? '' : `
     public String getMessage() {
