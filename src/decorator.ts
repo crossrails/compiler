@@ -96,7 +96,7 @@ ${this.header(`${indent}    `)}
 ${this.members.reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
 ${this.footer(`${indent}    `)}
 ${indent}}
-    `.replace(/\n{3}/g, '\n').trim();
+    `.replace(/\n{3}/g, '\n').substr(1);
 }
 
 ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {

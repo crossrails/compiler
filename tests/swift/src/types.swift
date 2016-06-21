@@ -1,6 +1,5 @@
 import Foundation
 
-
 public let booleanConst :Bool = Bool(this[.booleanConst])
 
 public let numberConst :Double = Double(this[.numberConst])

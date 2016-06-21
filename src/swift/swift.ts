@@ -14,7 +14,7 @@ declare module "../ast" {
     }
 
     interface VariableDeclaration {
-        body(): string
+        body(indent?: string): string
     }
 }
  
@@ -52,7 +52,7 @@ ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclar
 }
 
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
-    return `${indent}public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body()}\n`;
+    return `${indent}public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 }
 
 ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {
@@ -62,7 +62,6 @@ ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclarati
 ast.FunctionDeclaration.prototype.prefix = function (this: ast.FunctionDeclaration): string {
     return `public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
 }
-
 
 ast.FunctionDeclaration.prototype.suffix = function (this: ast.FunctionDeclaration): string {
     return `${this.signature.returnType instanceof ast.VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;

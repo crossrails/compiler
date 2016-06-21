@@ -109,7 +109,6 @@ FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): s
 
 FunctionDeclaration.prototype.body = function (this: FunctionDeclaration, indent?: string): string {
     let body = `${indent}    ${this.signature.returnType instanceof VoidType ? this.accessor() : `return ${this.signature.returnType.returnValue()}`};`;
-    //todo muliple throw types
     let thrownDeclaredTypes: DeclaredType[] = this.signature.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
     if(thrownDeclaredTypes.length) {
         body = `
@@ -118,7 +117,7 @@ ${indent}    try {
 ${indent}    } catch (NashornException e) {
 ${indent}        ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
 ${indent}        Object constructor = mirror.get("constructor");
-${indent}        if(constructor instanceof  ScriptObjectMirror) {
+${indent}        if(constructor instanceof ScriptObjectMirror) {
 ${indent}            Object name = ((ScriptObjectMirror)constructor).get("name");
 ${indent}            if(name instanceof String) switch ((String)name) {${
                          thrownDeclaredTypes.reduce((out, type) => `
@@ -141,7 +140,7 @@ ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? pro
 ${indent}        @Override 
 ${indent}        void build(BiConsumer<String, Function<Object[], Object>> builder) { 
 ${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
-${indent}            builder.accept("${m.declarationName()}", args -> ${m.signature.returnType instanceof VoidType ? 
+${indent}            builder.accept("${m.name}", args -> ${m.signature.returnType instanceof VoidType ? 
                      `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
                      `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
                 });`).join('').substr(1)} 

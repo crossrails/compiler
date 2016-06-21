@@ -9,7 +9,7 @@ interface Context {
     readonly queue: Array<() => void>;
     readonly typeDeclarations: Map<string, TypeDeclaration>;
     readonly thrownTypes: Set<string>;
-    readonly identifiers: Set<string>;
+    readonly identifiers: Set<Declaration>;
 }
 
 namespace Comment {
@@ -81,7 +81,7 @@ export abstract class MemberDeclaration extends Declaration {
         this.protected = (node.flags & ts.NodeFlags.Protected) != 0 || comment.isTagged('protected') || comment.isTagged('access', 'protected');
         this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
         if(node.name) {
-            context.identifiers.add(this.name);
+            context.identifiers.add(this);
         }
     }
 }
@@ -283,7 +283,7 @@ export class Module {
     readonly src: path.ParsedPath;
     readonly sourceRoot: string;
     readonly files: ReadonlyArray<SourceFile>;
-    readonly identifiers: ReadonlyArray<string>;
+    readonly identifiers: ReadonlyArray<Declaration>;
     
     constructor(file: string, implicitExport: boolean, charset: string) {
         this.src = path.parse(file);
