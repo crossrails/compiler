@@ -36,7 +36,7 @@ import java.util.function.*;
 import jdk.nashorn.api.scripting.*;${
     this.sourceFile.isModuleFile ? '' : `\n
 import static io.xrails.Src.global;`
-    }`;
+    }`.substr(1);
 }
 
 ClassDeclaration.prototype.header = function (this: ClassDeclaration) {

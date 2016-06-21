@@ -3,28 +3,27 @@ import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDecl
 let decorations : Map<Function, { proxy: { prototype: any }, additions: Set<PropertyKey>}> = new Map();
 
 export function decorate<T extends Function>(target: T, decorator: (type: T) => void) {
-    let decoration = decorations.get(target);
+    let decoration = decorations.get(target.prototype);
     if(!decoration) {
         decoration = {
             additions: new Set(), 
             proxy: { 
                 prototype: new Proxy(target.prototype, {
-                    set(target: T, property: PropertyKey, value: any, proxy: { emitters: PropertyKey[] }): boolean {
-                        Object.defineProperty(target, property, { value: value });
-                        decorations.get(target)!.additions.add(property);
-                        return true;
+                    set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
+                        decorations.get(prototype)!.additions.add(property);
+                        return Reflect.set(prototype, property, value, receiver);
                     }
                 })
             }
         }
-        decorations.set(target, decoration!);
+        decorations.set(target.prototype, decoration!);
     }
-    decorator(decoration.proxy as T);
+    decorator(target as T);
 }
 
 export function undecorate() {
-        for (let [target, decoration] of decorations) {
-            decoration.additions.forEach(property => delete target.prototype[property]);
+        for (let [prototype, decoration] of decorations) {
+            decoration.additions.forEach(property => Reflect.deleteProperty(prototype, property));
         }
         decorations.clear();    
 }
@@ -72,7 +71,7 @@ SourceFile.prototype.emit = function (this: SourceFile): string {
 ${this.header()}
 ${this.declarations.reduce((out, d) => `${out}${d.emit()}\n`, '')}
 ${this.footer()}
-`.substr(1)
+`.trim()
 }
 
 Declaration.prototype.declarationName = function(this: Declaration): string {

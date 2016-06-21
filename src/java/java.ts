@@ -49,12 +49,13 @@ decorate(ast.Module, x => x.prototype.emit = function (this: ast.Module, options
             packageName: { value: options.basePackage },
             declarations: { value: [ Object.create(ast.ClassDeclaration.prototype, { name: { value: name }, members: { value: globals }}) ] }
         });
+        Reflect.set(file.declarations[0], 'parent', file);
         writeFile(moduleFilename, file.emit());
     }
 }) 
 
 decorate(ast.SourceFile, x => x.prototype.header = function (this: ast.SourceFile): string {
-    return `package ${this.packageName};\n\n${(this.declarations[0] as ast.TypeDeclaration).imports()}`;
+    return `package ${this.packageName};\n\n${(this.declarations[0] as ast.TypeDeclaration).imports()}\n`;
 })
 
 decorate(ast.SourceFile, x => x.prototype.footer = function (this: ast.SourceFile): string {

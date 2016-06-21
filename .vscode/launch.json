@@ -12,8 +12,8 @@
                 "src.js",
 				"--implicitExport",
 				"--logLevel=debug",
-				// "--swift.outDir=../swift/src",
-				// "--swift.bundleId=io.xrails.src",				
+				"--swift.outDir=../swift/src",
+				"--swift.bundleId=io.xrails.src",				
 				"--java.outDir=../java/src",
 				"--java.basePackage=io.xrails"
             ],

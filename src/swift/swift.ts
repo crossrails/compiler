@@ -32,6 +32,7 @@ ast.Module.prototype.emit = function (this: ast.Module, options: SwiftOptions, w
     if(!writtenModuleFile) {
         let file: ast.SourceFile = Object.create(ast.SourceFile.prototype, {
             isModuleFile: { value: true},
+            module: { value: this },
             name: { value: this.name },
             declarations: { value: [] }
         });
@@ -67,8 +68,8 @@ ast.FunctionDeclaration.prototype.suffix = function (this: ast.FunctionDeclarati
     return this.signature.returnType instanceof ast.VoidType ? '' : `-> ${this.signature.returnType.emit()}`;
 }
 
-ast.ConstructorDeclaration.prototype.prefix = function (this: ast.ConstructorDeclaration): string {
-    return `    public init`;
+ast.ConstructorDeclaration.prototype.declarationName = function (this: ast.ConstructorDeclaration): string {
+    return `init`;
 }
 
 ast.ConstructorDeclaration.prototype.suffix = function (this: ast.ConstructorDeclaration): string {
