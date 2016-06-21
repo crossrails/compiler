@@ -1,6 +1,5 @@
 import Foundation
 
-var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
 
 public let booleanConst :Bool = Bool(this[.booleanConst])
 
@@ -8,7 +7,7 @@ public let numberConst :Double = Double(this[.numberConst])
 
 public let stringConst :String = String(this[.stringConst])
 
-public let numberOrNullArrayConst :[Any] = [Any](this[.numberOrNullArrayConst], element: JSValue.infer)
+public let numberOrNullArrayConst :[Double?] = [Double?](this[.numberOrNullArrayConst], element: { Double?($0, wrapped: Double.init) })
 
 public let numberArrayConst :[Double] = [Double](this[.numberArrayConst], element: Double.init)
 
@@ -125,31 +124,4 @@ public var optionalAnyVar :Any? {
     set {
         this[.optionalAnyVar] = this.valueOf(newValue, wrapped: this.valueOf)
     }
-}
-
-extension JSProperty {
-	static let booleanConst: JSProperty = "booleanConst"
-	static let numberConst: JSProperty = "numberConst"
-	static let stringConst: JSProperty = "stringConst"
-	static let numberOrNullArrayConst: JSProperty = "numberOrNullArrayConst"
-	static let numberArrayConst: JSProperty = "numberArrayConst"
-	static let stringArrayArrayConst: JSProperty = "stringArrayArrayConst"
-	static let anyConst: JSProperty = "anyConst"
-	static let optionalBooleanConst: JSProperty = "optionalBooleanConst"
-	static let optionalNumberConst: JSProperty = "optionalNumberConst"
-	static let optionalStringConst: JSProperty = "optionalStringConst"
-	static let optionalNumberArrayConst: JSProperty = "optionalNumberArrayConst"
-	static let optionalNullAnyConst: JSProperty = "optionalNullAnyConst"
-	static let optionalNonNullAnyConst: JSProperty = "optionalNonNullAnyConst"
-	static let booleanVar: JSProperty = "booleanVar"
-	static let numberVar: JSProperty = "numberVar"
-	static let stringVar: JSProperty = "stringVar"
-	static let numberArrayVar: JSProperty = "numberArrayVar"
-	static let anyVar: JSProperty = "anyVar"
-	static let stringArrayArrayVar: JSProperty = "stringArrayArrayVar"
-	static let optionalBooleanVar: JSProperty = "optionalBooleanVar"
-	static let optionalNumberVar: JSProperty = "optionalNumberVar"
-	static let optionalStringVar: JSProperty = "optionalStringVar"
-	static let optionalNumberArrayVar: JSProperty = "optionalNumberArrayVar"
-	static let optionalAnyVar: JSProperty = "optionalAnyVar"
 }

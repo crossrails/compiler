@@ -19,8 +19,7 @@ declare module "../ast" {
 }
  
 ast.Module.prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
-    Object.defineProperty(module, 'resourcePath', { writable: false, value: `NSBundle${options.bundleId ? 
-        `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`});
+    Reflect.set(this, 'resourcePath', `NSBundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
     let moduleFilename = path.join(options.outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
     for(let file of this.files as Array<ast.SourceFile>) {            

@@ -18,7 +18,7 @@ SourceFile.prototype.header = function (this: SourceFile): string {
 SourceFile.prototype.footer = function (this: SourceFile): string {
     return !this.isModuleFile ? '' : `
 extension JSProperty {
-    ${this.module.identifiers.map((id) => `static let ${id}: JSProperty = "${id}"`).join('\n\t')}
+    ${this.module.identifiers.map((id) => `static let ${id}: JSProperty = "${id}"`).join('\n    ')}
 }`
 }
 
