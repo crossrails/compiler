@@ -21,11 +21,11 @@ InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration) {
     return `import java.util.*;`
 }
 
-InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration) {
+InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration, indent?: string) {
     return '';
 }
 
-InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration) {
+InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, indent?: string) {
     return '';
 }
 
@@ -39,46 +39,46 @@ import static io.xrails.Src.global;`
     }`.substr(1);
 }
 
-ClassDeclaration.prototype.header = function (this: ClassDeclaration) {
+ClassDeclaration.prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-    static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
 }${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
-    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
+${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.members.some(m => !m.static) ? '' : `
-    private final ScriptObjectMirror prototype;
-    private final JSObject mirror;
+${indent}private final ScriptObjectMirror prototype;
+${indent}private final JSObject mirror;
 
-    ${this.declarationName()}(ScriptObjectMirror mirror) { 
-        this.prototype = mirror; 
-        this.mirror = mirror; 
-        JS.heap.put(this, mirror);
-    }
+${indent}${this.declarationName()}(ScriptObjectMirror mirror) { 
+${indent}   this.prototype = mirror; 
+${indent}   this.mirror = mirror; 
+${indent}   JS.heap.put(this, mirror);
+${indent}}
 
 `}`.substr(1);    
 }
 
-ClassDeclaration.prototype.footer = function (this: ClassDeclaration) {
+ClassDeclaration.prototype.footer = function (this: ClassDeclaration, indent?: string) {
     return !this.members.some(m => !m.static) ? '' : `
 ${!this.isThrown ? '' : `
-    public String getMessage() {
-        return (String)prototype.get("message");
-    }    
+${indent}public String getMessage() {
+${indent}    return (String)prototype.get("message");
+${indent}}    
 `.substr(1)}
-    @Override
-    public String toString() {
-        return mirror.toString();
-    }
+${indent}@Override
+${indent}public String toString() {
+${indent}    return mirror.toString();
+${indent}}
 
-    @Override
-    public int hashCode() {
-        return mirror.hashCode();
-    }
+${indent}@Override
+${indent}public int hashCode() {
+${indent}    return mirror.hashCode();
+${indent}}
 
-    @Override
-    public boolean equals(Object obj) {
-        return mirror.equals(JS.heap.getOrDefault(obj, obj));
-    }`;
+${indent}@Override
+${indent}public boolean equals(Object obj) {
+${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
+${indent}}`;
 }
 
 MemberDeclaration.prototype.mirror = function (this: MemberDeclaration) {
@@ -89,17 +89,17 @@ VariableDeclaration.prototype.accessor = function (this: VariableDeclaration) {
     return `${this.mirror()}.get("${this.declarationName()}")`
 }
 
-VariableDeclaration.prototype.getter = function (this: VariableDeclaration) {
+VariableDeclaration.prototype.getter = function (this: VariableDeclaration, indent?: string) {
     let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.returnValue()})` : this.type.returnValue();
     return `{
-        return ${returnValue};
-    }`;        
+${indent}    return ${returnValue};
+${indent}}`;        
 }
 
-VariableDeclaration.prototype.setter = function (this: VariableDeclaration) {
+VariableDeclaration.prototype.setter = function (this: VariableDeclaration, indent?: string) {
     return `{
-        ${this.mirror()}.setMember("${this.declarationName()}", ${this.type.argumentValue()});
-    }`;        
+${indent}    ${this.mirror()}.setMember("${this.declarationName()}", ${this.type.argumentValue()});
+${indent}}`;        
 }
 
 FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
@@ -107,47 +107,48 @@ FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): s
     return this.static ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
 }
 
-FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
+FunctionDeclaration.prototype.body = function (this: FunctionDeclaration, indent?: string): string {
     let body = `${this.signature.returnType instanceof VoidType ? this.accessor() : `return ${this.signature.returnType.returnValue()}`};`;
     //todo muliple throw types
     let thrownDeclaredTypes: DeclaredType[] = this.signature.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
     if(thrownDeclaredTypes.length) {
-        body = `try {
-            ${body}
-        } catch (NashornException e) {
-            ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
-            Object constructor = mirror.get("constructor");
-            if(constructor instanceof  ScriptObjectMirror) {
-                Object name = ((ScriptObjectMirror)constructor).get("name");
-                if(name instanceof String) switch ((String)name) {${
+        body = `
+${indent}   try {
+${indent}       ${body}
+${indent}   } catch (NashornException e) {
+${indent}       ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
+${indent}       Object constructor = mirror.get("constructor");
+${indent}       if(constructor instanceof  ScriptObjectMirror) {
+${indent}           Object name = ((ScriptObjectMirror)constructor).get("name");
+${indent}           if(name instanceof String) switch ((String)name) {${
                     thrownDeclaredTypes.reduce((out, type) => `
-                    ${out}case "${type.name}":
-                        throw new ${type.typeName()}((ScriptObjectMirror)e.getEcmaError());`, '')}
-                }
-            }
-            throw e;
-        }`; 
+${out}${indent}           case "${type.name}":
+${indent}               throw new ${type.typeName()}((ScriptObjectMirror)e.getEcmaError());`, '')}
+${indent}           }
+${indent}       }
+${indent}       throw e;
+${indent}   }`; 
     }
     return `{
-        ${body}
-    }`        
+${body}
+${indent}}`        
 }
 
-ConstructorDeclaration.prototype.body = function (this: ConstructorDeclaration): string {
+ConstructorDeclaration.prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
     return `{
-        prototype = (ScriptObjectMirror)classMirror.newObject(${this.signature.parameters.map(p => p.type.argumentValue()).join(', ')}); 
-        mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
-            @Override 
-            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
+${indent}   prototype = (ScriptObjectMirror)classMirror.newObject(${this.signature.parameters.map(p => p.type.argumentValue()).join(', ')}); 
+${indent}   mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
+${indent}       @Override 
+${indent}       void build(BiConsumer<String, Function<Object[], Object>> builder) { 
 ${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
-                builder.accept("${m.declarationName()}", args -> ${m.signature.returnType instanceof VoidType ? 
+${indent}           builder.accept("${m.declarationName()}", args -> ${m.signature.returnType instanceof VoidType ? 
                     `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
                     `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
                 });`).join('').substr(1)} 
-            } 
-        }; 
-        JS.heap.put(this, mirror); 
-    }\n`;        
+${indent}       } 
+${indent}   }; 
+${indent}   JS.heap.put(this, mirror); 
+${indent}}\n`;        
 }
 
 FunctionType.prototype.returnValue = function(this: FunctionType) {

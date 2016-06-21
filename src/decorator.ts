@@ -36,7 +36,7 @@ declare module "./ast" {
     }
 
     interface Declaration {
-        emit(): string
+        emit(indent?: string): string
         declarationName(): string
     }
 
@@ -50,15 +50,15 @@ declare module "./ast" {
     interface FunctionDeclaration {
         prefix(): string
         suffix(): string
-        body(): string
+        body(indent?: string): string
     }
 
     interface TypeDeclaration {
         keyword(): string
         typeName(): string
         suffix(): string
-        header(): string
-        footer(): string
+        header(indent?: string): string
+        footer(indent?: string): string
     }
 
     interface Type {
@@ -70,7 +70,7 @@ declare module "./ast" {
 SourceFile.prototype.emit = function (this: SourceFile): string {
         return `
 ${this.header()}
-${this.declarations.reduce((out, d) => `${out}${d.emit()}\n`, '')}
+${this.declarations.reduce((out, d) => `${out}${d.emit('')}\n`, '')}
 ${this.footer()}
 `.trim()
 }
@@ -83,19 +83,19 @@ DeclaredType.prototype.typeName = function(this: DeclaredType): string {
     return this.declaration ? this.declaration.declarationName() : this.name;
 }
 
-FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration): string {
-    return `${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.hasBody ? ` ${this.body()}\n` : '\n'}`;
+FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
+    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.hasBody ? ` ${this.body(indent)}\n` : '\n'}`;
 }
 
-TypeDeclaration.prototype.emit = function (this: TypeDeclaration): string {
+TypeDeclaration.prototype.emit = function (this: TypeDeclaration, indent?: string): string {
     return `
-public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
+${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
 
-${this.header()}
+${this.header(`${indent}   `)}
 
-${this.members.reduce((out, member) => `${out}${member.emit()}\n`, '')}
-${this.footer()}
-}
+${this.members.reduce((out, member) => `${out}${member.emit(`${indent}   `)}\n`, '')}
+${this.footer(`${indent}   `)}
+${indent}}
     `.replace(/\n{3}/g, '\n').trim();
 }
 

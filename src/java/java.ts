@@ -22,8 +22,8 @@ declare module "../ast" {
     }
 
     interface VariableDeclaration {
-        getter(): string
-        setter(): string
+        getter(indent?: string): string
+        setter(indent?: string): string
     }
 }
  
@@ -80,26 +80,32 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
     return "interface";
 })
 
-decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration): string {
+decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration, indent?: string): string {
     return `
-    public${this.static ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter()}
-${this.constant ? '' : `
-    public${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter()}
-`}`.substr(1);
+${indent}${this.protected ? 'protected' : 'public'}${this.static ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter(indent)}
+    ${this.constant ? '' : `
+${indent}${this.protected ? 'protected' : 'public'}${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter(indent)}
+    `}`.substr(1);
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ParameterDeclaration): string {
     return `${this.type.emit()} ${this.declarationName()}`;
 })
 
-decorate(FunctionDeclaration, ({prototype}) => prototype.emit = function (this: FunctionDeclaration): string {
-    let modifiers = `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}`;
-    let throwsClause = this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : '';  
-    return `    ${modifiers}${this.signature.returnType.emit()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${throwsClause}${this.hasBody ? ` ${this.body()}` : ';'}\n`;
+decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: FunctionDeclaration): string {
+    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected' : 'public'} ${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
 })
 
-decorate(ConstructorDeclaration, ({prototype}) => prototype.emit = function (this: ConstructorDeclaration): string {
-    return `    public ${this.parent.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')}) ${this.body()}`;
+decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: FunctionDeclaration): string {
+    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.hasBody ? '' : ';'}`;
+})
+
+decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ConstructorDeclaration): string {
+    return `${this.protected ? 'protected' : 'public'} `;
+})
+
+decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = function (this: ConstructorDeclaration): string {
+    return this.parent.declarationName();
 })
 
 decorate(Type, ({prototype}) => prototype.emit = function(this: Type, optional: boolean = this.optional): string {

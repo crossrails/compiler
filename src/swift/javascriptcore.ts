@@ -22,14 +22,14 @@ extension JSProperty {
 }`
 }
 
-FunctionDeclaration.prototype.body = function (this: FunctionDeclaration): string {
+FunctionDeclaration.prototype.body = function (this: FunctionDeclaration, indent?: string): string {
     return `{
         
-    }`        
+}`        
 }
 
 
-VariableDeclaration.prototype.body = function (this: VariableDeclaration) {
+VariableDeclaration.prototype.body = function (this: VariableDeclaration, indent?: string) {
     return this.constant ? `= ${this.type.returnValue()}` : 
 `{
     get {
@@ -41,11 +41,11 @@ VariableDeclaration.prototype.body = function (this: VariableDeclaration) {
 }`        
 }
 
-TypeDeclaration.prototype.header = function (this: TypeDeclaration): string {
+TypeDeclaration.prototype.header = function (this: TypeDeclaration, indent?: string): string {
     return "";
 }
 
-TypeDeclaration.prototype.footer = function (this: TypeDeclaration): string {
+TypeDeclaration.prototype.footer = function (this: TypeDeclaration, indent?: string): string {
     return "";
 }
 

@@ -45,15 +45,15 @@ ast.TypeDeclaration.prototype.suffix = function (this: ast.TypeDeclaration): str
 }
 
 ast.ClassDeclaration.prototype.suffix = function (this: ast.ClassDeclaration): string {
-    return this.isThrown ? ' throws' : '';
+    return '';
 }
 
 ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclaration): string {
     return "protocol";
 }
 
-ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration): string {
-    return `public ${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body()}`;
+ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
+    return `${indent}public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body()}\n`;
 }
 
 ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {
@@ -61,11 +61,12 @@ ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclarati
 }
 
 ast.FunctionDeclaration.prototype.prefix = function (this: ast.FunctionDeclaration): string {
-    return `public ${this.static ? 'static ' : ''} func`;
+    return `public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
 }
 
+
 ast.FunctionDeclaration.prototype.suffix = function (this: ast.FunctionDeclaration): string {
-    return this.signature.returnType instanceof ast.VoidType ? '' : `-> ${this.signature.returnType.emit()}`;
+    return `${this.signature.returnType instanceof ast.VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;
 }
 
 ast.ConstructorDeclaration.prototype.declarationName = function (this: ast.ConstructorDeclaration): string {
@@ -73,7 +74,7 @@ ast.ConstructorDeclaration.prototype.declarationName = function (this: ast.Const
 }
 
 ast.ConstructorDeclaration.prototype.suffix = function (this: ast.ConstructorDeclaration): string {
-    return ``;
+    return this.signature.thrownTypes.length ? ' throws' : '';
 }
 
 ast.Type.prototype.emit = function(this: ast.Type, optional: boolean = this.optional): string {
@@ -101,5 +102,5 @@ ast.ArrayType.prototype.typeName = function(this: ast.ArrayType): string {
 }
 
 ast.FunctionType.prototype.typeName = function(this: ast.FunctionType): string {
-    return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> ${this.signature.returnType.emit()}`;
+    return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> (${this.signature.returnType.emit()})`;
 }
