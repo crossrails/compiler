@@ -91,10 +91,10 @@ TypeDeclaration.prototype.emit = function (this: TypeDeclaration, indent?: strin
     return `
 ${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
 
-${this.header(`${indent}   `)}
+${this.header(`${indent}    `)}
 
-${this.members.reduce((out, member) => `${out}${member.emit(`${indent}   `)}\n`, '')}
-${this.footer(`${indent}   `)}
+${this.members.reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
+${this.footer(`${indent}    `)}
 ${indent}}
     `.replace(/\n{3}/g, '\n').trim();
 }

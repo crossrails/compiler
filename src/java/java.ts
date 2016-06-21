@@ -93,7 +93,7 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this:
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: FunctionDeclaration): string {
-    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected' : 'public'} ${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected ' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: FunctionDeclaration): string {
@@ -101,7 +101,7 @@ decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ConstructorDeclaration): string {
-    return `${this.protected ? 'protected' : 'public'} `;
+    return this.protected ? 'protected' : 'public';
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = function (this: ConstructorDeclaration): string {

@@ -22,19 +22,19 @@ public class SimpleObject {
     public static Boolean getStaticVoidNoArgMethodCalled() {
         return (Boolean)classMirror.get("staticVoidNoArgMethodCalled");
     }
-
+    
     public static void setStaticVoidNoArgMethodCalled(Boolean staticVoidNoArgMethodCalled) {
         classMirror.setMember("staticVoidNoArgMethodCalled", staticVoidNoArgMethodCalled);
     }
-
+    
     public Boolean getMethodToOverrideCalled() {
         return (Boolean)prototype.get("methodToOverrideCalled");
     }
-
+    
     public void setMethodToOverrideCalled(Boolean methodToOverrideCalled) {
         prototype.setMember("methodToOverrideCalled", methodToOverrideCalled);
     }
-
+    
     public SimpleObject(Number v) {
         prototype = (ScriptObjectMirror)classMirror.newObject(v); 
         mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
