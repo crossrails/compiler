@@ -6,7 +6,7 @@
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/src/main.ts",
-			"cwd": "${workspaceRoot}/tests/reference",
+			"cwd": "${workspaceRoot}/tests/input",
 			"args": [
 				// "--help"
                 "src.js",
