@@ -27,7 +27,7 @@ extension JSProperty {
 }`.substr(1)
 }
 
-FunctionDeclaration.prototype.argumentName = function (this: FunctionDeclaration): string {
+Declaration.prototype.argumentName = function (this: Declaration): string {
     return this.declarationName();
 }
 

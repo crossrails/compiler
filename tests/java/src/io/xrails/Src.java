@@ -173,7 +173,7 @@ public class Src {
     }
     
     public static void setStringNoArgLambda(Supplier<String> stringNoArgLambda) {
-        global.setMember("stringNoArgLambda", stringNoArgLambda);
+        global.setMember("stringNoArgLambda", JSObject(this.context, callback: { args in return this.valueOf(newValue()) }));
     }
     
     public static void throwSimpleError() throws Exception {
@@ -187,7 +187,7 @@ public class Src {
         } catch (NashornException e) {
             ScriptObjectMirror mirror = (ScriptObjectMirror)e.getEcmaError();
             Object constructor = mirror.get("constructor");
-            if(constructor instanceof  ScriptObjectMirror) {
+            if(constructor instanceof ScriptObjectMirror) {
                 Object name = ((ScriptObjectMirror)constructor).get("name");
                 if(name instanceof String) switch ((String)name) {
                     case "SpecialError":
