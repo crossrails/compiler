@@ -1,4 +1,5 @@
 import "./java"
+import {decorate} from '../decorator';
 
 import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 
@@ -17,19 +18,19 @@ declare module "../ast" {
     }
 }
 
-InterfaceDeclaration.prototype.imports = function (this: InterfaceDeclaration) {      
+decorate(InterfaceDeclaration, ({prototype}) => prototype.imports = function (this: InterfaceDeclaration) {      
     return `import java.util.*;`
-}
+})
 
-InterfaceDeclaration.prototype.header = function (this: InterfaceDeclaration, indent?: string) {
+decorate(InterfaceDeclaration, ({prototype}) => prototype.header = function (this: InterfaceDeclaration, indent?: string) {
     return '';
-}
+})
 
-InterfaceDeclaration.prototype.footer = function (this: InterfaceDeclaration, indent?: string) {
+decorate(InterfaceDeclaration, ({prototype}) => prototype.footer = function (this: InterfaceDeclaration, indent?: string) {
     return '';
-}
+})
 
-ClassDeclaration.prototype.imports = function (this: ClassDeclaration) {
+decorate(ClassDeclaration, ({prototype}) => prototype.imports = function (this: ClassDeclaration) {
     return `
 import java.util.*;
 import java.util.function.*;
@@ -37,9 +38,9 @@ import jdk.nashorn.api.scripting.*;${
     this.sourceFile.isModuleFile ? '' : `\n
 import static io.xrails.Src.global;`
     }`.substr(1);
-}
+})
 
-ClassDeclaration.prototype.header = function (this: ClassDeclaration, indent?: string) {
+decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
 ${indent}static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
@@ -56,9 +57,9 @@ ${indent}    JS.heap.put(this, mirror);
 ${indent}}
 
 `}`.substr(1);    
-}
+})
 
-ClassDeclaration.prototype.footer = function (this: ClassDeclaration, indent?: string) {
+decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ClassDeclaration, indent?: string) {
     return !this.members.some(m => !m.static) ? '' : `
 ${!this.isThrown ? '' : `
 ${indent}public String getMessage() {
@@ -79,35 +80,35 @@ ${indent}@Override
 ${indent}public boolean equals(Object obj) {
 ${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
 ${indent}}`;
-}
+})
 
-MemberDeclaration.prototype.mirror = function (this: MemberDeclaration) {
+decorate(MemberDeclaration, ({prototype}) => prototype.mirror = function (this: MemberDeclaration) {
     return this.parent == this.sourceFile ? 'global' : this.static ? 'classMirror' : 'prototype';        
-}
+})
 
-VariableDeclaration.prototype.accessor = function (this: VariableDeclaration) {
+decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
     return `${this.mirror()}.get("${this.declarationName()}")`
-}
+})
 
-VariableDeclaration.prototype.getter = function (this: VariableDeclaration, indent?: string) {
+decorate(VariableDeclaration, ({prototype}) => prototype.getter = function (this: VariableDeclaration, indent?: string) {
     let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.returnValue()})` : this.type.returnValue();
     return `{
 ${indent}    return ${returnValue};
 ${indent}}`;        
-}
+})
 
-VariableDeclaration.prototype.setter = function (this: VariableDeclaration, indent?: string) {
+decorate(VariableDeclaration, ({prototype}) => prototype.setter = function (this: VariableDeclaration, indent?: string) {
     return `{
 ${indent}    ${this.mirror()}.setMember("${this.declarationName()}", ${this.type.argumentValue()});
 ${indent}}`;        
-}
+})
 
-FunctionDeclaration.prototype.accessor = function (this: FunctionDeclaration): string {
+decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.argumentValue());
     return this.static ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
-}
+})
 
-FunctionDeclaration.prototype.body = function (this: FunctionDeclaration, indent?: string): string {
+decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
     let body = `${indent}    ${this.signature.returnType instanceof VoidType ? this.accessor() : `return ${this.signature.returnType.returnValue()}`};`;
     let thrownDeclaredTypes: DeclaredType[] = this.signature.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
     if(thrownDeclaredTypes.length) {
@@ -131,9 +132,9 @@ ${indent}    }`;
     return `{
 ${body}
 ${indent}}`        
-}
+})
 
-ConstructorDeclaration.prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
+decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
     return `{
 ${indent}    prototype = (ScriptObjectMirror)classMirror.newObject(${this.signature.parameters.map(p => p.type.argumentValue()).join(', ')}); 
 ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
@@ -148,52 +149,52 @@ ${indent}        }
 ${indent}    }; 
 ${indent}    JS.heap.put(this, mirror); 
 ${indent}}`;        
-}
+})
 
-FunctionType.prototype.returnValue = function(this: FunctionType) {
+decorate(FunctionType, ({prototype}) => prototype.returnValue = function(this: FunctionType) {
     return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}.class)`;    
-}
+})
 
-AnyType.prototype.returnValue = function(this: AnyType) {
+decorate(AnyType, ({prototype}) => prototype.returnValue = function(this: AnyType) {
     return `JS.wrap(${this.parent.accessor()}, JS.Object::new)`;    
-}
+})
 
-DeclaredType.prototype.returnValue = function(this: DeclaredType) {
+decorate(DeclaredType, ({prototype}) => prototype.returnValue = function(this: DeclaredType) {
     return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.declaration instanceof InterfaceDeclaration ? '.class' : '::new'})`;    
-}
+})
 
-ArrayType.prototype.returnValue = function(this: ArrayType) {
+decorate(ArrayType, ({prototype}) => prototype.returnValue = function(this: ArrayType) {
     return `JS.wrap(${this.parent.accessor()}, ${this.typeArguments[0].arrayElementReturnValue()})`;    
-}
+})
 
-Type.prototype.returnValue = function(this: Type) {
+decorate(Type, ({prototype}) => prototype.returnValue = function(this: Type) {
     return `(${this.typeName()})${this.parent.accessor()}`;    
-}
+})
 
-ArrayType.prototype.arrayElementReturnValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.arrayElementReturnValue = function(this: ArrayType, optional: boolean = this.optional) {
     return `o -> new JS.Array<>(o, ${this.typeArguments[0].arrayElementReturnValue()})`;    
-}
+})
 
-Type.prototype.arrayElementReturnValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.arrayElementReturnValue = function(this: Type, optional: boolean = this.optional) {
     return `JS.Array::new`;    
-}
+})
 
-Type.prototype.argumentValue = function(this: Type) {
+decorate(Type, ({prototype}) => prototype.argumentValue = function(this: Type) {
     return this.parent.declarationName();    
-}
+})
 
-DeclaredType.prototype.argumentValue = function(this: DeclaredType) {
+decorate(DeclaredType, ({prototype}) => prototype.argumentValue = function(this: DeclaredType) {
     return this.declaration instanceof InterfaceDeclaration ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
-}
+})
 
-ArrayType.prototype.argumentValue = function(this: ArrayType) {
+decorate(ArrayType, ({prototype}) => prototype.argumentValue = function(this: ArrayType) {
     return `JS.heap.computeIfAbsent(${this.parent.declarationName()}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].arrayElementArgumentValue(this.optional)}))`;    
-}
+})
 
-Type.prototype.arrayElementArgumentValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.arrayElementArgumentValue = function(this: Type, optional: boolean = this.optional) {
     return this.parent.declarationName();    
-}
+})
 
-ArrayType.prototype.arrayElementArgumentValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.arrayElementArgumentValue = function(this: ArrayType, optional: boolean = this.optional) {
     return `${this.parent.declarationName()}, JS.ArrayMirror::new`;    
-}
+})

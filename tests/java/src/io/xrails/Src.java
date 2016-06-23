@@ -173,7 +173,7 @@ public class Src {
     }
     
     public static void setStringNoArgLambda(Supplier<String> stringNoArgLambda) {
-        global.setMember("stringNoArgLambda", JSObject(this.context, callback: { args in return this.valueOf(newValue()) }));
+        global.setMember("stringNoArgLambda", stringNoArgLambda);
     }
     
     public static void throwSimpleError() throws Exception {

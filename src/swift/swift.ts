@@ -1,7 +1,11 @@
 import * as path from 'path';
 import * as ast from "../ast"
 import {log} from "../log"
+import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
+import {
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
+} from "../ast"
 
 export interface SwiftOptions extends CompilerOptions {
     javascriptcore?: CompilerOptions 
@@ -18,7 +22,7 @@ declare module "../ast" {
     }
 }
  
-ast.Module.prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
+decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
     Reflect.set(this, 'resourcePath', `NSBundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
     let moduleFilename = path.join(options.outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
@@ -37,73 +41,73 @@ ast.Module.prototype.emit = function (this: ast.Module, options: SwiftOptions, w
         });
         writeFile(moduleFilename, file.emit());
     }
-}
+})
 
-ast.TypeDeclaration.prototype.suffix = function (this: ast.TypeDeclaration): string {
+decorate(TypeDeclaration, ({prototype}) => prototype.suffix = function (this: ast.TypeDeclaration): string {
     return '';
-}
+})
 
-ast.ClassDeclaration.prototype.suffix = function (this: ast.ClassDeclaration): string {
+decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
     return '';
-}
+})
 
-ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclaration): string {
+decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (this: ast.InterfaceDeclaration): string {
     return "protocol";
-}
+})
 
-ast.InterfaceDeclaration.prototype.suffix = function (this: ast.InterfaceDeclaration): string {
+decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (this: ast.InterfaceDeclaration): string {
     return " : class";
-}
+})
 
 
-ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
+decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
     return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
-}
+})
 
-ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {
+decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
     return `${this.declarationName()}: ${this.type.emit()}`;
-}
+})
 
-ast.FunctionDeclaration.prototype.prefix = function (this: ast.FunctionDeclaration): string {
+decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
     return `public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
-}
+})
 
-ast.FunctionDeclaration.prototype.suffix = function (this: ast.FunctionDeclaration): string {
+decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: ast.FunctionDeclaration): string {
     return `${this.signature.returnType instanceof ast.VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;
-}
+})
 
-ast.ConstructorDeclaration.prototype.declarationName = function (this: ast.ConstructorDeclaration): string {
+decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = function (this: ast.ConstructorDeclaration): string {
     return `init`;
-}
+})
 
-ast.ConstructorDeclaration.prototype.suffix = function (this: ast.ConstructorDeclaration): string {
+decorate(ConstructorDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ConstructorDeclaration): string {
     return this.signature.thrownTypes.length ? ' throws' : '';
-}
+})
 
-ast.Type.prototype.emit = function(this: ast.Type, optional: boolean = this.optional): string {
+decorate(Type, ({prototype}) => prototype.emit = function(this: ast.Type, optional: boolean = this.optional): string {
     return `${this.typeName()}${optional ? '?' : ''}`;    
-}
+})
 
-ast.AnyType.prototype.typeName = function(this: ast.AnyType): string {
+decorate(AnyType, ({prototype}) => prototype.typeName = function(this: ast.AnyType): string {
     return 'Any';  
-}
+})
 
-ast.BooleanType.prototype.typeName = function(this: ast.BooleanType): string {
+decorate(BooleanType, ({prototype}) => prototype.typeName = function(this: ast.BooleanType): string {
     return 'Bool';    
-}
+})
 
-ast.StringType.prototype.typeName = function(this: ast.StringType): string {
+decorate(StringType, ({prototype}) => prototype.typeName = function(this: ast.StringType): string {
     return 'String'    
-}
+})
 
-ast.NumberType.prototype.typeName = function(this: ast.NumberType): string {
+decorate(NumberType, ({prototype}) => prototype.typeName = function(this: ast.NumberType): string {
     return 'Double'    
-}
+})
 
-ast.ArrayType.prototype.typeName = function(this: ast.ArrayType): string {
+decorate(ArrayType, ({prototype}) => prototype.typeName = function(this: ast.ArrayType): string {
     return `[${this.typeArguments[0].emit()}]`;    
-}
+})
 
-ast.FunctionType.prototype.typeName = function(this: ast.FunctionType): string {
+decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: ast.FunctionType): string {
     return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> (${this.signature.returnType.emit()})`;
-}
+})

@@ -3,23 +3,22 @@ import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDecl
 let decorations : Map<Function, { proxy: { prototype: any }, additions: Set<PropertyKey>}> = new Map();
 
 export function decorate<T extends Function>(target: T, decorator: (type: T) => void) {
-    // let decoration = decorations.get(target.prototype);
-    // if(!decoration) {
-    //     decoration = {
-    //         additions: new Set(), 
-    //         proxy: { 
-    //             prototype: new Proxy(target.prototype, {
-    //                 set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
-    //                     decorations.get(prototype)!.additions.add(property);
-    //                     return Reflect.set(prototype, property, value, receiver);
-    //                 }
-    //             })
-    //         }
-    //     }
-    //     decorations.set(target.prototype, decoration!);
-    // }
-    // decorator(decoration.proxy as T);
-    decorator(target as T);
+    let decoration = decorations.get(target.prototype);
+    if(!decoration) {
+        decoration = {
+            additions: new Set(), 
+            proxy: { 
+                prototype: new Proxy(target.prototype, {
+                    set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
+                        decorations.get(prototype)!.additions.add(property);
+                        return Reflect.set(prototype, property, value, receiver);
+                    }
+                })
+            }
+        }
+        decorations.set(target.prototype, decoration!);
+    }
+    decorator(decoration.proxy as T);
 }
 
 export function undecorate() {
