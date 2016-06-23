@@ -14,6 +14,6 @@
   "exclude": [
     "node_modules",
     "bin",
-    "tests/reference"
+    "tests/input"
   ]
 }
