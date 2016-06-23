@@ -85,7 +85,7 @@ public var simpleInterfaceInstanceCalled :Bool {
     }
 }
 
-public protocol SimpleInterface {
+public protocol SimpleInterface : class {
 
     public func voidNoArgMethod()
 
@@ -102,4 +102,37 @@ public var simpleInterfaceInstance :SimpleInterface {
 
 public func acceptSimpleInterface(simpleInterface: SimpleInterface) {
     try! this[.acceptSimpleInterface](this.valueOf(simpleInterface))
+}
+
+
+
+extension SimpleInterface {
+    func eval(context: JSContext) -> JSValue {
+        return JSObject(context, callbacks: [
+
+            "voidNoArgMethod": { args in
+                self.voidNoArgMethod()
+                return nil
+            }    
+        ])
+    }
+}
+
+class JS_SimpleInterface : SimpleInterface {
+    
+    private let this :JSInstance;
+    
+    init(_ instance :JSInstance) {
+        this = instance
+        this.bind(self)
+    }
+    
+    deinit {
+        this.unbind(self)
+    }
+    
+    func voidNoArgMethod() {
+        try! this[.voidNoArgMethod]();
+    }
+    
 }

@@ -51,8 +51,13 @@ ast.InterfaceDeclaration.prototype.keyword = function (this: ast.InterfaceDeclar
     return "protocol";
 }
 
+ast.InterfaceDeclaration.prototype.suffix = function (this: ast.InterfaceDeclaration): string {
+    return " : class";
+}
+
+
 ast.VariableDeclaration.prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
-    return `${indent}public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
+    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 }
 
 ast.ParameterDeclaration.prototype.emit = function (this: ast.ParameterDeclaration): string {

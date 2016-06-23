@@ -21,10 +21,43 @@ SourceFile.prototype.header = function (this: SourceFile): string {
 }
 
 SourceFile.prototype.footer = function (this: SourceFile): string {
-    return !this.isModuleFile ? '' : `
+    return `
+${this.declarations.filter(d => d instanceof InterfaceDeclaration).reduce((out: string, i: InterfaceDeclaration) => `${out}
+extension ${i.declarationName()} {
+    func eval(context: JSContext) -> JSValue {
+        return JSObject(context, callbacks: [
+${i.members.reduce((out, m) => `${out}
+            "${m.name}": { args in
+                self.${m.declarationName()}()
+                return nil
+            }`, '')}    
+        ])
+    }
+}
+
+class JS_${i.declarationName()} : ${i.declarationName()} {
+    
+    private let this :JSInstance;
+    
+    init(_ instance :JSInstance) {
+        this = instance
+        this.bind(self)
+    }
+    
+    deinit {
+        this.unbind(self)
+    }
+    
+${i.members.reduce((out, m) => `${out}
+    func ${m.declarationName()}() {
+        try! this[.${m.declarationName()}]();
+    }
+`, '').substr(1)}    
+}
+`, '')}${!this.isModuleFile ? '' : `
 extension JSProperty {
     ${this.module.identifiers.map((d) => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
-}`.substr(1)
+}`.substr(1)}`.substr(1);
 }
 
 Declaration.prototype.argumentName = function (this: Declaration): string {
