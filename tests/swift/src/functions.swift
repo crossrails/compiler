@@ -5,7 +5,7 @@ public var voidNoArgFunctionCalled :Bool {
         return Bool(this[.voidNoArgFunctionCalled])
     }
     set {
-        this[.voidNoArgFunctionCalled] = this.valueOf(voidNoArgFunctionCalled)
+        this[.voidNoArgFunctionCalled] = this.valueOf(newValue)
     }
 }
 
