@@ -22,6 +22,7 @@
     "jasmine-node": "^2.0.0",
     "rewire": "^2.5.1",
     "typescript": "next",
+    "ts-node": "^0.9.3",
     "typings": "^1.0.4",
     "coveralls": "^2.11.9",
     "del": "^2.2.0",

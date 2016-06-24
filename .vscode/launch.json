@@ -30,6 +30,36 @@
 			"outDir": "${workspaceRoot}/src",
 			"sourceMaps": true
 		},
+		// {
+		// 	"name": "Launch",
+		// 	"type": "node",
+		// 	"request": "launch",
+		// 	"program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+		// 	"cwd": "${workspaceRoot}",
+		// 	"args": [
+		// 		"${workspaceRoot}/src/main.ts",
+		// 		// "--help"
+        //         "${workspaceRoot}/tests/input/src.js",
+		// 		"--implicitExport",
+		// 		"--logLevel=debug",
+		// 		"--swift.outDir=${workspaceRoot}/tests/swift/src",
+		// 		"--swift.bundleId=io.xrails.src",				
+		// 		"--java.outDir=${workspaceRoot}/tests/java/src",
+		// 		"--java.basePackage=io.xrails"
+        //     ],
+		// 	"preLaunchTask": "build",
+		// 	"stopOnEntry": false,
+		// 	"runtimeExecutable": null,
+		// 	"runtimeArgs": [
+		// 		"--nolazy"
+		// 	],
+		// 	"env": {
+		// 		"NODE_ENV": "development"
+		// 	},
+		// 	"externalConsole": false,
+		// 	"outDir": "${workspaceRoot}/src",
+		// 	"sourceMaps": true
+		// },
 		{
 			"name": "Attach",
 			"type": "node",

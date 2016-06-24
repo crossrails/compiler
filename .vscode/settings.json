@@ -8,8 +8,8 @@
     "files.exclude": {
         "**/.git": true,
         "**/.DS_Store": true,
-        "**/*.js": { "when": "$(basename).ts" },
-         "**/*.js.map": true
+        "src/**/*.js": { "when": "$(basename).ts" },
+         "src/**/*.js.map": true
     },
    "typescript.tsdk": "./node_modules/typescript/lib",
    "files.autoSave": "onFocusChange"

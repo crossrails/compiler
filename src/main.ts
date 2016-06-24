@@ -75,7 +75,6 @@ function main(...args: string[]): number {
                 group: 'General options:',
                 desc: 'Redirect output structure to a directory',
                 type: 'string',
-                // normalize: true,
                 default: '.'             
             },
             'noEmit': { 

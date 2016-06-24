@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {log} from "./log"
 import {Module} from "./ast" 
 import {writeFileSync} from 'fs';
@@ -35,6 +36,7 @@ export class Compiler {
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
         if(this.options[language]) {
             let options = Object.assign({}, this.options, this.options[language]);
+            options.outDir = path.normalize(options.outDir);
             let emittedOutput = false;  
             for(let engine of engines) {
                 if(options[engine]) {

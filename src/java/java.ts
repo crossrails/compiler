@@ -33,7 +33,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, optio
     let globals = this.declarations.filter(d => !(d instanceof TypeDeclaration));
     let writtenModuleFile = false;  
     for(let type of this.declarations.filter(d => d instanceof TypeDeclaration) as TypeDeclaration[]) {               
-        let filename = path.join(outDir, path.relative(this.sourceRoot, type.sourceFile.path.dir), `${type.declarationName()}.java`);
+        let filename = path.join(outDir, path.relative(path.join(this.src.dir, this.sourceRoot), type.sourceFile.path.dir), `${type.declarationName()}.java`);
         let file: SourceFile = Object.create(SourceFile.prototype, {
             isModuleFile: { value: filename == moduleFilename},
             name: { value: type.name },
