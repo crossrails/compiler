@@ -44,12 +44,6 @@ public class SpecialError : Equatable, ErrorProtocol {
     private let this :JSInstance;
     private var proxy :JSInstance!;
     
-    public init(_ message :String) {
-        self.this = try! SpecialError.this.construct(SpecialError.this.valueOf(message))
-        self.proxy = self.dynamicType === SpecialError.self ? this : JSObject(this.context, prototype: this, callbacks: [:])
-        this.bind(self)
-    }
-    
     init(_ instance :JSInstance) {
         this = instance
         proxy = instance;
@@ -58,6 +52,12 @@ public class SpecialError : Equatable, ErrorProtocol {
     
     deinit {
         this.unbind(self)
+    }
+    
+    public init(_ message :String) {
+        self.this = try! SpecialError.this.construct(SpecialError.this.valueOf(message))
+        self.proxy = self.dynamicType === SpecialError.self ? this : JSObject(this.context, prototype: this, callbacks: [:])
+        this.bind(self)
     }
     
     var message :String {

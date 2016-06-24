@@ -9,6 +9,20 @@ public class SimpleObject : Equatable {
     private let this :JSInstance;
     private var proxy :JSInstance!;
     
+    init(_ instance :JSInstance) {
+        this = instance
+        proxy = instance;
+        this.bind(self)
+    }
+    
+    deinit {
+        this.unbind(self)
+    }
+    
+    public var methodToOverrideCalled :Bool {
+        get { return Bool(proxy[.methodToOverrideCalled]) }
+    }
+    
     public init(_ v :Double) {
         self.this = try! SimpleObject.this.construct(SimpleObject.this.valueOf(v))
         self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [
@@ -20,26 +34,12 @@ public class SimpleObject : Equatable {
         this.bind(self)
     }
     
-    init(_ instance :JSInstance) {
-        this = instance
-        proxy = instance;
-        this.bind(self)
-    }
-    
-    deinit {
-        this.unbind(self)
-    }
-    
     public static func staticVoidNoArgMethod() {
         try! this[.staticVoidNoArgMethod]();
     }
     
     public func numberSingleObjectArgMethod(_ a :SimpleObject) -> Double {
         return Double(try! this[.numberSingleObjectArgMethod](this.valueOf(a)))
-    }
-    
-    public func upcastThisToObject() -> Any {
-        return try! this[.upcastThisToObject]().infer();
     }
     
     public func callOverriddenMethod() {
@@ -49,16 +49,15 @@ public class SimpleObject : Equatable {
     public func methodToOverride() {
         try! this[.methodToOverride].call(proxy)
     }
-    
-    public var methodToOverrideCalled :Bool {
-        get { return Bool(proxy[.methodToOverrideCalled]) }
-    }
+
+    public func upcastThisToObject() -> Any {
+        return try! this[.upcastThisToObject]().infer();
+    }    
 }
 
 public func ==(lhs: SimpleObject, rhs: SimpleObject) -> Bool {
     return lhs as AnyObject == rhs as AnyObject
 }
-
     
 public let simpleObjectInstance :SimpleObject = SimpleObject(this[.simpleObjectInstance])
 
