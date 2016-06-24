@@ -8,11 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		00A968FC1CEBC846001C97AA /* types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A968FB1CEBC846001C97AA /* types.swift */; };
-		1D15F92A1C92FA5800952FBE /* js.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D15F9291C92FA5800952FBE /* js.swift */; };
 		1DB561251C680B59003442CF /* src.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB561241C680B59003442CF /* src.swift */; };
 		1DE3D3D11C66BA6F009671D8 /* src.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DE3D3D01C66BA6F009671D8 /* src.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DE3D3DD1C66BAA6009671D8 /* srcTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE3D3DC1C66BAA6009671D8 /* srcTest.swift */; };
 		1DE3D3DF1C66BAA6009671D8 /* src.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE3D3CD1C66BA6F009671D8 /* src.framework */; };
+		B62500321D1DBA3E00493DDD /* javascriptcore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62500311D1DBA3E00493DDD /* javascriptcore.swift */; };
 		B63B760F1D1DAEB9004D66B8 /* src.js in Resources */ = {isa = PBXBuildFile; fileRef = B63B760E1D1DAEB9004D66B8 /* src.js */; };
 		B6D665EE1D1B0AF400AD848E /* functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D665EC1D1B0AF400AD848E /* functions.swift */; };
 		B6D665EF1D1B0AF400AD848E /* objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D665ED1D1B0AF400AD848E /* objects.swift */; };
@@ -41,6 +41,7 @@
 		1DE3D3DA1C66BAA6009671D8 /* test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DE3D3DC1C66BAA6009671D8 /* srcTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = srcTest.swift; sourceTree = "<group>"; };
 		1DE3D3DE1C66BAA6009671D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B62500311D1DBA3E00493DDD /* javascriptcore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = javascriptcore.swift; path = ../../src/swift/javascriptcore.swift; sourceTree = "<group>"; };
 		B63B760E1D1DAEB9004D66B8 /* src.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = src.js; path = ../input/src.js; sourceTree = "<group>"; };
 		B6D665EC1D1B0AF400AD848E /* functions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = functions.swift; sourceTree = "<group>"; };
 		B6D665ED1D1B0AF400AD848E /* objects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = objects.swift; sourceTree = "<group>"; };
@@ -69,6 +70,7 @@
 		1DE3D3C11C66B9E8009671D8 = {
 			isa = PBXGroup;
 			children = (
+				B62500311D1DBA3E00493DDD /* javascriptcore.swift */,
 				B63B760E1D1DAEB9004D66B8 /* src.js */,
 				1DE3D3CF1C66BA6F009671D8 /* src */,
 				1DE3D3DB1C66BAA6009671D8 /* test */,
@@ -173,9 +175,11 @@
 				TargetAttributes = {
 					1DE3D3CC1C66BA6F009671D8 = {
 						CreatedOnToolsVersion = 7.2;
+						LastSwiftMigration = 0800;
 					};
 					1DE3D3D91C66BAA6009671D8 = {
 						CreatedOnToolsVersion = 7.2;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -220,11 +224,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D15F92A1C92FA5800952FBE /* js.swift in Sources */,
 				1DB561251C680B59003442CF /* src.swift in Sources */,
 				00A968FC1CEBC846001C97AA /* types.swift in Sources */,
 				B6D665EF1D1B0AF400AD848E /* objects.swift in Sources */,
 				B6D665EE1D1B0AF400AD848E /* functions.swift in Sources */,
+				B62500321D1DBA3E00493DDD /* javascriptcore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +321,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -368,6 +373,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -419,6 +425,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -460,6 +467,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.xrails.test;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

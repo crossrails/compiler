@@ -34,7 +34,7 @@ public class SimpleObject : Equatable {
         try! this[.staticVoidNoArgMethod]();
     }
     
-    public func numberSingleObjectArgMethod(a :SimpleObject) -> Double {
+    public func numberSingleObjectArgMethod(_ a :SimpleObject) -> Double {
         return Double(try! this[.numberSingleObjectArgMethod](this.valueOf(a)))
     }
     
@@ -108,7 +108,7 @@ class JS_SimpleInterface : SimpleInterface {
 }
 
 extension SimpleInterface {
-    func eval(context: JSContext) -> JSValue {
+    func eval(_ context: JSContext) -> JSValue {
         return JSObject(context, callbacks: [
             "voidNoArgMethod": { args in
                 self.voidNoArgMethod()
@@ -125,6 +125,6 @@ public var simpleInterfaceInstance :SimpleInterface {
     }
 }
 
-public func acceptSimpleInterface(simpleInterface :SimpleInterface) {
+public func acceptSimpleInterface(_ simpleInterface :SimpleInterface) {
     try! this[.acceptSimpleInterface](this.valueOf(simpleInterface, with:simpleInterface.eval))
 }

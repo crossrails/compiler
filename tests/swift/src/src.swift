@@ -1,6 +1,6 @@
 import Foundation
 
-var this :JSInstance = try! JSContext().eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
+var this :JSInstance = try! JSContext().eval(Bundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!)
 
 extension JSProperty {
     static let booleanConst: JSProperty = "booleanConst"

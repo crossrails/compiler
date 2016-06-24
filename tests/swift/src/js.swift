@@ -9,7 +9,7 @@
 import Foundation
 import JavaScriptCore
 
-private let bindings = NSMapTable(keyOptions: [.ObjectPointerPersonality, .WeakMemory], valueOptions: .ObjectPointerPersonality)
+private let bindings = MapTable(keyOptions: [.objectPointerPersonality, .weakMemory], valueOptions: .objectPointerPersonality)
 
 struct JSContext {
     
@@ -23,8 +23,8 @@ struct JSContext {
         self.ref = ref
     }
     
-    func eval(path :String) throws {
-        let string = JSStringCreateWithCFString(try NSString(contentsOfFile: path, encoding: NSUTF8StringEncoding) as String)
+    func eval(_ path :String) throws {
+        let string = JSStringCreateWithCFString(try NSString(contentsOfFile: path, encoding: String.Encoding.utf8.rawValue) as String)
         let url = JSStringCreateWithCFString(path)
         defer {
             JSStringRelease(url)
@@ -35,12 +35,12 @@ struct JSContext {
         }
     }
     
-    func invoke<T>(@noescape f: (inout exception :JSValueRef ) -> T) throws -> T {
-        var exception :JSValueRef = nil
-        let result = f(exception: &exception)
+    func invoke<T>(@noescape _ f: (inout exception :JSValueRef ) -> T) throws -> T {
+        var exception :JSValueRef? = nil
+        let result = f(exception: &exception!)
         if exception != nil {
-            print("Exception thrown: \(String(self, ref: exception))")
-            throw Error(JSValue(self, ref: exception))
+            print("Exception thrown: \(String(self, ref: exception!))")
+            throw Error(JSValue(self, ref: exception!))
         }
         return result
     }
@@ -98,7 +98,7 @@ private let message : JSProperty = "message"
 private let name : JSProperty = "name"
 private let Function : JSProperty = "Function"
 
-public struct Error: ErrorType, CustomStringConvertible {
+public struct Error: ErrorProtocol, CustomStringConvertible {
     
     let exception :JSValue
     
@@ -197,35 +197,35 @@ class JSObject : JSValue {
         self.callbacks = callbacks
         var definition :JSClassDefinition = kJSClassDefinitionEmpty
         definition.finalize = {
-            Unmanaged<JSObject>.fromOpaque(COpaquePointer(JSObjectGetPrivate($0))).release()
+            Unmanaged<JSObject>.fromOpaque(OpaquePointer(JSObjectGetPrivate($0))).release()
         }
         definition.callAsFunction = { (_, function, this, argCount, args, exception) -> JSValueRef in
             let data = JSObjectGetPrivate(this)
-            let object :JSObject = Unmanaged.fromOpaque(COpaquePointer(data == nil ? JSObjectGetPrivate(function) : data)).takeUnretainedValue()
+            let object :JSObject = Unmanaged.fromOpaque(OpaquePointer((data == nil ? JSObjectGetPrivate(function) : data)!)).takeUnretainedValue()
             do {
-                let value = JSValue(object.context, ref: function)
+                let value = JSValue(object.context, ref: function!)
                 var arguments = [JSValue]()
                 for index in 0..<argCount {
-                    arguments.append(JSValue(object.context, ref: args[index]))
+                    arguments.append(JSValue(object.context, ref: (args?[index]!)!))
                 }
                 let callback = object.callbacks[String(value[name])]!
                 return try callback(arguments)?.ref ?? JSValueMakeUndefined(object.context.ref)
             } catch let error as Error {
-                exception.initialize(error.exception.ref)
+                exception?.initialize(with: error.exception.ref)
             } catch let error as CustomStringConvertible {
-                var value : JSValueRef = nil
+                var value : JSValueRef? = nil
                 var message = object.valueOf(error.description).ref
                 value = JSObjectMakeError(object.context.ref, 1, &message, &value)
-                exception.initialize(value)
+                exception?.initialize(with: value)
             } catch {
-                var value : JSValueRef = nil
+                var value : JSValueRef? = nil
                 value = JSObjectMakeError(object.context.ref, 0, nil, &value)
-                exception.initialize(value)
+                exception?.initialize(with: value)
             }
             return JSValueMakeUndefined(object.context.ref)
         }
         var functions: [JSStaticFunction] = callbacks.keys.map({
-            JSStaticFunction(name: ($0 as NSString).UTF8String, callAsFunction: definition.callAsFunction, attributes: UInt32(kJSPropertyAttributeNone))
+            JSStaticFunction(name: ($0 as NSString).utf8String, callAsFunction: definition.callAsFunction, attributes: UInt32(kJSPropertyAttributeNone))
         })
         functions.append(JSStaticFunction(name: nil, callAsFunction: nil, attributes: 0))
         definition.staticFunctions = UnsafePointer<JSStaticFunction>(functions)
@@ -240,9 +240,9 @@ class JSObject : JSValue {
 //    }
 }
 
-private func cast(any :Any) -> JSValue? {
+private func cast(_ any :Any) -> JSValue? {
     if let object = any as? AnyObject {
-        if let value = bindings.objectForKey(object) as? JSValue {
+        if let value = bindings.object(forKey: object) as? JSValue {
             return value
         }
     }
@@ -261,17 +261,17 @@ func == (lhs: Any, rhs: Any) -> Bool {
 }
 
 protocol JSFunction {
-    func bind(object: AnyObject)
-    func call(this :JSThis, args :JSValue...) throws -> JSValue
-    func call(this :JSThis, args :[JSValue]) throws -> JSValue
+    func bind(_ object: AnyObject)
+    func call(_ this :JSThis, args :JSValue...) throws -> JSValue
+    func call(_ this :JSThis, args :[JSValue]) throws -> JSValue
 }
 
 extension JSValue : JSFunction {
-    func call(this :JSThis, args :JSValue...) throws -> JSValue {
+    func call(_ this :JSThis, args :JSValue...) throws -> JSValue {
         return try self.call(this, args: args)
     }
     
-    func call(this :JSThis, args :[JSValue]) throws -> JSValue {
+    func call(_ this :JSThis, args :[JSValue]) throws -> JSValue {
 //        print("calling \(self) with \(args) on object \(this)")
 //        for arg in args {
 //            if(JSValueIsObject(context.ref, arg.ref)) {
@@ -314,21 +314,21 @@ protocol JSThis {
     
     subscript(property: JSProperty) -> (_ :JSValue...) throws -> (JSValue) { get }
     
-    func valueOf(value: Bool) -> JSValue
+    func valueOf(_ value: Bool) -> JSValue
     
-    func valueOf(value: Double) -> JSValue
+    func valueOf(_ value: Double) -> JSValue
     
-    func valueOf(value: String) -> JSValue
+    func valueOf(_ value: String) -> JSValue
     
-    func valueOf<Wrapped>(value: Optional<Wrapped>, @noescape wrapped:(Wrapped) -> JSValue) -> JSValue
+    func valueOf<Wrapped>(_ value: Optional<Wrapped>, @noescape wrapped:(Wrapped) -> JSValue) -> JSValue
     
-    func valueOf<Element>(value: Array<Element>, @noescape element:(Element) -> JSValue) -> JSValue
+    func valueOf<Element>(_ value: Array<Element>, @noescape element:(Element) -> JSValue) -> JSValue
     
-    func valueOf(object: AnyObject) -> JSValue
+    func valueOf(_ object: AnyObject) -> JSValue
     
-    func valueOf(object: AnyObject, with eval :(JSContext) -> (JSValue)) -> JSValue
+    func valueOf(_ object: AnyObject, with eval :(JSContext) -> (JSValue)) -> JSValue
 
-    func valueOf(value: Any?) -> JSValue
+    func valueOf(_ value: Any?) -> JSValue
 }
 
 extension JSValue : JSThis {
@@ -339,15 +339,15 @@ extension JSValue : JSThis {
         }
     }
     
-    func valueOf(value: Bool) -> JSValue {
+    func valueOf(_ value: Bool) -> JSValue {
         return JSValue(context, ref: JSValueMakeBoolean(context.ref, value))
     }
     
-    func valueOf(value: Double) -> JSValue {
+    func valueOf(_ value: Double) -> JSValue {
         return JSValue(context, ref: JSValueMakeNumber(context.ref, value))
     }
     
-    func valueOf(value: String) -> JSValue {
+    func valueOf(_ value: String) -> JSValue {
         let string = JSStringCreateWithUTF8CString(value)
         defer {
             JSStringRelease(string)
@@ -355,26 +355,26 @@ extension JSValue : JSThis {
         return JSValue(context, ref: JSValueMakeString(context.ref, string))
     }
     
-    func valueOf<Wrapped>(value: Optional<Wrapped>, @noescape wrapped:(Wrapped) -> JSValue) -> JSValue {
+    func valueOf<Wrapped>(_ value: Optional<Wrapped>, @noescape wrapped:(Wrapped) -> JSValue) -> JSValue {
         return value == nil ? JSValue(context, ref: JSValueMakeNull(context.ref)) : wrapped(value!)
     }
     
-    func valueOf<Element>(value: Array<Element>, @noescape element:(Element) -> JSValue) -> JSValue {
+    func valueOf<Element>(_ value: Array<Element>, @noescape element:(Element) -> JSValue) -> JSValue {
         return JSValue(context, ref: try! context.invoke {
             JSObjectMakeArray(self.context.ref, value.count, value.map({ element($0).ref }), &$0)
         })
     }
     
-    func valueOf(object: AnyObject) -> JSValue {
-        return bindings.objectForKey(object) as! JSValue
+    func valueOf(_ object: AnyObject) -> JSValue {
+        return bindings.object(forKey: object) as! JSValue
     }
     
-    func valueOf<T :AnyObject>(object: T, with eval :(JSContext) -> (JSValue)) -> JSValue {
-        let value :JSValue? = bindings.objectForKey(object) as? JSValue
+    func valueOf<T :AnyObject>(_ object: T, with eval :(JSContext) -> (JSValue)) -> JSValue {
+        let value :JSValue? = bindings.object(forKey: object) as? JSValue
         return value ?? eval(context)
     }
     
-    func valueOf(value :Any?) -> JSValue {
+    func valueOf(_ value :Any?) -> JSValue {
         switch value {
             case nil:
                 return JSValue(context, ref: JSValueMakeNull(context.ref))
@@ -396,18 +396,18 @@ extension JSValue : JSThis {
 }
 
 protocol JSInstance : JSThis {
-    func bind(object: AnyObject)
-    func unbind(object: AnyObject)
+    func bind(_ object: AnyObject)
+    func unbind(_ object: AnyObject)
 }
 
 extension JSValue : JSInstance {
     
-    func bind(object: AnyObject) {
+    func bind(_ object: AnyObject) {
         bindings.setObject(self, forKey: object)
     }
     
-    func unbind(object: AnyObject) {
-        bindings.removeObjectForKey(object)
+    func unbind(_ object: AnyObject) {
+        bindings.removeObject(forKey: object)
     }
 }
 
@@ -418,18 +418,18 @@ extension JSContext {
         }
     }
     
-    func eval(path :String) throws -> JSInstance {
+    func eval(_ path :String) throws -> JSInstance {
         try eval(path) as Void;
         return globalObject
     }
 }
 
 protocol JSClass : JSThis {
-    func construct(args :JSValue...) throws -> JSInstance
+    func construct(_ args :JSValue...) throws -> JSInstance
 }
 
 extension JSValue : JSClass {
-    func construct(args :JSValue...) throws -> JSInstance {
+    func construct(_ args :JSValue...) throws -> JSInstance {
         return JSValue(context, ref: try context.invoke {
             JSObjectCallAsConstructor(self.context.ref, self.ref, args.count, args.map({ $0.ref}), &$0)
         })
@@ -475,7 +475,7 @@ extension String {
 
 extension Optional {
     init(_ value: JSValue, @noescape wrapped:(JSValue) -> Wrapped) {
-        self = JSValueIsNull(value.context.ref, value.ref) || JSValueIsUndefined(value.context.ref, value.ref) ? .None : wrapped(value)
+        self = JSValueIsNull(value.context.ref, value.ref) || JSValueIsUndefined(value.context.ref, value.ref) ? .none : wrapped(value)
     }
 }
 

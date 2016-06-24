@@ -17,7 +17,7 @@ class test: XCTestCase {
     }
     
     override func tearDown() {
-        try! this.context.eval(NSBundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!) as Void
+        try! this.context.eval(Bundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!) as Void
     }
     
     func testSimpleException() {

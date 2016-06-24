@@ -17,7 +17,7 @@ public func stringNoArgFunction() -> String {
     return String(try! this[.stringNoArgFunction]())
 }
 
-public func numberMultipleArgFunction(a: Double, b: Double) -> Double {
+public func numberMultipleArgFunction(_ a: Double, b: Double) -> Double {
     return Double(try! this[.numberMultipleArgFunction](this.valueOf(a), this.valueOf(b)))
 }
 
@@ -35,7 +35,7 @@ public func throwSimpleError() throws {
     try this[.throwSimpleError]()
 }
 
-public class SpecialError : Equatable, ErrorType {
+public class SpecialError : Equatable, ErrorProtocol {
     
     private static var this :JSClass {
         get { return src.this["SpecialException"] }
