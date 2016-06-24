@@ -23,7 +23,7 @@ declare module "../ast" {
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
-    Reflect.set(this, 'resourcePath', `NSBundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
+    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
     let moduleFilename = path.join(options.outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
     for(let file of this.files as Array<ast.SourceFile>) {            
@@ -48,7 +48,14 @@ decorate(TypeDeclaration, ({prototype}) => prototype.suffix = function (this: as
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
-    return '';
+    return ' : Equatable';
+})
+
+decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ast.ClassDeclaration): string {
+    return `}    
+
+public func ==(lhs: ${this.declarationName()}, rhs: ${this.declarationName()}) -> Bool { 
+    return lhs as AnyObject == rhs as AnyObject`;
 })
 
 decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (this: ast.InterfaceDeclaration): string {
