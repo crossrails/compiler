@@ -1,67 +1,64 @@
 import Foundation
 
-public class SimpleObject {
-
-    public static var staticVoidNoArgMethodCalled :Bool {
-        get {
-            return Bool(this[.staticVoidNoArgMethodCalled])
-        }
-        set {
-            this[.staticVoidNoArgMethodCalled] = this.valueOf(newValue)
-        }
+public class SimpleObject : Equatable {
+    
+    private static var this :JSClass {
+        get { return src.this["SimpleObject"] }
     }
-
-    public var methodToOverrideCalled :Bool {
-        get {
-            return Bool(this[.methodToOverrideCalled])
-        }
-        set {
-            this[.methodToOverrideCalled] = this.valueOf(newValue)
-        }
+    
+    private let this :JSInstance;
+    private var proxy :JSInstance!;
+    
+    public init(_ v :Double) {
+        self.this = try! SimpleObject.this.construct(SimpleObject.this.valueOf(v))
+        self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [
+            "methodToOverride": { args in
+                self.methodToOverride()
+                return nil
+            }
+            ])
+        this.bind(self)
     }
-
-    public func init(v: Double) {
-        self.this = try! SimpleObject.this.construct(this.valueOf(v)) 
-        self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
-            "numberSingleObjectArgMethod": { args in 
-                return self.numberSingleObjectArgMethod(args)
-            }, 
-            "callOverriddenMethod": { args in 
-                self.callOverriddenMethod(args) 
-                return null
-            }, 
-            "methodToOverride": { args in 
-                self.methodToOverride(args) 
-                return null
-            }, 
-            "upcastThisToObject": { args in 
-                return self.upcastThisToObject(args)
-            } 
-        ]) 
-        this.bind(self) 
+    
+    init(_ instance :JSInstance) {
+        this = instance
+        proxy = instance;
+        this.bind(self)
     }
-
+    
+    deinit {
+        this.unbind(self)
+    }
+    
     public static func staticVoidNoArgMethod() {
-        try! this[.staticVoidNoArgMethod]()
+        try! this[.staticVoidNoArgMethod]();
     }
-
-    public func numberSingleObjectArgMethod(a: SimpleObject) -> Double {
+    
+    public func numberSingleObjectArgMethod(a :SimpleObject) -> Double {
         return Double(try! this[.numberSingleObjectArgMethod](this.valueOf(a)))
     }
-
-    public func callOverriddenMethod() {
-        try! this[.callOverriddenMethod]()
-    }
-
-    public func methodToOverride() {
-        try! this[.methodToOverride]()
-    }
-
+    
     public func upcastThisToObject() -> Any {
-        return try! this[.upcastThisToObject]().infer()
+        return try! this[.upcastThisToObject]().infer();
     }
-
+    
+    public func callOverriddenMethod() {
+        try! this[.callOverriddenMethod].call(proxy)
+    }
+    
+    public func methodToOverride() {
+        try! this[.methodToOverride].call(proxy)
+    }
+    
+    public var methodToOverrideCalled :Bool {
+        get { return Bool(proxy[.methodToOverrideCalled]) }
+    }
 }
+
+public func ==(lhs: SimpleObject, rhs: SimpleObject) -> Bool {
+    return lhs as AnyObject == rhs as AnyObject
+}
+
     
 public let simpleObjectInstance :SimpleObject = SimpleObject(this[.simpleObjectInstance])
 
@@ -87,35 +84,8 @@ public var simpleInterfaceInstanceCalled :Bool {
 
 public protocol SimpleInterface : class {
 
-    public func voidNoArgMethod()
+    func voidNoArgMethod()
 
-}
-    
-public var simpleInterfaceInstance :SimpleInterface {
-    get {
-        return SimpleInterface(this[.simpleInterfaceInstance])
-    }
-    set {
-        this[.simpleInterfaceInstance] = this.valueOf(newValue)
-    }
-}
-
-public func acceptSimpleInterface(simpleInterface: SimpleInterface) {
-    try! this[.acceptSimpleInterface](this.valueOf(simpleInterface))
-}
-
-
-
-extension SimpleInterface {
-    func eval(context: JSContext) -> JSValue {
-        return JSObject(context, callbacks: [
-
-            "voidNoArgMethod": { args in
-                self.voidNoArgMethod()
-                return nil
-            }    
-        ])
-    }
 }
 
 class JS_SimpleInterface : SimpleInterface {
@@ -135,4 +105,26 @@ class JS_SimpleInterface : SimpleInterface {
         try! this[.voidNoArgMethod]();
     }
     
+}
+
+extension SimpleInterface {
+    func eval(context: JSContext) -> JSValue {
+        return JSObject(context, callbacks: [
+            "voidNoArgMethod": { args in
+                self.voidNoArgMethod()
+                return nil
+            }
+            ])
+    }
+}
+
+    
+public var simpleInterfaceInstance :SimpleInterface {
+    get {
+        return JS_SimpleInterface(this[.simpleInterfaceInstance])
+    }
+}
+
+public func acceptSimpleInterface(simpleInterface :SimpleInterface) {
+    try! this[.acceptSimpleInterface](this.valueOf(simpleInterface, with:simpleInterface.eval))
 }

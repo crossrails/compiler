@@ -51,4 +51,5 @@ extension JSProperty {
     static let voidNoArgMethod: JSProperty = "voidNoArgMethod"
     static let simpleInterfaceInstance: JSProperty = "simpleInterfaceInstance"
     static let acceptSimpleInterface: JSProperty = "acceptSimpleInterface"
+    static let message: JSProperty = "message"
 }

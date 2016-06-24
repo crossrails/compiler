@@ -35,7 +35,7 @@ class test: XCTestCase {
         do {
             try throwSpecialError()
             XCTFail()
-        } catch let e as SpecialException {
+        } catch let e as SpecialError {
             XCTAssertEqual("Special error message", e.message)
         } catch {
             XCTFail()

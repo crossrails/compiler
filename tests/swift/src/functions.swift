@@ -35,22 +35,47 @@ public func throwSimpleError() throws {
     try this[.throwSimpleError]()
 }
 
-public class SpecialError {
-
-    public func init(message: String) {
-        self.this = try! SimpleObject.this.construct(this.valueOf(message)) 
-        self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
- 
-        ]) 
-        this.bind(self) 
+public class SpecialError : Equatable, ErrorType {
+    
+    private static var this :JSClass {
+        get { return src.this["SpecialException"] }
     }
-
+    
+    private let this :JSInstance;
+    private var proxy :JSInstance!;
+    
+    public init(_ message :String) {
+        self.this = try! SpecialError.this.construct(SpecialError.this.valueOf(message))
+        self.proxy = self.dynamicType === SpecialError.self ? this : JSObject(this.context, prototype: this, callbacks: [:])
+        this.bind(self)
+    }
+    
+    init(_ instance :JSInstance) {
+        this = instance
+        proxy = instance;
+        this.bind(self)
+    }
+    
+    deinit {
+        this.unbind(self)
+    }
+    
+    var message :String {
+        get {
+            return String(this[.message]);
+        }
+    }
 }
+
+public func ==(lhs: SpecialError, rhs: SpecialError) -> Bool {
+    return lhs as AnyObject == rhs as AnyObject
+}
+
     
 public func throwSpecialError() throws {
     do {
         try this[.throwSpecialError]()
     } catch let error as Error {
-        throw new SpecialError(error.exception)
+        throw SpecialError(error.exception)
     }
 }
