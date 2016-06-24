@@ -1,17 +1,19 @@
 import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType} from "./ast"
+import * as assert from "assert"
 
-let decorations : Map<Function, { proxy: { prototype: any }, additions: Set<PropertyKey>}> = new Map();
+let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
 
 export function decorate<T extends Function>(target: T, decorator: (type: T) => void) {
     let decoration = decorations.get(target.prototype);
     if(!decoration) {
         decoration = {
-            additions: new Set(), 
+            changes: new Map(), 
             proxy: { 
                 prototype: new Proxy(target.prototype, {
                     set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
-                        decorations.get(prototype)!.additions.add(property);
-                        return Reflect.set(prototype, property, value, receiver);
+                        let existing = Reflect.getOwnPropertyDescriptor(prototype, property);    
+                        decorations.get(prototype)!.changes.set(property, existing ? existing.value : undefined);
+                        return Reflect.set(prototype, property, value, receiver);                    
                     }
                 })
             }
@@ -23,7 +25,7 @@ export function decorate<T extends Function>(target: T, decorator: (type: T) => 
 
 export function undecorate() {
     for (let [prototype, decoration] of decorations) {
-        decoration.additions.forEach(property => Reflect.deleteProperty(prototype, property));
+        decoration.changes.forEach((value, property) => value ? Reflect.set(prototype, property, value) : Reflect.deleteProperty(prototype, property)); 
     }
     decorations.clear();    
 }
