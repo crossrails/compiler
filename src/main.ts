@@ -52,6 +52,12 @@ function main(...args: string[]): number {
                 group: 'Swift options:',
                 desc: 'The id of the bundle containing the javascript source file, omit to use the main bundle',
                 type: 'string'             
+            },
+            'swift.omitArgumentLabels': { 
+                group: 'Swift options:',
+                desc: 'Prefix all function arguments with _',
+                default: false,             
+                type: 'boolean'
             }
         })
         .options({

@@ -164,6 +164,7 @@ export class VariableDeclaration extends MemberDeclaration {
 
 export class ParameterDeclaration extends Declaration {
     readonly type: Type;
+    readonly parent: Declaration;
     
     constructor(node: ts.ParameterDeclaration, parent: Declaration, context: Context) {
         super(node, parent);

@@ -9,12 +9,14 @@ import {
 
 export interface SwiftOptions extends CompilerOptions {
     javascriptcore?: CompilerOptions 
-    bundleId: string|undefined   
+    bundleId: string|undefined
+    omitArgumentLabels: boolean|undefined   
 }
 
 declare module "../ast" {
     interface Module {
         resourcePath: string
+        parameterPrefix: string
     }
 
     interface VariableDeclaration {
@@ -24,6 +26,7 @@ declare module "../ast" {
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
     Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
+    Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(options.outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
     for(let file of this.files as Array<ast.SourceFile>) {            
@@ -66,21 +69,24 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (thi
     return " : class";
 })
 
-
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
     return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.declarationName()}: ${this.type.emit()}`;
+    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
-    return `public ${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: ast.FunctionDeclaration): string {
     return `${this.signature.returnType instanceof ast.VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;
+})
+
+decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ast.ConstructorDeclaration): string {
+    return `public`;
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = function (this: ast.ConstructorDeclaration): string {
