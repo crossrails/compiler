@@ -7,7 +7,7 @@ public class SimpleObject : Equatable {
     } 
      
     private let this :JSInstance
-    private var proxy :JSInstance! 
+    private var proxy :JSInstance!
     
     init(_ instance :JSInstance) { 
         this = instance 

@@ -34,8 +34,9 @@ function throwSimpleError(): void {
 }
 
 class SpecialError {
+    message: string
 
-    constructor(private message: string) {
+    constructor(message: string) {
         this.message = message
     }
 }

@@ -69,16 +69,17 @@ ${indent}}`
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
+    let members = this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration');
     return `{
 ${indent}    self.this = try! ${this.thisName()}.construct(${this.signature.parameters.map(p => p.type.argumentValue()).join(', ')}) 
-${indent}    self.proxy = self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
-${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
+${indent}    self.proxy = ${members.length == 0 ? 'this' : `self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
+${members.map((m: FunctionDeclaration) => `
 ${indent}        "${m.name}": { args in ${m.signature.returnType instanceof VoidType ? `
 ${indent}            self.${m.declarationName()}(args) 
 ${indent}            return nil` :  `
 ${indent}            return self.${m.declarationName()}(args)`}
 ${indent}        }`).join(', ').substr(1)} 
-${indent}    ]) 
+${indent}    ])`} 
 ${indent}    this.bind(self) 
 ${indent}}`;        
 })
@@ -106,11 +107,11 @@ ${indent}}`
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration): string {
     return `
     private static var this :JSClass { 
-        get { return src.this["${this.name}"] } 
+        get { return ${this.module.name}.this["${this.name}"] } 
     } 
      
     private let this :JSInstance
-    private var proxy :JSInstance! 
+    private var proxy :JSInstance!
     
     init(_ instance :JSInstance) { 
         this = instance 

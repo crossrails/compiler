@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;${
     this.sourceFile.isModuleFile ? '' : `\n
-import static io.xrails.Src.global;`
+import static io.xrails.${this.module.name}.global;`
     }`.substr(1);
 })
 

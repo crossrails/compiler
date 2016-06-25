@@ -34,6 +34,7 @@ extension JSProperty {
     static let stringNoArgLambda: JSProperty = "stringNoArgLambda"
     static let throwSimpleError: JSProperty = "throwSimpleError"
     static let SpecialError: JSProperty = "SpecialError"
+    static let message: JSProperty = "message"
     static let throwSpecialError: JSProperty = "throwSpecialError"
     static let SimpleObject: JSProperty = "SimpleObject"
     static let staticVoidNoArgMethodCalled: JSProperty = "staticVoidNoArgMethodCalled"
@@ -51,5 +52,4 @@ extension JSProperty {
     static let voidNoArgMethod: JSProperty = "voidNoArgMethod"
     static let simpleInterfaceInstance: JSProperty = "simpleInterfaceInstance"
     static let acceptSimpleInterface: JSProperty = "acceptSimpleInterface"
-    static let message: JSProperty = "message"
 }

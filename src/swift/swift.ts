@@ -51,7 +51,7 @@ decorate(TypeDeclaration, ({prototype}) => prototype.suffix = function (this: as
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
-    return ' : Equatable';
+    return ` : Equatable${this.isThrown ? ', ErrorProtocol' : ''}`;
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ast.ClassDeclaration): string {

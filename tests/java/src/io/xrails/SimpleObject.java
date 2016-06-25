@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;
 
-import static io.xrails.Src.global;
+import static io.xrails.src.global;
 
 public class SimpleObject {
 

@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;
 
-import static io.xrails.Src.global;
+import static io.xrails.src.global;
 
 public class SpecialException extends Exception {
 
@@ -19,6 +19,14 @@ public class SpecialException extends Exception {
         JS.heap.put(this, mirror);
     }
 
+    public String getMessage() {
+        return (String)prototype.get("message");
+    }
+    
+    public void setMessage(String message) {
+        prototype.setMember("message", message);
+    }
+    
     public SpecialException(String message) {
         prototype = (ScriptObjectMirror)classMirror.newObject(message); 
         mirror = getClass() == SpecialException.class ? prototype : new JS.AbstractMirror(prototype) { 
