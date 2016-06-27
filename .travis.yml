@@ -1,3 +1,4 @@
+osx_image: xcode8
 env: NODE_VERSION="6"
 addons:
   code_climate:
