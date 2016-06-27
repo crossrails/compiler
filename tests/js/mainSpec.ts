@@ -12,20 +12,13 @@ describe("Main", () => {
             
     it("successfully compiles the reference project", function(this: This) {
         let exitCode = require('../../src/main')(
-            './tests/reference/src.js', 
+            './tests/input/src.js',
+            '--implicitExport', 
             '--swift'
         );
         expect(exitCode).toBe(0);
         expect(this.writeFileMethod).toHaveBeenCalledTimes(4)
-        expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/tests[\\\/]reference[\\\/]src\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
-    });
-
-    it("fails when no output languages given", function(this: This) {
-        let exitCode = require('../../src/main')(
-            './tests/reference/src.js' 
-        );
-        expect(exitCode).toBe(1);
-        expect(this.writeFileMethod).not.toHaveBeenCalled();
+        expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
     });
         
     it("fails when no args given", function(this: This) {

@@ -3,9 +3,9 @@ import * as Path from 'path';
 
 export class Log {
     private _warningCount = 0
-    private _errorCount = 0;
+    private _errorCount = 0
 
-    public level: Log.Level = Log.Level.WARNING;
+    public level: Log.Level = Log.Level.WARNING
     
     public setLevel(level: string) {
         let i = 0;
@@ -16,6 +16,11 @@ export class Log {
             }
         }
         this.warn(`Unknown log level '${level}', level remaining unchanged at ${Log.Level[this.level]}`);        
+    }
+
+    public resetCounters() {
+        this._warningCount = 0;
+        this._errorCount = 0;    
     }
 
     public get warningCount() {
@@ -29,7 +34,7 @@ export class Log {
     public debug(message: any, node?: ts.Node, line: number = 0) {
         this.log(Log.Level.DEBUG, message, node, line);
     }
-    
+
     public info(message: any, node?: ts.Node, line: number = 0) {
         this.log(Log.Level.INFO, message, node, line);
     }

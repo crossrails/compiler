@@ -2,7 +2,7 @@
   "testFramework": "jasmine",
   "files": [
       "src/**/*.ts",
-      "tests/reference/*"
+      "tests/input/*"
   ],
   "tests": [
       "tests/js/**/*Spec.ts"

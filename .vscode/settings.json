@@ -9,7 +9,9 @@
         "**/.git": true,
         "**/.DS_Store": true,
         "src/**/*.js": { "when": "$(basename).ts" },
-         "src/**/*.js.map": true
+        "src/**/*.js.map": true,
+        "tests/js**/*.js": { "when": "$(basename).ts" },
+        "tests/js/**/*.js.map": true
     },
    "typescript.tsdk": "./node_modules/typescript/lib",
    "files.autoSave": "onFocusChange"

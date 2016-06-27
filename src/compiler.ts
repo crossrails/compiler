@@ -40,7 +40,7 @@ export class Compiler {
             let emittedOutput = false;  
             for(let engine of engines) {
                 if(options[engine]) {
-                    this.emit(module, language, engine, options);
+                    this.emit(module, language, engine, Object.assign({}, options, options[engine]));
                     emittedOutput = true;
                 }
             }
