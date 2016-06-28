@@ -10,16 +10,16 @@ describe("Main", () => {
         this.writeFileMethod = spyOn(fs, 'writeFileSync');
     });
             
-    it("successfully compiles the reference project", function(this: This) {
-        let exitCode = require('../../src/main')(
-            './tests/input/src.js',
-            '--implicitExport', 
-            '--swift'
-        );
-        expect(exitCode).toBe(0);
-        expect(this.writeFileMethod).toHaveBeenCalledTimes(4)
-        expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
-    });
+    // it("successfully compiles the reference project", function(this: This) {
+    //     let exitCode = require('../../src/main')(
+    //         './tests/input/src.js',
+    //         '--implicitExport', 
+    //         '--swift'
+    //     );
+    //     expect(exitCode).toBe(0);
+    //     expect(this.writeFileMethod).toHaveBeenCalledTimes(4)
+    //     expect(this.writeFileMethod).toHaveBeenCalledWith(jasmine.stringMatching(/types\.swift/), jasmine.stringMatching(/optionalBooleanConst/));        
+    // });
         
     it("fails when no args given", function(this: This) {
         try {

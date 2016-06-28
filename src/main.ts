@@ -104,7 +104,7 @@ function main(...args: string[]): number {
     let compiler = new Compiler(options, [
         [`swift`,   [`javascriptcore`]], 
         ['java',    [`nashorn`, 'javascriptcore']],
-        [`csharp`,  [`chakracore`]], 
+        [`cs`,      [`chakracore`]], 
         [`php`,     [`v8`]], 
     ]);
 
