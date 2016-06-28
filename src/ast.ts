@@ -50,7 +50,7 @@ class Comment {
     }
 }
 
-export abstract class Declaration {       
+export abstract class Declaration {
     readonly name: string; 
     readonly parent: Declaration|SourceFile;
 
@@ -71,7 +71,7 @@ export abstract class Declaration {
     }
 }
 
-export abstract class MemberDeclaration extends Declaration {       
+export abstract class MemberDeclaration extends Declaration {
     readonly comment: string
     readonly protected: boolean;
     readonly static: boolean;
@@ -94,7 +94,7 @@ export class FunctionSignature {
     constructor(node: ts.SignatureDeclaration, comment: Comment, parent: Declaration, context: Context) {
         if(node.type) {
             this.returnType = Type.from(node.type, false, parent, context);
-        } else if(this.constructor.name === 'FunctionDeclaration') {
+        } else {
             log.warn(`Return type information missing, assuming void`, node);
             this.returnType = new VoidType(parent);
         } 
@@ -485,13 +485,12 @@ export class VoidType extends Type {
 }
 
 export class ErrorType extends Type {
-
 }
 
 export class AnyType extends Type {
 }
 
-export class StringType extends Type  {
+export class StringType extends Type {
 }
 
 export class NumberType extends Type {
