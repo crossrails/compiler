@@ -393,6 +393,8 @@ export abstract class Type {
     static fromReference(reference: ts.TypeReferenceNode, optional: boolean, parent: Declaration, context: Context) {
         let identifier = reference.typeName as ts.Identifier
         switch(identifier.text) {
+            case 'Error':
+                return new ErrorType(optional, parent);
             case 'Array':
             case 'ReadonlyArray':
                 return new ArrayType(reference.typeArguments, optional, parent, context);
