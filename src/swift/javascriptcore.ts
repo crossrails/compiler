@@ -49,7 +49,7 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.thisName = function (t
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.argumentValue());
-    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.static ? `(${args.join(', ')})` : `.call(${['proxy', ...args].join(', ')})`}`;
+    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.static ? '(' : `.call(proxy${args.length ? `, args: ` : ''}`}${args.join(', ')})`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
