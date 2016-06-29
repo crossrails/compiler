@@ -94,7 +94,7 @@ export class FunctionSignature {
     constructor(node: ts.SignatureDeclaration, comment: Comment, parent: Declaration, context: Context) {
         if(node.type) {
             this.returnType = Type.from(node.type, false, parent, context);
-        } else {
+        } else if(!(parent instanceof ConstructorDeclaration)) {
             log.warn(`Return type information missing, assuming void`, node);
             this.returnType = new VoidType(parent);
         } 

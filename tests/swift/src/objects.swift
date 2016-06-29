@@ -41,18 +41,18 @@ public class SimpleObject : Equatable {
         self.this = try! SimpleObject.this.construct(SimpleObject.this.valueOf(v)) 
         self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
             "numberSingleObjectArgMethod": { args in 
-                return self.numberSingleObjectArgMethod(args)
+                return self.this.valueOf(self.numberSingleObjectArgMethod(a: SimpleObject(args[0])))
             }, 
             "callOverriddenMethod": { args in 
-                self.callOverriddenMethod(args) 
+                self.callOverriddenMethod() 
                 return nil
             }, 
             "methodToOverride": { args in 
-                self.methodToOverride(args) 
+                self.methodToOverride() 
                 return nil
             }, 
             "upcastThisToObject": { args in 
-                return self.upcastThisToObject(args)
+                return self.this.valueOf(self.upcastThisToObject())
             } 
         ]) 
         this.bind(self) 
@@ -63,7 +63,7 @@ public class SimpleObject : Equatable {
     }
 
     public func numberSingleObjectArgMethod(a: SimpleObject) -> Double {
-        return Double(try! this[.numberSingleObjectArgMethod].call(proxy, this.valueOf(a)))
+        return Double(try! this[.numberSingleObjectArgMethod].call(proxy, args: this.valueOf(a)))
     }
 
     public func callOverriddenMethod() {
