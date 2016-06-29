@@ -19,8 +19,8 @@ install:
   - "npm run upload-code-coverage"
 language: objective-c
 osx_image: xcode8
-xcode_project: tests/swift/swift.xcodeproj
-xcode_scheme: src
+script:
+  - set -o pipefail && xcodebuild -project tests/swift/swift.xcodeproj -scheme src build test | xcpretty
 notifications:
   webhooks:
     urls:
