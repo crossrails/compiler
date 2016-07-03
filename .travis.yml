@@ -21,7 +21,7 @@ install:
   - "npm install -g codeclimate-test-reporter"
   - "npm run create-code-coverage"
   - "npm run upload-code-coverage"
-  - "gradle test"
+  - "cd tests/java/ && gradle test && cd .. && cd .."
 language: objective-c
 osx_image: xcode7.3
 script:
