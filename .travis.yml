@@ -8,8 +8,8 @@ before_install:
   - brew install brew-cask
   - brew cask install java
   - brew install nvm
+  - brew install gradle
 install: 
-  - "java -version"
   - "nvm install $NODE_VERSION"
   - "node --version"
   - "npm install"
@@ -21,6 +21,7 @@ install:
   - "npm install -g codeclimate-test-reporter"
   - "npm run create-code-coverage"
   - "npm run upload-code-coverage"
+  - "gradle test"
 language: objective-c
 osx_image: xcode7.3
 script:

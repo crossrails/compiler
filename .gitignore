@@ -5,3 +5,4 @@ src/**/*.js
 src/**/*.js.map
 tests/js/**/*.js
 tests/js/**/*.js.map
+tests/java/build/
