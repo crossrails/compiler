@@ -1,8 +1,47 @@
 {
-  "name": "xrails-complier",
+  "name": "@xrails/complier",
   "version": "0.1.0",
-  "private": true,
+  "description": "A transpiler to expose the interface of a typescript/javascript library to native swift 3/java 8 code",
+  "keywords": [
+    "transpiler",
+    "swift",
+    "java",
+    "android",
+    "ios",
+    "windows",
+    "macos",
+    "typscript",
+    "javascriptcore",
+    "nashorn",
+    "chakracore"  
+  ],
+  "homepage": "https://www.crossrails.io",
+  "bugs": "https://github.com/crossrails/compiler/issues",
+  "license": "AGPL-1.0",
+  "author": { 
+    "name" : "Nicholas Bransby-Williams", 
+    "email" : "nbransby@gmail.com", 
+    "url" : "https://www.linkedin.com/in/nbransby"
+  },
+  "contributors": [{ 
+    "name" : "Andrew Reed", 
+    "email" : "andrew_redd@hotmail.com", 
+    "url" : "https://www.linkedin.com/in/andrew-reed-mobile"
+  }],
+  "files": [
+    "bin",
+    "src",
+    "typings",
+    "tsconfig.json",
+    "typings.json"
+  ],
+  "main": "src/main.js",
   "bin": "./bin/xrails",
+  "repository": "github:crossrails/compiler",
+  "engines": {
+    "node" : ">=6.2"
+  },
+  "preferGlobal": true,
   "scripts": {
     "prepublish": "typings -v && tsc -v && typings install && tsc",
     "build-wrappers": "gulp build-wrappers",
@@ -11,6 +50,10 @@
     "create-code-coverage": "istanbul cover node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json",
     "upload-code-coverage": "codecov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && CODECLIMATE_REPO_TOKEN=786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3 codeclimate-test-reporter < coverage/lcov.info && rm -rf ./coverage",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
+  },
+  "dependencies": {
+    "doctrine": "^1.2.1",
+    "yargs": "^4.7.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
@@ -30,9 +73,5 @@
     "mocha": "^2.5.3",
     "codecov": "^1.0.1",
     "tsd": "^0.6.5"
-  },
-  "dependencies": {
-    "doctrine": "^1.2.1",
-    "yargs": "^4.7.1"
   }
 }
