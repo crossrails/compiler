@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;
 
-import static io.xrails.src.global;
+import static io.xrails.Src.global;
 
 public class SimpleObject {
 
@@ -68,7 +68,6 @@ public class SimpleObject {
     public Object upcastThisToObject() {
         return JS.wrap(((JSObject)prototype.getMember("upcastThisToObject")).call(mirror), JS.Object::new);
     }
-
 
     @Override
     public String toString() {

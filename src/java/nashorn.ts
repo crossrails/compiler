@@ -36,14 +36,14 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;${
     this.sourceFile.isModuleFile ? '' : `\n
-import static io.xrails.${this.module.name}.global;`
+import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module.name.slice(1)}.global;`
     }`.substr(1);
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("../reference/src.js");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("../input/src.js");`.substr(1)
 }${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.members.some(m => !m.static) ? '' : `
@@ -61,11 +61,6 @@ ${indent}}
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ClassDeclaration, indent?: string) {
     return !this.members.some(m => !m.static) ? '' : `
-${!this.isThrown ? '' : `
-${indent}public String getMessage() {
-${indent}    return (String)prototype.get("message");
-${indent}}    
-`.substr(1)}
 ${indent}@Override
 ${indent}public String toString() {
 ${indent}    return mirror.toString();

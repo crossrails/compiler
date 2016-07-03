@@ -7,7 +7,6 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static io.xrails.HandwrittenSrc.*;
 import static io.xrails.Src.*;
 import static org.junit.Assert.*;
 
@@ -18,7 +17,7 @@ public class SrcTest {
 
     @Before
     public void setUp() {
-        JS.eval("../reference/src.js");
+        JS.eval("../input/src.js");
     }
 
     @Test
