@@ -96,6 +96,7 @@ export class FunctionSignature {
             this.returnType = Type.from(node.type, false, parent, context);
         } else if(!(parent instanceof ConstructorDeclaration)) {
             log.warn(`Return type information missing, assuming void`, node);
+            log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, node)
             this.returnType = new VoidType(parent);
         } 
         let parameters: ParameterDeclaration[] = [];
@@ -155,7 +156,8 @@ export class VariableDeclaration extends MemberDeclaration {
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
         } else {
-            log.warn(`Type information missing, resorting to Any`, node);
+            log.warn(`Type information missing for variable declaration, resorting to Any`, node);
+            log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, node)
             this.type = new AnyType(false, this);
         } 
         this.constant = (node.parent && node.parent.flags & ts.NodeFlags.Const) != 0
@@ -171,7 +173,8 @@ export class ParameterDeclaration extends Declaration {
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
         } else {
-            log.warn(`Type information missing, resorting to Any`, node);
+            log.warn(`Type information missing for function parameter, resorting to Any`, node);
+            log.info(`Resolve this warning by adding a typescript type annotation or a @param jsdoc tag`, node)
             this.type = new AnyType(false, this);
         } 
     }    
@@ -202,6 +205,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                     break;                
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
+                    log.info(`This syntax element is not currently support by crossrails`, member)
             }            
         }
         this.members = members;
@@ -268,6 +272,7 @@ export class SourceFile {
                     break;
                 default:
                     log.warn(`Skipping ${ts.SyntaxKind[statement.kind]}`, statement);
+                    log.info(`This syntax element is not currently supported by crossrails`, statement)
             }            
         }
         this.declarations = declarations;
@@ -309,6 +314,7 @@ export class Module {
         }
         if(files.length == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
+            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
         }
         context.queue.forEach(f => f());
         this.files = files;
@@ -386,6 +392,7 @@ export abstract class Type {
             }
         } catch(error) {
             log.warn(`${error}, erasing to Any`, type);
+            log.info(`This type is not supported by crossrails`, type)
             return new AnyType(optional, parent);
         }
     }
@@ -465,6 +472,7 @@ export class DeclaredType extends GenericType {
                 } else {
                     log.error(msg, type.node, type.lineNumber);
                 }
+                log.info(`Resolve this error by adding the source for ${this.name} to the input file otherwise output will not compile standalone`)
             }
         })
     }     

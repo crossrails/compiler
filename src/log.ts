@@ -16,6 +16,7 @@ export class Log {
             }
         }
         this.warn(`Unknown log level '${level}', level remaining unchanged at ${Log.Level[this.level]}`);        
+        this.info(`Supported log levels are 'debug', 'info', 'warning', 'error`);        
     }
 
     public resetCounters() {
