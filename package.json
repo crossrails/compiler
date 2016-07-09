@@ -13,21 +13,23 @@
     "typscript",
     "javascriptcore",
     "nashorn",
-    "chakracore"  
+    "chakracore"
   ],
   "homepage": "https://www.crossrails.io",
   "bugs": "https://github.com/crossrails/compiler/issues",
   "license": "AGPL-1.0",
-  "author": { 
-    "name" : "Nicholas Bransby-Williams", 
-    "email" : "nbransby@gmail.com", 
-    "url" : "https://www.linkedin.com/in/nbransby"
+  "author": {
+    "name": "Nicholas Bransby-Williams",
+    "email": "nbransby@gmail.com",
+    "url": "https://www.linkedin.com/in/nbransby"
   },
-  "contributors": [{ 
-    "name" : "Andrew Reed", 
-    "email" : "andrew_redd@hotmail.com", 
-    "url" : "https://www.linkedin.com/in/andrew-reed-mobile"
-  }],
+  "contributors": [
+    {
+      "name": "Andrew Reed",
+      "email": "andrew_redd@hotmail.com",
+      "url": "https://www.linkedin.com/in/andrew-reed-mobile"
+    }
+  ],
   "files": [
     "bin",
     "src",
@@ -39,7 +41,7 @@
   "bin": "./bin/xrails",
   "repository": "github:crossrails/compiler",
   "engines": {
-    "node" : ">=6.2"
+    "node": ">=6.2"
   },
   "preferGlobal": true,
   "scripts": {
@@ -56,22 +58,23 @@
     "yargs": "^4.7.1"
   },
   "devDependencies": {
+    "codecov": "^1.0.1",
+    "coveralls": "^2.11.9",
+    "del": "^2.2.0",
     "gulp": "^3.9.1",
     "gulp-cli": "^1.2.1",
     "gulp-concat": "^2.6.0",
     "gulp-git": "^1.7.2",
+    "gulp-shell": "^0.5.2",
     "istanbul": "^0.4.3",
     "jasmine": "^2.4.1",
     "jasmine-node": "^2.0.0",
-    "rewire": "^2.5.1",
-    "typescript": "next",
-    "ts-node": "^0.9.3",
-    "typings": "^1.0.4",
-    "coveralls": "^2.11.9",
-    "del": "^2.2.0",
-    "nyc": "^6.4.4",
     "mocha": "^2.5.3",
-    "codecov": "^1.0.1",
-    "tsd": "^0.6.5"
+    "nyc": "^6.4.4",
+    "rewire": "^2.5.1",
+    "ts-node": "^0.9.3",
+    "tsd": "^0.6.5",
+    "typescript": "next",
+    "typings": "^1.0.4"
   }
 }

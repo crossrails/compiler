@@ -2,6 +2,7 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var git = require('gulp-git');
 var del = require('del');
+var shell = require('gulp-shell');
 
 gulp.task('build-wrappers', function() {
   del(['temp']).then(paths => {
@@ -20,3 +21,9 @@ gulp.task('build-wrappers', function() {
   });
 });
 
+gulp.task('gen-markdown', function() {
+  gulp.src('.')
+    .pipe(shell([
+        'node src/main --help > test.md'
+    ]));
+});
