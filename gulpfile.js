@@ -24,6 +24,6 @@ gulp.task('build-wrappers', function() {
 gulp.task('gen-markdown', function() {
   gulp.src('.')
     .pipe(shell([
-        'node src/main --help > test.md'
+        'node src/main --help > spec.md'
     ]));
 });
