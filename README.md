@@ -1,6 +1,10 @@
-# Cross Rails Compiler
+# Crossrails complier
 
-A simple to use compiler for generating cross-platform files, for Java, iOS(swift) and Android.
+Crossrails lets you share code between the web and native apps, reducing your cost and time-to-market.
+
+Define elegant APIs in TypeScript which are compiled to Java and Swift by the Crossrails compiler.
+
+Build your shared library on modern HTML5 APIs such as Fetch, IndexedDB and WebSockets.
 
 [![NPM version][npm-image]][npm-url]
 [![Typings][typings-image]][typings-url]
