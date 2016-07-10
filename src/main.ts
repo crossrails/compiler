@@ -16,7 +16,7 @@ function main(...args: string[]): number {
         .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')
         .alias('v', 'version').version()
         .help('h').alias('h', 'help')
-        .group(['p', 'l', 'h', 'v'], 'Global options:')
+        .group(['p', 'l', 'h', 'v', 'charset', 'implicitExport'], 'Global options:')
         .option('p', {
             config: true,
             alias: 'project',
