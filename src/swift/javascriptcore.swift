@@ -180,11 +180,11 @@ class JSObject : JSValue {
         self.callbacks = callbacks
         var definition :JSClassDefinition = kJSClassDefinitionEmpty
         definition.finalize = {
-            Unmanaged<JSObject>.fromOpaque(OpaquePointer(JSObjectGetPrivate($0))).release()
+            Unmanaged<JSObject>.fromOpaque(JSObjectGetPrivate($0)).release()
         }
         definition.callAsFunction = { (_, function, this, argCount, args, exception) -> JSValueRef? in
             let data = JSObjectGetPrivate(this)
-            let object :JSObject = Unmanaged.fromOpaque(OpaquePointer((data == nil ? JSObjectGetPrivate(function) : data)!)).takeUnretainedValue()
+            let object :JSObject = Unmanaged.fromOpaque((data == nil ? JSObjectGetPrivate(function) : data)!).takeUnretainedValue()
             do {
                 let value = JSValue(object.context, ref: function!)
                 var arguments = [JSValue]()
@@ -214,7 +214,7 @@ class JSObject : JSValue {
         definition.staticFunctions = UnsafePointer<JSStaticFunction>(functions)
         let clazz = JSClassCreate(&definition)
         super.init(context, ref: JSObjectMake(context.ref, clazz, nil))
-        assert(JSObjectSetPrivate(ref, UnsafeMutablePointer(OpaquePointer(bitPattern:Unmanaged.passRetained(self)))))
+        assert(JSObjectSetPrivate(ref, UnsafeMutablePointer(Unmanaged.passRetained(self).toOpaque())))
         JSClassRelease(clazz)
     }
     
@@ -259,7 +259,7 @@ struct JSProperty : CustomStringConvertible, StringLiteralConvertible {
 import Foundation
 import JavaScriptCore
 
-protocol JSThis {
+protocol JSThis : class {
     
     var ref : JSObjectRef { get }
     

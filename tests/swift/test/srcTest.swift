@@ -54,7 +54,7 @@ class test: XCTestCase {
         XCTAssertFalse(simpleInterfaceInstanceCalled)
         simpleInterfaceInstance.voidNoArgMethod()
         XCTAssert(simpleInterfaceInstanceCalled)
-        acceptSimpleInterface(SimpleInterfaceImpl())
+        acceptSimpleInterface(simpleInterface: SimpleInterfaceImpl())
         XCTAssert(test.testInterfaceMethodCalled)
         test.testInterfaceMethodCalled = false
         simpleInterfaceInstance.voidNoArgMethod()
@@ -76,16 +76,16 @@ class test: XCTestCase {
     }
     
     func testInheritance() {
-        var o = SimpleObject(5)
+        var o = SimpleObject(v: 5)
         o.callOverriddenMethod()
         XCTAssert(o.methodToOverrideCalled)
         
-        o = SimpleObjectOverride(5)
+        o = SimpleObjectOverride(v: 5)
         o.callOverriddenMethod()
         XCTAssert(test.testInheritanceMethodCalled)
         XCTAssertFalse(o.methodToOverrideCalled)
         
-        o = SimpleObjectOverrideCallSuper(5)
+        o = SimpleObjectOverrideCallSuper(v: 5)
         o.methodToOverride()
         XCTAssert(o.methodToOverrideCalled)
     }
@@ -95,9 +95,9 @@ class test: XCTestCase {
         
         XCTAssertNotNil(simpleObjectInstance)
         
-        XCTAssertEqual(49.0, simpleObjectInstance.numberSingleObjectArgMethod(simpleObjectInstance))
+        XCTAssertEqual(49.0, simpleObjectInstance.numberSingleObjectArgMethod(a: simpleObjectInstance))
         
-        XCTAssertEqual(14.0, simpleObjectInstance.numberSingleObjectArgMethod(SimpleObject(2)))
+        XCTAssertEqual(14.0, simpleObjectInstance.numberSingleObjectArgMethod(a: SimpleObject(v: 2)))
         
         XCTAssertEqual(simpleObjectInstance, simpleObjectInstance)
         XCTAssert(simpleObjectInstance == simpleObjectInstance.upcastThisToObject())
@@ -111,8 +111,8 @@ class test: XCTestCase {
     
         XCTAssertEqual("stringNoArgFunctionReturnValue", stringNoArgFunction())
         
-        XCTAssertEqual(25.0, numberMultipleArgFunction(5, b: 5))
-        XCTAssertEqual(-3.0, numberMultipleArgFunction(-2, b: 1.5))
+        XCTAssertEqual(25.0, numberMultipleArgFunction(a: 5, b: 5))
+        XCTAssertEqual(-3.0, numberMultipleArgFunction(a: -2, b: 1.5))
         
         XCTAssertEqual("stringNoArgLambdaReturnValue", stringNoArgLambda())
         XCTAssertEqual(stringNoArgLambda(), stringNoArgLambda())
@@ -238,7 +238,7 @@ class test: XCTestCase {
     }
     
     func testKnownNativeSideObjectDeallocation() {
-        var o :AnyObject? = SimpleObject(1)
+        var o :AnyObject? = SimpleObject(v: 1)
         weak var ref = o
         XCTAssertNotNil(ref)
         optionalAnyVar = o

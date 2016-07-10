@@ -30,7 +30,7 @@ public class SimpleObject : Equatable {
 
     public var methodToOverrideCalled :Bool {
         get {
-            return Bool(this[.methodToOverrideCalled])
+            return Bool(proxy[.methodToOverrideCalled])
         }
         set {
             this[.methodToOverrideCalled] = this.valueOf(newValue)
