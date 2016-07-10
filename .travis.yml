@@ -23,7 +23,7 @@ install:
   - "npm run upload-code-coverage"
   - "cd tests/java/ && gradle test && cd .. && cd .."
 language: objective-c
-osx_image: xcode7.3
+osx_image: xcode8
 script:
   - set -o pipefail && xcodebuild -project tests/swift/swift.xcodeproj -scheme src build test | xcpretty
 notifications:
