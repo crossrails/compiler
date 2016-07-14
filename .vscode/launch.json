@@ -44,7 +44,7 @@
 				"--logLevel=debug",
 				"--swift.outDir=${workspaceRoot}/tests/swift/src",
 				"--swift.bundleId=io.xrails.src",				
-				"--java.outDir=${workspaceRoot}/tests/java/src",
+				"--java.outDir=${workspaceRoot}/tests/java/src/main/java",
 				"--java.basePackage=io.xrails"
             ],
 			"preLaunchTask": "build",
