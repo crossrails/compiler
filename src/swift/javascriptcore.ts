@@ -89,7 +89,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.argumentName = function
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
-    return `this[.${this.declarationName()}]`
+    return `${this.static ? 'this' : 'proxy'}[.${this.declarationName()}]`
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.body = function (this: VariableDeclaration, indent?: string) { 
@@ -99,7 +99,7 @@ ${indent}    get {
 ${indent}        ${this.type instanceof FunctionType ? '': 'return '}${this.type.toNativeValue(this.accessor(), `${indent}    `)}
 ${indent}    }
 ${indent}    set {
-${indent}        this[.${this.declarationName()}] = ${this.type.fromNativeValue()}
+${indent}        ${this.static ? 'this' : 'proxy'}[.${this.declarationName()}] = ${this.type.fromNativeValue()}
 ${indent}    }
 ${indent}}`        
 })

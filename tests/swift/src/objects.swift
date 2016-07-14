@@ -33,7 +33,7 @@ public class SimpleObject : Equatable {
             return Bool(proxy[.methodToOverrideCalled])
         }
         set {
-            this[.methodToOverrideCalled] = this.valueOf(newValue)
+            proxy[.methodToOverrideCalled] = this.valueOf(newValue)
         }
     }
 

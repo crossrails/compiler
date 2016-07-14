@@ -56,10 +56,10 @@ public class SpecialError : Equatable, ErrorProtocol {
 
     public var message :String {
         get {
-            return String(this[.message])
+            return String(proxy[.message])
         }
         set {
-            this[.message] = this.valueOf(newValue)
+            proxy[.message] = this.valueOf(newValue)
         }
     }
 
