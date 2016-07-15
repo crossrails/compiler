@@ -10,12 +10,12 @@ The public API of your library is translated to native code providing the develo
 
 The goal of the project is to enable the sharing of code from native JavaScript environments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS plus serverside environments. 
 
-Unlike related tools such as ReactNative and NativeScript it is not designed to let you build apps using only JavaScript and does not attempt to provide wrappers around native, platform specific APIs. It was designed with multi discipline teams in mind, to help them avoid duplicating identical non-UI code in multiple languages.
+Unlike related tools such as ReactNative and NativeScript it is not designed to let you build apps using only JavaScript and does not attempt to provide wrappers around native, platform specific APIs. It was designed with multi discipline teams in mind, to help them avoid duplicating non-UI code in multiple languages.
 
 ## Installing
 
 ```shell
-npm install -g xrails/compiler
+npm install -g @xrails/compiler
 ```
 
 ## Usage
