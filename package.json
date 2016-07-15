@@ -1,8 +1,10 @@
 {
-  "name": "@xrails/complier",
+  "name": "@xrails/compiler",
   "version": "0.1.0",
-  "description": "A transpiler to expose the interface of a typescript/javascript library to native swift 3/java 8 code",
+  "description": "Expose the public interface of your JavaScript or TypeScript library to native code",
   "keywords": [
+    "crossrails",
+    "xrails",
     "transpiler",
     "swift",
     "java",
@@ -10,12 +12,12 @@
     "ios",
     "windows",
     "macos",
-    "typscript",
+    "typescript",
     "javascriptcore",
     "nashorn",
     "chakracore"
   ],
-  "homepage": "https://www.crossrails.io",
+  "homepage": "http://www.crossrails.io",
   "bugs": "https://github.com/crossrails/compiler/issues",
   "license": "AGPL-1.0",
   "author": {
@@ -26,19 +28,17 @@
   "contributors": [
     {
       "name": "Andrew Reed",
-      "email": "andrew_redd@hotmail.com",
+      "email": "andrew_reed@hotmail.com",
       "url": "https://www.linkedin.com/in/andrew-reed-mobile"
     }
   ],
   "files": [
-    "bin",
-    "src",
-    "typings",
-    "tsconfig.json",
-    "typings.json"
+    "src"
   ],
-  "main": "src/main.js",
-  "bin": "./bin/xrails",
+  "main": "./src/main.js",
+  "bin": {
+    "xrails": "./src/main.js" 
+  },
   "repository": "github:crossrails/compiler",
   "engines": {
     "node": ">=6.2"

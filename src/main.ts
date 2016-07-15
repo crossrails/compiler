@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {log} from "./log"
 import {Module} from "./ast"
 import {Compiler, CompilerOptions} from "./compiler"
