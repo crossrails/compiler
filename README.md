@@ -1,7 +1,5 @@
 # Crossrails Complier
 [![NPM version][npm-image]][npm-url]
-[![Typings][typings-image]][typings-url]
-[![Typescript][typescript-image]][typescript-url]
 [![Build status][travis-image]][travis-url]
 [![Gitter][gitter-image]][gitter-url]
 [![Coverage Status][coverage-image]][coverage-url]
@@ -12,10 +10,6 @@ The goal of the project is to enable the sharing of code from native JavaScript 
 
 The public API of your library is translated to native code providing the developer integrating your library with a native coding experence. Behind the scenes the generated native code calls into a JavaScript engine, executing your original JavaScript source.
 
-[typescript-image]: https://img.shields.io/badge/typescript-1.9.0--dev.20160516-green.svg
-[typescript-url]: https://github.com/Microsoft/TypeScript
-[typings-url]: https://github.com/typings/typings
-[typings-image]: https://img.shields.io/badge/typings-1.0.4-green.svg
 [npm-image]: https://img.shields.io/npm/v/@cycle/core.svg
 [npm-url]: https://npmjs.org/package/typings
 [travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
