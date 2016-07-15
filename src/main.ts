@@ -91,11 +91,11 @@ function main(...args: string[]): number {
                 type: 'boolean',             
                 default: false             
             },
-            'noEmitWrapper': { 
+            'embedWrapper': { 
                 group: 'General options:',
-                desc: 'Do not emit the wrapper for the specified JS engine in compiled output',
+                desc: 'Copy the native wrapper for the specified JS engine into the compiled output',
                 type: 'boolean',         
-                default: false             
+                default: true             
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.outDir or swift.javascriptcore.outDir')

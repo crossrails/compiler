@@ -254,7 +254,7 @@ export class SourceFile {
         for (let statement of node.statements) {
             let comment = new Comment(statement);
             if(!implicitExport && !(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
-                log.info(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
+                log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
             } else switch(statement.kind) {
                 case ts.SyntaxKind.VariableStatement:
                     for (let declaration of (statement as ts.VariableStatement).declarationList.declarations) {

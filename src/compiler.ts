@@ -1,5 +1,5 @@
 import * as path from 'path';
-import {log} from "./log"
+import {log, Log} from "./log"
 import {Module} from "./ast" 
 import {writeFileSync} from 'fs';
 import {undecorate} from './decorator';
@@ -30,8 +30,8 @@ export class Compiler {
             log.error(`No output languages specified use --${[...this.languages.keys()].join(' or --')}`);
             log.info(`You need to specify at least one language to generate source for`);
         }       
-        console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.errorCount == 1 ? '' : 's'}`)
-        if(log.errorCount || log.warningCount) {
+        console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.warningCount == 1 ? '' : 's'}`)
+        if((log.level === Log.Level.ERROR || log.level === Log.Level.WARNING) && (log.errorCount || log.warningCount)) {
             console.log(`Run with --logLevel=info to see more details`)            
         }
         return log.errorCount;
