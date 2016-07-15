@@ -1,10 +1,10 @@
 # Crossrails complier
 
-Crossrails lets you share code between the web and native apps, reducing your cost and time-to-market.
+The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraies and SDKs to other languages, namely Swift and Java with plans to add support for C# and PHP. 
 
-Define elegant APIs in TypeScript which are compiled to Java and Swift by the Crossrails compiler.
+The goal of the project is to enable the sharing of code from native JavaScript enviroments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS and serverside enviroments. 
 
-Build your shared library on modern HTML5 APIs such as Fetch, IndexedDB and WebSockets.
+Only the public API of your library is translated to native code so although the developer intergating your libary is provided with a native coding experence your original JavaScript source code executes on a JavaScript virtual machine behind the scenes. 
 
 [![NPM version][npm-image]][npm-url]
 [![Typings][typings-image]][typings-url]
