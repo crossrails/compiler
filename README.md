@@ -1,8 +1,4 @@
-# Crossrails Complier
-[![Gitter][gitter-image]][gitter-url]
-[![NPM version][npm-image]][npm-url]
-[![Build status][travis-image]][travis-url]
-[![Coverage Status][coverage-image]][coverage-url]
+# Crossrails Complier [![Gitter][gitter-image]][gitter-url] [![NPM version][npm-image]][npm-url] [![Build status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url]
 
 The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraries to other languages, namely Swift and Java with support for C# and PHP coming soon. 
 
