@@ -1,14 +1,32 @@
 # Crossrails Complier
+[![Gitter][gitter-image]][gitter-url]
 [![NPM version][npm-image]][npm-url]
 [![Build status][travis-image]][travis-url]
-[![Gitter][gitter-image]][gitter-url]
 [![Coverage Status][coverage-image]][coverage-url]
 
-The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraries and SDKs to other languages, namely Swift and Java with support for C# and PHP coming soon. 
-
-The goal of the project is to enable the sharing of code from native JavaScript environments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS and serverside environments. 
+The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraries to other languages, namely Swift and Java with support for C# and PHP coming soon. 
 
 The public API of your library is translated to native code providing the developer integrating your library with a native coding experence. Behind the scenes the generated native code calls into a JavaScript engine, executing your original JavaScript source.
+
+The goal of the project is to enable the sharing of code from native JavaScript environments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS plus serverside environments. 
+
+Unlike related tools such as ReactNative and NativeScript it is not designed to let you build apps using only JavaScript and does not attempt to provide wrappers around native, platform specific APIs. It was designed with multi discipline teams in mind, to help them avoid duplicating identical non-UI code in multiple languages.
+
+## Installing
+
+```shell
+npm install -g xrails/compiler
+```
+
+## Usage
+
+```shell
+xrails [file.js] [options]  
+```
+
+## Documentation
+
+*  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler%20Options.md)
 
 [npm-image]: https://img.shields.io/npm/v/@cycle/core.svg
 [npm-url]: https://npmjs.org/package/typings
