@@ -1,17 +1,16 @@
-# Crossrails complier
-
-The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraies and SDKs to other languages, namely Swift and Java with plans to add support for C# and PHP. 
-
-The goal of the project is to enable the sharing of code from native JavaScript enviroments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS and serverside enviroments. 
-
-Only the public API of your library is translated to native code so although the developer intergating your libary is provided with a native coding experence your original JavaScript source code executes on a JavaScript virtual machine behind the scenes. 
-
+# Crossrails Complier
 [![NPM version][npm-image]][npm-url]
 [![Typings][typings-image]][typings-url]
 [![Typescript][typescript-image]][typescript-url]
 [![Build status][travis-image]][travis-url]
 [![Gitter][gitter-image]][gitter-url]
 [![Coverage Status][coverage-image]][coverage-url]
+
+The crossrails compiler is a command line tool which translates JavaScript or TypeScript libraries and SDKs to other languages, namely Swift and Java with support for C# and PHP coming soon. 
+
+The goal of the project is to enable the sharing of code from native JavaScript environments such as node and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, MacOS and serverside environments. 
+
+The public API of your library is translated to native code providing the developer integrating your library with a native coding experence. Behind the scenes the generated native code calls into a JavaScript engine, executing your original JavaScript source.
 
 [typescript-image]: https://img.shields.io/badge/typescript-1.9.0--dev.20160516-green.svg
 [typescript-url]: https://github.com/Microsoft/TypeScript
