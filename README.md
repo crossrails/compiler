@@ -22,17 +22,16 @@ xrails myLibrary.js --swift
 ```
 This would output the Swift files beside the original source files, utilising the default JavaScript engine for the language (*JavaScriptCore in Swift's case*). 
 
-**You can specify multiple languages at once, this example also specifies separate output directories for each**
+**You can specify multiple languages at once and also specify separate output directories for each**
 ```shell
 xrails myLibrary.js --swift.outDir=src/swift --java.outDir=src/java
 ```  
-  
-  
+
 The input JavaScript source file will be bundled with the native language output and should be the same file you would include in the browser, aka post any transpilation or module bundling as it will need to be capable of running on your chosen JavaScript engine.
 
 The compiler uses the source map of your input file to parse your original JavaScript or TypeScript source code, in the example above it would look for `myLibrary.js.map` in the same directory.
 
-**If your source map is elsewhere you can specify its location with**
+**If your source map is elsewhere you can specify its location**
 ```shell
 xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.outDir=src/java
 ```
