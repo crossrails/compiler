@@ -24,18 +24,23 @@ This would output the Swift files beside the original source files, utilising th
 
 **You can specify multiple languages at once and also specify separate output directories for each**
 ```shell
-xrails myLibrary.js --swift.outDir=src/swift --java.outDir=src/java
+xrails myLibrary.js --swift.emit=src/swift --java.emit=src/java
 ``` 
 
 ## Under the hood
 
 The input JavaScript source file will be bundled with the native language output and should be the same file you would include in the browser, aka post any transpilation or module bundling as it will need to be capable of running on your chosen JavaScript engine.
 
+**To output the JavaScript source file to a specific location use the emitJS option**
+```shell
+xrails myLibrary.js --java.emit=src/main/java --java.emitJS=src/main/res
+```
+
 The compiler uses the source map of your input file to parse your original JavaScript or TypeScript source code, in the example above it would look for `myLibrary.js.map` in the same directory.
 
 **If your source map is elsewhere you can specify its location**
 ```shell
-xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.outDir=src/java
+xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.emit=src/java
 ```
 
 ## Extra reading 
