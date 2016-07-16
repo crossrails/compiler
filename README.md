@@ -1,4 +1,6 @@
-# Crossrails Compiler [![Gitter][gitter-image]][gitter-url] [![NPM version][npm-image]][npm-url] [![Build status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url]
+# Crossrails Compiler [![Gitter][gitter-image]][gitter-url] [![npm version][version-image]][package-url]
+[![Downloads][downloads-image]][package-url]
+ [![Build status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url]
 
 The crossrails compiler is a command line tool which translates **JavaScript** or **TypeScript** libraries to other languages, namely **Swift** and **Java** with support for **C#** and **PHP** coming soon. 
 
@@ -42,8 +44,9 @@ xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.outDir=src/java
 
 *  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler%20Options.md)
 
-[npm-image]: https://img.shields.io/npm/v/@cycle/core.svg
-[npm-url]: https://npmjs.org/package/typings
+[package-url]: https://www.npmjs.com/package/xrails/compiler
+[version-image]: https://badge.fury.io/js/typescript.svg
+[downloads-image]: https://img.shields.io/npm/v/@cycle/core.svg
 [travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
 [travis-url]: https://travis-ci.org/crossrails/compiler
 [gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
