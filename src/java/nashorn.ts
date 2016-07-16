@@ -51,7 +51,7 @@ import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("../input/src.js");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("${this.module.src.base}");`.substr(1)
 }${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.members.some(m => !m.static) ? '' : `

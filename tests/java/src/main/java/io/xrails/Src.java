@@ -6,7 +6,7 @@ import jdk.nashorn.api.scripting.*;
 
 public class Src {
 
-    static final ScriptObjectMirror global = JS.eval("../input/src.js");
+    static final ScriptObjectMirror global = JS.eval("src.js");
 
     public static Boolean getBooleanConst() {
         return (Boolean)global.get("booleanConst");

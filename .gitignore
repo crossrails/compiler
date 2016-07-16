@@ -1,4 +1,5 @@
 out/
+**/.gradle/
 node_modules/**
 typings/**
 src/**/*.js

@@ -1,4 +1,5 @@
 import * as path from 'path';
+import {readFileSync} from 'fs';
 import {log, Log} from "./log"
 import {Module} from "./ast" 
 import {writeFileSync} from 'fs';
@@ -16,7 +17,7 @@ export interface CompilerOptions {
 
 export class Compiler {
     
-    private readonly languages: Map<string, string[]>
+    private readonly languages: Map<string, string[]>    
     
     constructor(private readonly options: CompilerOptions, languages: [string, string[]][]) {
         this.languages = new Map(languages);
@@ -41,7 +42,7 @@ export class Compiler {
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
         if(this.options[language]) {
             let options = Object.assign({}, this.options, this.options[language]);
-            let outDir = typeof options.emit === 'boolean' ? '.' : path.normalize(options.emit);
+            let outDir = typeof options.emit === 'boolean' ? '.' : options.emit;
             let emittedOutput = false;  
             for(let engine of engines) {
                 if(options[engine]) {
@@ -72,7 +73,14 @@ export class Compiler {
         }        
         module.emit(outDir, engineOptions, writeFile);
         if(options.emitWrapper) {
-            module.emitWrapper(typeof options.emitWrapper === 'boolean' ? outDir : path.normalize(options.emitWrapper), engineOptions, writeFile);
+            module.emitWrapper(typeof options.emitWrapper === 'boolean' ? outDir : options.emitWrapper, engineOptions, writeFile);
+        }                
+        if(options.emitJS) {
+            let src = path.join(typeof options.emitJS === 'boolean' ? outDir : options.emitJS, module.src.base);
+            let dest = path.join(module.src.dir, module.src.base);
+            if(src != dest) {
+                writeFile(src, readFileSync(dest, 'utf8'));
+            }
         }                
         undecorate();
     }    

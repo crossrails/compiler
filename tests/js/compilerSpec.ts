@@ -118,12 +118,16 @@ describe("Compiler", () => {
     });
 
     it("sets outDir to the path specified in the emit* options", function(this: This) {
-        let compiler = new Compiler({emit: `emit/path`, emitWrapper: `wrapper\\path`, '.': {}} as any, [['.', ['compiler']]]);
+        let compiler = new Compiler({emit: `emit/path`, emitWrapper: `wrapper/path`, emitJS: `js/path`, '.': {}} as any, [['.', ['compiler']]]);
         let emitMethodOnTheModule = jasmine.createSpy('emit')
         let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
-        expect(compiler.compile({emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
-        expect(emitMethodOnTheModule).toHaveBeenCalledWith(`emit${sep}path`, jasmine.anything(), jasmine.anything());
-        expect(emitWrapperMethodOnTheModule).toHaveBeenCalledWith(`wrapper${sep}path`, jasmine.anything(), jasmine.anything());
+        spyOn(fs, 'writeFileSync');
+        spyOn(fs, 'readFileSync');
+        expect(compiler.compile({src: {dir:".", base:"src.js"}, emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
+        expect(emitMethodOnTheModule).toHaveBeenCalledWith(`emit/path`, jasmine.anything(), jasmine.anything());
+        expect(emitWrapperMethodOnTheModule).toHaveBeenCalledWith(`wrapper/path`, jasmine.anything(), jasmine.anything());
+        expect(fs.readFileSync).toHaveBeenCalledWith('src.js', 'utf8');
+        expect(fs.writeFileSync).toHaveBeenCalledWith(`js${sep}path${sep}src.js`, undefined);
     });
 
     it("creates a new directory and any necessary subdirectories on writeFile", function(this: This) {

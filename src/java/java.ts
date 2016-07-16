@@ -49,7 +49,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             isModuleFile: { value: true},
             name: { value: name },
             packageName: { value: options.basePackage },
-            declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, members: { value: globals }}) ] }
+            declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, module: { value: this }, members: { value: globals }}) ] }
         });
         Reflect.set(file.declarations[0], 'parent', file);
         writeFile(moduleFilename, file.emit());
