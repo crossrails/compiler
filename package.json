@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "doctrine": "^1.2.1",
+    "mkdirp": "^0.5.1",
     "yargs": "^4.8.0"
   },
   "devDependencies": {

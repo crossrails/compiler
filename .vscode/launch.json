@@ -1,50 +1,21 @@
 {
 	"version": "0.2.0",
 	"configurations": [
-		// {
-		// 	"name": "Launch",
-		// 	"type": "node",
-		// 	"request": "launch",
-		// 	"program": "${workspaceRoot}/src/main.ts",
-		// 	"cwd": "${workspaceRoot}/tests/input",
-		// 	"args": [
-		// 		// "--help"
-        //         "src.js",
-		// 		"--implicitExport",
-		// 		"--logLevel=debug",
-		// 		"--swift.outDir=../swift/src",
-		// 		"--swift.bundleId=io.xrails.src",				
-		// 		"--java.outDir=../java/src",
-		// 		"--java.basePackage=io.xrails"
-        //     ],
-		// 	"preLaunchTask": "build",
-		// 	"stopOnEntry": false,
-		// 	"runtimeExecutable": null,
-		// 	"runtimeArgs": [
-		// 		"--nolazy"
-		// 	],
-		// 	"env": {
-		// 		"NODE_ENV": "development"
-		// 	},
-		// 	"externalConsole": false,
-		// 	"outDir": "${workspaceRoot}/src",
-		// 	"sourceMaps": true
-		// },
 		{
 			"name": "Launch",
 			"type": "node",
 			"request": "launch",
-			"program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
-			"cwd": "${workspaceRoot}",
+			"program": "${workspaceRoot}/src/main.ts",
+			"cwd": "${workspaceRoot}/tests/input",
 			"args": [
-				"${workspaceRoot}/src/main.ts",
 				// "--help"
+                "src.js",
                 "${workspaceRoot}/tests/input/src.js",
 				"--implicitExport",
 				"--logLevel=debug",
-				"--swift.outDir=${workspaceRoot}/tests/swift/src",
+				"--swift.emit=${workspaceRoot}/tests/swift/src",
 				"--swift.bundleId=io.xrails.src",				
-				"--java.outDir=${workspaceRoot}/tests/java/src/main/java",
+				"--java.emit=${workspaceRoot}/tests/java/src/main/java",
 				"--java.basePackage=io.xrails"
             ],
 			"preLaunchTask": "build",
@@ -60,6 +31,36 @@
 			"outDir": "${workspaceRoot}/src",
 			"sourceMaps": true
 		},
+		// {
+		// 	"name": "Launch",
+		// 	"type": "node",
+		// 	"request": "launch",
+		// 	"program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+		// 	"cwd": "${workspaceRoot}",
+		// 	"args": [
+		// 		"${workspaceRoot}/src/main.ts",
+		// 		// "--help"
+        //         "${workspaceRoot}/tests/input/src.js",
+		// 		"--implicitExport",
+		// 		"--logLevel=debug",
+		// 		"--swift.emit=${workspaceRoot}/tests/swift/src",
+		// 		"--swift.bundleId=io.xrails.src",				
+		// 		"--java.emit=${workspaceRoot}/tests/java/src/main/java",
+		// 		"--java.basePackage=io.xrails"
+        //     ],
+		// 	"preLaunchTask": "build",
+		// 	"stopOnEntry": false,
+		// 	"runtimeExecutable": null,
+		// 	"runtimeArgs": [
+		// 		"--nolazy"
+		// 	],
+		// 	"env": {
+		// 		"NODE_ENV": "development"
+		// 	},
+		// 	"externalConsole": false,
+		// 	"outDir": "${workspaceRoot}/src",
+		// 	"sourceMaps": true
+		// },
 		{
 			"name": "Attach",
 			"type": "node",

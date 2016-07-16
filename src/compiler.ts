@@ -4,12 +4,13 @@ import {Module} from "./ast"
 import {writeFileSync} from 'fs';
 import {undecorate} from './decorator';
 
+var mkdirp = require('mkdirp');
+
 export interface CompilerOptions {
    emit: boolean|string
    emitJS: boolean|string
    emitWrapper: boolean|string
-   implicitExport: boolean
-//    newLine: 'lf'|'crlf'
+    //    newLine: 'lf'|'crlf'
     [option: string]: any
 }
 
@@ -65,6 +66,7 @@ export class Compiler {
                 log.info(`Skipping emit of file ${filename}`);
             } else {
                 log.info(`Emitting file ${filename}`);
+                mkdirp.sync(path.parse(filename).dir)
                 writeFileSync(filename, data);            
             }
         });

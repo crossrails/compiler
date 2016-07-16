@@ -30,6 +30,10 @@ function main(...args: string[]): number {
             describe: 'The character set of the input files',
             type: 'string'
         })
+        .option('sourceMap', {
+            describe: 'Path to the source map of the input file, defaults to [file.js].map',
+            type: 'string'
+        })
         .option('implicitExport', {
             default: false,
             describe: 'Expose all declarations found (by default only those marked with export are exposed)',
@@ -52,7 +56,7 @@ function main(...args: string[]): number {
             },
             'swift.bundleId': { 
                 group: 'Swift options:',
-                desc: 'The id of the bundle containing the javascript source file, omit to use the main bundle',
+                desc: 'The id of the bundle containing the JS source file, omit to use the main bundle',
                 type: 'string'             
             },
             'swift.omitArgumentLabels': { 
@@ -96,8 +100,12 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
-        .parse<CompilerOptions & {logLevel: string, charset: string, implicitExport: boolean}>(args);
+        .parse<CompilerOptions & {sourceMap?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
 
+    ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
+        options[o] = options[o] == 'true' ? true : options[o] == 'false' ? false : options[o]
+    });
+    
     log.setLevel(options.logLevel);
 
     let compiler = new Compiler(options, [
@@ -114,7 +122,7 @@ function main(...args: string[]): number {
         //todo
         return 1;
     } else {
-        return compiler.compile(new Module(filename, options.implicitExport, options.charset));
+        return compiler.compile(new Module(filename, options.sourceMap, options.implicitExport, options.charset));
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));       

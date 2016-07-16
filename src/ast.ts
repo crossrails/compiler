@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as assert from 'assert';
 import * as doctrine from 'doctrine';
 import * as ts from "typescript";
-import {log} from "./log"
+import {log, Log} from "./log"
 
 interface Context {
     readonly queue: Array<() => void>;
@@ -189,7 +189,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
         for (let member of node.members) {
             let comment = new Comment(member);
             if(member.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private')) {
-                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
+                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
             } else switch(member.kind) {
                 case ts.SyntaxKind.PropertyDeclaration:
                     members.push(new VariableDeclaration(member as ts.PropertyDeclaration, comment, this, context));
@@ -291,14 +291,14 @@ export class Module {
     readonly files: ReadonlyArray<SourceFile>;
     readonly identifiers: ReadonlyArray<Declaration>;
     
-    constructor(file: string, implicitExport: boolean, charset: string) {
+    constructor(file: string, sourceMap: string = `${file}.map`, implicitExport: boolean, charset: string) {
         this.src = path.parse(file);
         this.name = this.src.name;
         let files: SourceFile[] = [];
         let context: Context = {queue: [], typeDeclarations: new Map(), thrownTypes: new Set(), identifiers: new Set()};
         try {
-            log.debug(`Attempting to open sourcemap at ${path.relative('.', `${file}.map`)}`);
-            let map = JSON.parse(readFileSync(`${file}.map`, charset));
+            log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
+            let map = JSON.parse(readFileSync(sourceMap, charset));
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             this.sourceRoot = map.sourceRoot;
             for (let source of map.sources) {
@@ -308,7 +308,7 @@ export class Module {
             if(error.code != 'ENOENT') {
                 throw error;
             }
-            log.debug(`No sourcemap found`);
+            log.log(sourceMap == `${file}.map` ? Log.Level.INFO : Log.Level.WARNING, `No sourcemap found`);
             this.sourceRoot = '.';
             this.addSourceFile(files, file, implicitExport, charset, context);
         }

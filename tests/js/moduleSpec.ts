@@ -21,19 +21,37 @@ describe("Module", () => {
     it("throws file not found when module source file does not exist", function(this: This) {
         this.readFileMethod.and.callThrough();
         try {
-            let module = new ast.Module("missingfile.js", false, "utf8");
+            let module = new ast.Module("missingfile.js", undefined, false, "utf8");
             fail("Did not throw exception");
         } catch(error) {
             expect(error.code).toBe('ENOENT');
         }
     });
 
+    it("reads the sourcemap if one is passed in", function(this: This) {
+        this.readFileMethod.and.callFake((file: string) => {
+            if(file == 'different.js.map') throw {code: 'ENOENT'};
+            return "";    
+        });
+        let module = new ast.Module("src.js", "different.js.map", false, "utf8");
+        expect(this.readFileMethod).toHaveBeenCalledWith("different.js.map", jasmine.anything());
+    });
+    
+    it("reads the sourcemap beside the input file if none specified", function(this: This) {
+        this.readFileMethod.and.callFake((file: string) => {
+            if(file == 'src.js.map') throw {code: 'ENOENT'};
+            return "";    
+        });
+        let module = new ast.Module("src.js", undefined, false, "utf8");
+        expect(this.readFileMethod).toHaveBeenCalledWith("src.js.map", jasmine.anything());
+    });
+    
     it("parses the supplied file if source map not found", function(this: This) {
         this.readFileMethod.and.callFake((file: string) => {
             if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "";    
         });
-        let module = new ast.Module("src.js", false, "utf8");
+        let module = new ast.Module("src.js", undefined, false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1)
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("src.js", "", jasmine.anything(), jasmine.anything());
     });
@@ -42,7 +60,7 @@ describe("Module", () => {
         this.readFileMethod.and.callFake((file: string) => {
             return file != 'transpiled.js.map' ? '' : '{"sourceRoot": "", "sources": ["source1.ts", "source2.ts"]}';    
         });
-        let module = new ast.Module("transpiled.js", false, "utf8");
+        let module = new ast.Module("transpiled.js", undefined, false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(2)
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("source1.ts", "", jasmine.anything(), jasmine.anything());
         expect(this.createSourceFileMethod).toHaveBeenCalledWith("source2.ts", "", jasmine.anything(), jasmine.anything());
@@ -54,7 +72,7 @@ describe("Module", () => {
             if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "export let declaration";    
         });
-        let module = new ast.Module("src.js", false, "utf8");
+        let module = new ast.Module("src.js", undefined, false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1);
         expect(module.files.length).toBe(1);
         expect(module.files[0].path.base).toBe("src.js");
@@ -66,7 +84,7 @@ describe("Module", () => {
             if(file == 'src.js.map') throw {code: 'ENOENT'};
             return "let declaration";    
         });
-        let module = new ast.Module("src.js", false, "utf8");
+        let module = new ast.Module("src.js", undefined, false, "utf8");
         expect(this.createSourceFileMethod).toHaveBeenCalledTimes(1);
         expect(module.files.length).toBe(0);
     });

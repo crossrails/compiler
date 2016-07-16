@@ -3,6 +3,8 @@ import {Module} from "../../src/ast"
 import {Compiler, CompilerOptions} from "../../src/compiler"
 import {log} from "../../src/log"
 
+var mkdirp = require('mkdirp');
+
 describe("Compiler", () => {
     
     interface This {
@@ -82,8 +84,10 @@ describe("Compiler", () => {
         let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
         })
+        spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
         expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(mkdirp.sync).toHaveBeenCalled()
         expect(fs.writeFileSync).toHaveBeenCalled()
     });
 
@@ -92,12 +96,14 @@ describe("Compiler", () => {
         let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
         })
+        spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
         expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(mkdirp.sync).not.toHaveBeenCalled()
         expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 
-    it("does not emit a language when emit is false for that language ", function(this: This) {
+    it("does not emit a language when emit is false for that language", function(this: This) {
         let compiler = new Compiler({'.': {emit: false}, './': {emit: true}} as any, [['.', ['compiler']], ['./', ['compiler']]]);
         let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
@@ -105,5 +111,16 @@ describe("Compiler", () => {
         spyOn(fs, 'writeFileSync');
         expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+    });
+
+    it("creates a new directory and any necessary subdirectories on writeFile", function(this: This) {
+        let compiler = new Compiler({emit: true, '.': {}} as any, [['.', ['compiler']]]);
+        let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
+            writeFile('path/to/file', 'content');
+        })
+        spyOn(mkdirp, 'sync');
+        spyOn(fs, 'writeFileSync');
+        expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(mkdirp.sync).toHaveBeenCalledWith('path/to')
     });
 });
