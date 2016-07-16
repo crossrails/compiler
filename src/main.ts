@@ -87,7 +87,7 @@ function main(...args: string[]): number {
             },
             'noEmit': { 
                 group: 'General options:',
-                desc: 'Do not emit complied output',
+                desc: 'Do not emit compiled output',
                 type: 'boolean',             
                 default: false             
             },

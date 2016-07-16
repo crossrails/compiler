@@ -204,7 +204,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                     members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, comment, this, context));
                     break;                
                 default:
-                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
+                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
                     log.info(`This syntax element is not currently support by crossrails`, member)
             }            
         }
