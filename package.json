@@ -1,5 +1,5 @@
 {
-  "name": "@xrails/compiler",
+  "name": "xrails-compiler",
   "version": "0.1.0",
   "description": "Expose the public interface of your JavaScript or TypeScript library to native code",
   "keywords": [
