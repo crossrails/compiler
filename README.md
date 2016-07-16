@@ -20,7 +20,7 @@ Simply specify a JavaScript source file and the native language you want to tran
 ```shell
 xrails myLibrary.js --swift
 ```
-This would output the Swift files beside the original source files, utilising the default JavaScript engine for the language (JavaScriptCore in Swift's case). 
+This would output the Swift files beside the original source files, utilising the default JavaScript engine for the language (*JavaScriptCore in Swift's case*). 
 
 You can specify multiple languages at once, this example also specifies separate output directories for each:
 ```shell
