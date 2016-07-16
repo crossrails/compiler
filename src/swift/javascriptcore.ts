@@ -1,4 +1,7 @@
+import * as path from 'path';
+import {readFileSync} from 'fs';
 import "./swift"
+import {SwiftOptions} from "./swift"
 import {decorate} from '../decorator';
 import {
     Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
@@ -19,6 +22,10 @@ declare module "../ast" {
         genericFromNativeValue(optional?: boolean): string;
     }
 }
+
+decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module, outDir: string, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
+    writeFile(path.join(outDir, 'js.swift'), readFileSync(path.join(__dirname, 'javascriptcore.swift'), 'utf8'));
+})
 
 decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceFile): string {
     return `import Foundation\n${!this.isModuleFile  ? '' : `\nvar this :JSInstance = try! JSContext().eval(${this.module.resourcePath})`}`;

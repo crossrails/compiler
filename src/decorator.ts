@@ -34,6 +34,7 @@ declare module "./ast" {
 
     interface Module {
         emit<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
+        emitWrapper<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
     }
 
     interface Declaration {

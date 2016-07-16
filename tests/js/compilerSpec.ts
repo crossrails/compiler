@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import {sep} from 'path';
 import {Module} from "../../src/ast"
 import {Compiler, CompilerOptions} from "../../src/compiler"
 import {log} from "../../src/log"
@@ -80,26 +81,29 @@ describe("Compiler", () => {
     });   
 
     it("emits when emit is true", function(this: This) {
-        let compiler = new Compiler({emit: true, '.': {}} as any, [['.', ['compiler']]]);
+        let compiler = new Compiler({emit: true, emitWrapper: true, '.': {}} as any, [['.', ['compiler']]]);
         let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
         })
+        let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
-        expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(compiler.compile({emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
+        expect(emitWrapperMethodOnTheModule).toHaveBeenCalled()
         expect(mkdirp.sync).toHaveBeenCalled()
         expect(fs.writeFileSync).toHaveBeenCalled()
     });
 
     it("does not emit when emit is false", function(this: This) {
-        let compiler = new Compiler({emit: false, '.': {}} as any, [['.', ['compiler']]]);
-        let emitMethodOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
+        let compiler = new Compiler({emit: false, emitWrapper: true, '.': {}} as any, [['.', ['compiler']]]);
+        let emitMethodsOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
         })
+        let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
-        expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
-        expect(mkdirp.sync).not.toHaveBeenCalled()
+        expect(compiler.compile({emit: emitMethodsOnTheModule, emitWrapper: emitMethodsOnTheModule} as any)).toBe(0);
+        expect(mkdirp.sync).not.toHaveBeenCalled();
         expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
 
@@ -111,6 +115,15 @@ describe("Compiler", () => {
         spyOn(fs, 'writeFileSync');
         expect(compiler.compile({emit: emitMethodOnTheModule} as any)).toBe(0);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+    });
+
+    it("sets outDir to the path specified in the emit* options", function(this: This) {
+        let compiler = new Compiler({emit: `emit/path`, emitWrapper: `wrapper\\path`, '.': {}} as any, [['.', ['compiler']]]);
+        let emitMethodOnTheModule = jasmine.createSpy('emit')
+        let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
+        expect(compiler.compile({emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
+        expect(emitMethodOnTheModule).toHaveBeenCalledWith(`emit${sep}path`, jasmine.anything(), jasmine.anything());
+        expect(emitWrapperMethodOnTheModule).toHaveBeenCalledWith(`wrapper${sep}path`, jasmine.anything(), jasmine.anything());
     });
 
     it("creates a new directory and any necessary subdirectories on writeFile", function(this: This) {

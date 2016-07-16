@@ -1,4 +1,7 @@
+import * as path from 'path';
+import {readFileSync} from 'fs';
 import "./java"
+import {JavaOptions} from "./java"
 import {decorate} from '../decorator';
 
 import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
@@ -17,6 +20,11 @@ declare module "../ast" {
         genericFromNativeValue(optional?: boolean): string;
     }
 }
+
+decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module, outDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
+    outDir = path.join(outDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
+    writeFile(path.join(outDir, 'JS.java'), readFileSync(path.join(__dirname, 'nashorn.java'), 'utf8'));
+})
 
 decorate(InterfaceDeclaration, ({prototype}) => prototype.imports = function (this: InterfaceDeclaration) {      
     return `import java.util.*;`

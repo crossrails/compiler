@@ -60,8 +60,8 @@ export class Compiler {
     private emit(module: Module, language: string, engine: string, outDir: string, options: CompilerOptions) {
         let engineOptions = Object.assign({}, options, options[engine])
         log.info(`Emitting ${language} source for ${engine} engine to ${outDir}`);
-        require(`./${language}/${engine}`);        
-        module.emit(outDir, engineOptions, (filename, data) => {
+        require(path.join(__dirname, language, engine));
+        let writeFile = (filename: string, data: string) => {
             if(!engineOptions.emit) {
                 log.info(`Skipping emit of file ${filename}`);
             } else {
@@ -69,7 +69,11 @@ export class Compiler {
                 mkdirp.sync(path.parse(filename).dir)
                 writeFileSync(filename, data);            
             }
-        });
+        }        
+        module.emit(outDir, engineOptions, writeFile);
+        if(options.emitWrapper) {
+            module.emitWrapper(typeof options.emitWrapper === 'boolean' ? outDir : path.normalize(options.emitWrapper), engineOptions, writeFile);
+        }                
         undecorate();
     }    
 }
