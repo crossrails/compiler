@@ -11,7 +11,7 @@ Unlike similar tools such as [ReactNative](https://facebook.github.io/react-nati
 ## Installing
 
 ```shell
-npm install -g xrails-compiler
+npm install -g xrails
 ```
 
 ## Basic usage
@@ -47,9 +47,9 @@ xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.emit=src/java
 
 *  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler%20Options.md)
 
-[package-url]: https://www.npmjs.com/package/xrails-compiler
-[version-image]: https://badge.fury.io/js/xrails-compiler.svg
-[downloads-image]: https://img.shields.io/npm/dt/xrails-compiler.svg
+[package-url]: https://www.npmjs.com/package/xrails
+[version-image]: https://badge.fury.io/js/xrails.svg
+[downloads-image]: https://img.shields.io/npm/dt/xrails.svg
 [travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
 [travis-url]: https://travis-ci.org/crossrails/compiler
 [gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
