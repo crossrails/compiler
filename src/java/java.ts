@@ -27,8 +27,8 @@ declare module "../ast" {
     }
 }
  
-decorate(Module, ({prototype}) => prototype.emit = function (this: Module, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
-    let outDir = path.join(options.outDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
+decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootOutDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
+    let outDir = path.join(rootOutDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
     let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
     let globals = this.declarations.filter(d => !(d instanceof TypeDeclaration));
     let writtenModuleFile = false;  
@@ -37,7 +37,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, optio
         let file: SourceFile = Object.create(SourceFile.prototype, {
             isModuleFile: { value: filename == moduleFilename},
             name: { value: type.name },
-            packageName: { value: path.relative(options.outDir, path.dirname(filename)).replace(path.sep, '.') },
+            packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
             declarations: { value: [ filename != moduleFilename ? type : Object.create(type, { members: { value: type.members.concat(globals) }})] }
         });
         writeFile(filename, file.emit());

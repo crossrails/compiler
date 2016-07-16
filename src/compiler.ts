@@ -5,11 +5,11 @@ import {writeFileSync} from 'fs';
 import {undecorate} from './decorator';
 
 export interface CompilerOptions {
-   outDir: string
-   exportAll?: boolean
+   emit: boolean|string
+   emitJS: boolean|string
+   emitWrapper: boolean|string
+   implicitExport: boolean
 //    newLine: 'lf'|'crlf'
-   noEmit?: boolean
-   noEmitWrapper?: boolean
     [option: string]: any
 }
 
@@ -40,28 +40,28 @@ export class Compiler {
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
         if(this.options[language]) {
             let options = Object.assign({}, this.options, this.options[language]);
-            options.outDir = path.normalize(options.outDir);
+            let outDir = typeof options.emit === 'boolean' ? '.' : path.normalize(options.emit);
             let emittedOutput = false;  
             for(let engine of engines) {
                 if(options[engine]) {
-                    this.emit(module, language, engine, Object.assign({}, options, options[engine]));
+                    this.emit(module, language, engine, outDir, Object.assign({}, options, options[engine]));
                     emittedOutput = true;
                 }
             }
             if(!emittedOutput) {
-                this.emit(module, language, engines[0], options);
+                this.emit(module, language, engines[0], outDir, options);
             }
             return true;
         }
         return false;
     }
     
-    private emit(module: Module, language: string, engine: string, options: CompilerOptions) {
+    private emit(module: Module, language: string, engine: string, outDir: string, options: CompilerOptions) {
         let engineOptions = Object.assign({}, options, options[engine])
-        log.info(`Emitting ${language} source for ${engine} engine to ${engineOptions.outDir}`);
+        log.info(`Emitting ${language} source for ${engine} engine to ${outDir}`);
         require(`./${language}/${engine}`);        
-        module.emit(engineOptions, (filename, data) => {
-            if(engineOptions.noEmit) {
+        module.emit(outDir, engineOptions, (filename, data) => {
+            if(!engineOptions.emit) {
                 log.info(`Skipping emit of file ${filename}`);
             } else {
                 log.info(`Emitting file ${filename}`);

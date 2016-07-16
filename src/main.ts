@@ -79,26 +79,23 @@ function main(...args: string[]): number {
             }
         })
         .options({ 
-            'outDir': { 
+            'emit': { 
                 group: 'General options:',
-                desc: 'Redirect output structure to a directory',
-                type: 'string',
-                default: '.'             
+                desc: 'Emit compiled output, specify a path to to redirect output structure, defaults to beside the input files [boolean]',
+                default: true             
             },
-            'noEmit': { 
+            'emitJS': { 
                 group: 'General options:',
-                desc: 'Do not emit compiled output',
-                type: 'boolean',             
-                default: false             
+                desc: 'Copy the input JavaScript source file into the compiled output, specify a path to override default location [boolean]',
+                default: true             
             },
-            'embedWrapper': { 
+            'emitWrapper': { 
                 group: 'General options:',
-                desc: 'Copy the native wrapper for the specified JS engine into the compiled output',
-                type: 'boolean',         
+                desc: 'Copy the native wrapper for the JS engine into the compiled output, specify a path to override default location [boolean]',
                 default: true             
             }
         })
-        .epilog('General options can be applied globally or to any language or engine, e.g. swift.outDir or swift.javascriptcore.outDir')
+        .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
         .parse<CompilerOptions & {logLevel: string, charset: string, implicitExport: boolean}>(args);
 
     log.setLevel(options.logLevel);

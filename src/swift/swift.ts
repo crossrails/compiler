@@ -24,13 +24,13 @@ declare module "../ast" {
     }
 }
  
-decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
+decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, outDir: string, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
     Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("src", ofType: "js")!`);
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
-    let moduleFilename = path.join(options.outDir, `${this.name}.swift`);
+    let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
     for(let file of this.files as Array<ast.SourceFile>) {            
-        let filename = `${path.join(options.outDir, path.relative(path.join(this.src.dir, this.sourceRoot), file.path.dir), file.path.name)}.swift`;
+        let filename = `${path.join(outDir, path.relative(path.join(this.src.dir, this.sourceRoot), file.path.dir), file.path.name)}.swift`;
         Object.defineProperty(file, 'isModuleFile', { writable: false, value: filename == moduleFilename});
         writeFile(filename, file.emit());                
         writtenModuleFile = writtenModuleFile || file.isModuleFile;

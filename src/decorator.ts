@@ -33,7 +33,7 @@ export function undecorate() {
 declare module "./ast" {
 
     interface Module {
-        emit<Options>(options: Options, writeFile: (filename: string, data: string) => void): void
+        emit<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
     }
 
     interface Declaration {
