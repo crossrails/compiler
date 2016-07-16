@@ -43,8 +43,8 @@ xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.outDir=src/java
 *  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler%20Options.md)
 
 [package-url]: https://www.npmjs.com/package/xrails/compiler
-[version-image]: https://badge.fury.io/js/typescript.svg
-[downloads-image]: https://img.shields.io/npm/v/@cycle/core.svg
+[version-image]: https://badge.fury.io/js/xrails/compiler.svg
+[downloads-image]: https://img.shields.io/npm/dm/xrails/compiler.svg
 [travis-image]: https://travis-ci.org/crossrails/compiler.svg?branch=master
 [travis-url]: https://travis-ci.org/crossrails/compiler
 [gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
