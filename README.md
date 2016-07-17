@@ -2,9 +2,9 @@
 
 The crossrails compiler is a command line tool which translates **JavaScript** or **TypeScript** libraries to other languages, namely **Swift** and **Java** with support for **C#** and **PHP** coming soon. 
 
-The public API of your library is translated to native code providing the developer integrating your library with a fully native coding experience. Behind the scenes the generated native code executes your original source on a JavaScript engine.
+The public interface of your library is translated to native code providing the developer integrating your library with a fully native coding experience. Behind the scenes the generated native code executes your original source on a JavaScript engine.
 
-The goal of the project is to enable seamless code sharing from native JavaScript environments such as Node.js and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, macOS, tvOS plus serverside environments. 
+The goal of the project is to enable seamless code sharing from native JavaScript environments such as Node.js and the browser to any platform capable of running a JavaScript virtual machine such as iOS, Android, Windows, macOS, tvOS and serverside environments. 
 
 Unlike similar tools such as [ReactNative](https://facebook.github.io/react-native/) and [NativeScript](https://www.nativescript.org/), it is not designed to let you build apps using only JavaScript and does not attempt to provide wrappers around native, platform specific APIs. It was designed to help multi discipline teams writing native apps to avoid duplicating non-UI code in multiple languages.
 
