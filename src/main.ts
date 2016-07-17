@@ -15,10 +15,10 @@ function main(...args: string[]): number {
             return !argv._[0] || argv._[0].endsWith('.js') ? true : 'File argument must be a javascript source file (.js)';
         })
         .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
-        .example('$0 src.js --java.outDir java', 'Compile to java, outputting to a java subdirectory')
+        .example('$0 src.js --java.emit java', 'Compile to java, outputting to a java subdirectory')
         .alias('v', 'version').version()
         .help('h').alias('h', 'help')
-        .group(['p', 'l', 'h', 'v', 'charset', 'implicitExport'], 'Global options:')
+        .group(['p', 'l', 'h', 'v', 'charset', 'sourceMap', 'implicitExport'], 'Global options:')
         .option('p', {
             config: true,
             alias: 'project',
@@ -48,7 +48,7 @@ function main(...args: string[]): number {
         .options({
             'swift': { 
                 group: 'Swift options:',
-                desc: 'Compile source to swift (enabled automatically if any swift option specified e.g. swift.outDir=gen)' 
+                desc: 'Compile source to swift (enabled automatically if any swift option specified e.g. swift.emit=gen)' 
             },
             'swift.javascriptcore': { 
                 group: 'Swift options:',
@@ -69,7 +69,7 @@ function main(...args: string[]): number {
         .options({
             'java': { 
                 group: 'Java options:',
-                desc: 'Compile source to java (enabled automatically if any java option specified e.g. java.outDir=gen)' 
+                desc: 'Compile source to java (enabled automatically if any java option specified e.g. java.emit=gen)' 
             },
             'java.nashorn': { 
                 group: 'Java options:',
@@ -85,17 +85,17 @@ function main(...args: string[]): number {
         .options({ 
             'emit': { 
                 group: 'General options:',
-                desc: 'Emit compiled output, specify a path to to redirect output structure, defaults to beside the input files [boolean]',
+                desc: 'Emit compiled output, defaults to beside the input files, specify a path to override location [boolean]',
                 default: true             
             },
             'emitJS': { 
                 group: 'General options:',
-                desc: 'Copy the input JavaScript source file into the compiled output, specify a path to override default location [boolean]',
+                desc: 'Copy the input JS file into the compiled output, specify a path to override default location [boolean]',
                 default: true             
             },
             'emitWrapper': { 
                 group: 'General options:',
-                desc: 'Copy the native wrapper for the JS engine into the compiled output, specify a path to override default location [boolean]',
+                desc: 'Copy the JS engine wrapper into the compiled output, specify a path to override default location [boolean]',
                 default: true             
             }
         })
@@ -110,7 +110,7 @@ function main(...args: string[]): number {
 
     let compiler = new Compiler(options, [
         [`swift`,   [`javascriptcore`]], 
-        ['java',    [`nashorn`, 'javascriptcore']],
+        ['java',    [`nashorn`, 'j2v8']],
         [`cs`,      [`chakracore`]], 
         [`php`,     [`v8`]], 
     ]);
