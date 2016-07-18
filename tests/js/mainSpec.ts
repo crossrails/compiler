@@ -69,5 +69,15 @@ describe("Main", () => {
             );
             expect(this.compilerConstructor).toHaveBeenCalledWith(jasmine.objectContaining({emit: "path", emitJS: true, emitWrapper: false}), jasmine.anything());
         });
+
+        it("does not pass in options containing a language attribute if none specified", function(this: This) {
+            require('../../src/main')(
+                `src.js`
+            );
+            expect(this.compilerConstructor).not.toHaveBeenCalledWith(jasmine.objectContaining({swift: jasmine.anything()}), jasmine.anything());
+            expect(this.compilerConstructor).not.toHaveBeenCalledWith(jasmine.objectContaining({java: jasmine.anything()}), jasmine.anything());
+            expect(this.compilerConstructor).not.toHaveBeenCalledWith(jasmine.objectContaining({cs: jasmine.anything()}), jasmine.anything());
+            expect(this.compilerConstructor).not.toHaveBeenCalledWith(jasmine.objectContaining({php: jasmine.anything()}), jasmine.anything());
+        });
     });
 });

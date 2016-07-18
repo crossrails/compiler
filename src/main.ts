@@ -61,9 +61,7 @@ function main(...args: string[]): number {
             },
             'swift.omitArgumentLabels': { 
                 group: 'Swift options:',
-                desc: 'Prefix all function arguments with _',
-                default: false,             
-                type: 'boolean'
+                desc: 'Prefix all function arguments with _ [boolean] [default: false]',
             }
         })
         .options({
