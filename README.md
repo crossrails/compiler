@@ -54,6 +54,5 @@ xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.emit=src/java
 [travis-url]: https://travis-ci.org/crossrails/compiler
 [gitter-image]: https://badges.gitter.im/crossrails/compiler.svg
 [gitter-url]: https://gitter.im/crossrails/compiler?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
-[coverage-image]:https://coveralls.io/repos/github/crossrails/compiler/badge.svg?branch=master
-[coverage-url]:https://coveralls.io/github/crossrails/compiler?branch=master
-
+[coverage-image]:https://codecov.io/gh/crossrails/compiler/branch/master/graph/badge.svg
+[coverage-url]:https://codecov.io/gh/crossrails/compiler
