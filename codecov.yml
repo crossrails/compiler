@@ -1,0 +1,10 @@
+coverage:
+  status:
+    project:
+      default:
+        paths: 
+        - "src/*.ts"
+  notify:
+    gitter:
+      default:
+        url: https://webhooks.gitter.im/e/f73e0abf1b1f0a48641e
