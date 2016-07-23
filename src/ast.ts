@@ -1,4 +1,4 @@
-import {readFileSync} from 'fs';
+import {readFileSync, accessSync, R_OK} from 'fs';
 import * as path from 'path';
 import * as assert from 'assert';
 import * as doctrine from 'doctrine';
@@ -291,46 +291,59 @@ export class Module {
     readonly files: ReadonlyArray<SourceFile>;
     readonly identifiers: ReadonlyArray<Declaration>;
     
-    constructor(file: string, sourceMap: string = `${file}.map`, implicitExport: boolean, charset: string) {
-        this.src = path.parse(file);
+    constructor(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, implicitExport: boolean, charset: string) {
+        this.src = path.parse(src);
         this.name = this.src.name;
-        let files: SourceFile[] = [];
+        let sourceMap = this.mapSources(src, sourceMapFile, declarationFile, typings, charset);
+        this.sourceRoot = sourceMap.sourceRoot;
         let context: Context = {queue: [], typeDeclarations: new Map(), thrownTypes: new Set(), identifiers: new Set()};
-        try {
-            log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
-            let map = JSON.parse(readFileSync(sourceMap, charset));
-            log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
-            this.sourceRoot = map.sourceRoot;
-            for (let source of map.sources) {
-                this.addSourceFile(files, path.join(this.src.dir, map.sourceRoot, source), implicitExport, charset, context);
+        let files: SourceFile[] = [];
+        for (let source of sourceMap.sources) {
+            let filename = path.join(this.src.dir, this.sourceRoot, source);
+            log.info(`Parsing ${path.relative('.', filename)}`);
+            let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), implicitExport, this, context);
+            if(sourceFile.declarations.length) {
+                files.push(sourceFile);
+            } else {
+                log.info(`No exported declarations found in ${path.relative('.', filename)}`);            
             }
-        } catch(error) {
-            if(error.code != 'ENOENT') {
-                throw error;
-            }
-            log.log(sourceMap == `${file}.map` ? Log.Level.INFO : Log.Level.WARNING, `No sourcemap found`);
-            this.sourceRoot = '.';
-            this.addSourceFile(files, file, implicitExport, charset, context);
         }
+        this.files = files;
         if(files.length == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
             log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
         }
         context.queue.forEach(f => f());
-        this.files = files;
         this.identifiers = Array.from(context.identifiers);
-    }    
+    }   
 
-
-    private addSourceFile(files: SourceFile[], filename: string, implicitExport: boolean, charset: string, context: Context): void {
-        log.info(`Parsing ${path.relative('.', filename)}`);
-        let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), implicitExport, this, context);
-        if(sourceFile.declarations.length) {
-            files.push(sourceFile);
-        } else {
-            log.info(`No exported declarations found in ${path.relative('.', filename)}`);            
+    private mapSources(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, charset: string) : {sourceRoot: string, sources: string[]} {
+        if(sourceMapFile || !declarationFile) try {                
+            let sourceMap = sourceMapFile || `${src}.map`;
+            log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
+            let map = JSON.parse(readFileSync(sourceMap, charset));
+            log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
+            return map;
+        } catch(error) {
+            if(sourceMapFile || error.code != 'ENOENT') {
+                throw error;
+            }
+            log.info(`No sourcemap found`);
         }
-    }
+        try {
+            let file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
+            log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
+            accessSync(file, R_OK);
+            log.debug(`Declaration file (.d.ts) found`);
+            return  {sourceRoot: '.', sources: [file] };
+        } catch(error) {
+            if(declarationFile || error.code != 'ENOENT') {
+                throw error;
+            }
+            log.info(`No declaration file (.d.ts) file found`);
+        }
+        return { sourceRoot: '.', sources: [src] };
+    } 
 
     get declarations(): ReadonlyArray<MemberDeclaration> {
         return this.files.reduce((declarations: MemberDeclaration[], file: SourceFile) => 

@@ -60,7 +60,7 @@ export class Compiler {
     
     private emit(module: Module, language: string, engine: string, outDir: string, options: CompilerOptions) {
         let engineOptions = Object.assign({}, options, options[engine])
-        log.info(`Emitting ${language} source for ${engine} engine to ${outDir}`);
+        log.info(`Emitting ${language} source for ${engine} engine to ${path.relative('.', outDir)}`);
         require(path.join(__dirname, language, engine));
         let writeFile = (filename: string, data: string) => {
             if(!engineOptions.emit) {

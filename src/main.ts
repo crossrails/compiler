@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 
+import * as path from 'path';
 import {log} from "./log"
 import {Module} from "./ast"
+import {readFileSync} from 'fs';
 import {Compiler, CompilerOptions} from "./compiler"
 
 import yargs = require('yargs');
@@ -9,10 +11,10 @@ import yargs = require('yargs');
 function main(...args: string[]): number {
 
     let options = yargs
-        .usage('Usage: $0 [file.js] [options]')
-        .demand(1)
+        .usage('Usage: $0 [file.js|package.json|bower.json] [options]')
         .check((argv: yargs.Argv, aliases: { [key: string]: string[] }) => {
-            return !argv._[0] || argv._[0].endsWith('.js') ? true : 'File argument must be a javascript source file (.js)';
+            let filename = argv._[0] && path.basename(argv._[0]);
+            return !filename || filename.endsWith('.js') || filename == 'package.json' || filename == 'bower.json' ? true : 'File argument must be a javascript source file (.js) or package manifest file (bower.json|package.json)';
         })
         .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
         .example('$0 src.js --java.emit java', 'Compile to java, outputting to a java subdirectory')
@@ -25,13 +27,17 @@ function main(...args: string[]): number {
             describe: 'Path to a xrails.json project config file (or to a directory containing one)',
             type: 'string'
         })
+        .option('sourceMap', {
+            describe: 'Path to the source map of the input file, defaults to [file.js].map',
+            type: 'string'
+        })
+        .option('declarationFile', {
+            describe: 'Path to a typescript declaration file (.d.ts), defaults to [file.js].d.ts',
+            type: 'string'
+        })
         .option('charset', {
             default: 'utf8',
             describe: 'The character set of the input files',
-            type: 'string'
-        })
-        .option('sourceMap', {
-            describe: 'Path to the source map of the input file, defaults to [file.js].map',
             type: 'string'
         })
         .option('implicitExport', {
@@ -98,7 +104,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
-        .parse<CompilerOptions & {sourceMap?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
+        .parse<CompilerOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
 
     ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
         options[o] = options[o] == 'true' ? true : options[o] == 'false' ? false : options[o]
@@ -115,15 +121,38 @@ function main(...args: string[]): number {
 
     let filename: string|undefined = options._[0];
 
-    if(filename == undefined) {
-        log.debug('No filename supplied attempting to read package.json')
-        //todo
-        return 1;
+    if(!filename || filename.endsWith('package.json')) {
+        filename = readPackageFile(filename || `package.json`, options);
+    }
+    if(!filename || filename.endsWith('bower.json')) {
+        filename = readPackageFile(filename || `bower.json`, options);
+    }
+    if(!filename) {
+        log.error(`No file argument specified and no package manifest file found`)
+        log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        return compiler.compile(new Module(filename, options.sourceMap, options.implicitExport, options.charset));
+        let module = new Module(filename, options.sourceMap, options.declarationFile, options.typings, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));       
+        compiler.compile(module);        
+    }
+    
+    return log.errorCount;
+}
+
+function readPackageFile(filename: string, options: {typings?: string, charset: string}): string|undefined {
+    try {
+        log.debug(`Attempting to open package manifest file at ${path.relative('.', filename)}`);
+        let json = JSON.parse(readFileSync(filename, options.charset));
+        options.typings = json.typings; 
+        log.debug(`Using main source file ${path.relative('.', json.main)} specified in manifest file`);
+        return json.main;
+    } catch(error) {
+        if(error.code != 'ENOENT') {
+            throw error;
+        }
+        return undefined;
     }
 }
 
