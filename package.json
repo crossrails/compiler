@@ -51,7 +51,7 @@
     "build-input-project": "cd tests/input && node ../../src/main.js src.js --logLevel=debug --implicitExport --swift.emit=../swift/src --swift.bundleId=io.xrails.src --java.emit=../java/src/main/java --java.emitJS=../java --java.basePackage=io.xrails",
     "create-code-coverage": "istanbul cover node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json",
     "upload-code-coverage": "codecov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && CODECLIMATE_REPO_TOKEN=786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3 codeclimate-test-reporter < coverage/lcov.info && rm -rf ./coverage",
-    "codacy": "CODACY_PROJECT_TOKEN=e4496c612bf14081a639b753f6facb00 && istanbul cover node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json && cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage && rm -rf ./coverage",
+    "codacy": "CODACY_PROJECT_TOKEN=7777e2694a204884aea080de85313ca3 && istanbul cover node_modules/jasmine/bin/jasmine.js JASMINE_CONFIG_PATH=jasmine.json && cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage && rm -rf ./coverage",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
   },
   "dependencies": {
