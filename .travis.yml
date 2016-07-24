@@ -21,6 +21,7 @@ install:
   - "npm install -g codeclimate-test-reporter"
   - "npm run create-code-coverage"
   - "npm run upload-code-coverage"
+  - "npm run codacy"
   - "cd tests/java/ && gradle test && cd .. && cd .."
 language: objective-c
 osx_image: xcode8
