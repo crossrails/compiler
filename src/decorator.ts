@@ -105,11 +105,11 @@ ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
     return "class";
 }
 
-decorate(TypeDeclaration, ({prototype}) => prototype.header = function (this: TypeDeclaration, indent?: string): string {
+TypeDeclaration.prototype.header = function (this: TypeDeclaration, indent?: string): string {
     return "";
-})
+}
 
-decorate(TypeDeclaration, ({prototype}) => prototype.footer = function (this: TypeDeclaration, indent?: string): string {
+TypeDeclaration.prototype.footer = function (this: TypeDeclaration, indent?: string): string {
     return "";
-})
+}
 
