@@ -4,12 +4,10 @@ import * as ts from "typescript";
 import * as AST from "../../src/ast"
 import {log} from "../../src/log"
 
-let ast = rewire<typeof AST>('../../src/ast');
-
 describe("MemberDeclaration", () => {
 
     it("considers global declarations static", function() {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(sourceFile.declarations[0].static).toBe(true);
     });
 
@@ -19,7 +17,7 @@ describe("TypeDeclaration", () => {
 
     it("skips private member declarations", function() {
         let context = {identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', `
+        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', `
             export class MyClass {
                 publicVar;
                 private privateKeywordUsed;
@@ -41,7 +39,7 @@ describe("TypeDeclaration", () => {
 describe("FunctionDeclaration", () => {
 
     it("assumes void for return types and any for argument types when none specified", function() {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export function myfunc(a) {}", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', "export function myfunc(a) {}", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         let myfunc = sourceFile.declarations[0] as AST.FunctionDeclaration;
         expect(myfunc.signature.returnType.constructor.name).toBe('VoidType');
         expect(myfunc.signature.parameters[0].type.constructor.name).toBe('AnyType');
@@ -49,7 +47,7 @@ describe("FunctionDeclaration", () => {
 
     it("correctly parses throw tags from the jsdoc comment ", function() {
         let context = {identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', `
+        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', `
             export class BigError {}
             /**
              * @throws
@@ -84,24 +82,26 @@ describe("FunctionDeclaration", () => {
 describe("VariableDeclaration", () => {
     
     interface This {
+        ast: typeof AST & rewire.Rewire;
         typeOfMethod: jasmine.Spy;            
         anyTypeConstructor: jasmine.Spy;            
     }
     
     beforeEach(function(this: This) {
+        this.ast = rewire<typeof AST>('../../src/ast');
         this.typeOfMethod = jasmine.createSpy('Type.of');
-        ast.__set__('Type.from', this.typeOfMethod);
+        this.ast.__set__('Type.from', this.typeOfMethod);
         this.anyTypeConstructor = jasmine.createSpy('AnyType');
-        ast.__set__('AnyType', this.anyTypeConstructor);
+        this.ast.__set__('AnyType', this.anyTypeConstructor);
     });
     
     it("has an any type when missing type information", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
-        let sourceFile = new ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
         expect(this.typeOfMethod).toHaveBeenCalledTimes(1);
     });
 

@@ -2,19 +2,24 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as ast from '../../src/ast';
 import * as compiler from '../../src/compiler';
+import {log} from "../../src/log"
 
 describe("Main", () => {
     
-    // it("successfully compiles the input project", function() {
-    //     let exitCode = require('../../src/main')(
-    //         './tests/input/src.js',
-    //         '--emit=false',
-    //         '--implicitExport', 
-    //         '--swift',
-    //         '--java.basePackage=io.xrails'
-    //     );
-    //     expect(exitCode).toBe(0);
-    // });
+    beforeEach(function() {
+        log.resetCounters();
+    });
+
+    it("successfully compiles the input project", function() {
+        let exitCode = require('../../src/main')(
+            './tests/input/src.js',
+            '--emit=false',
+            '--implicitExport', 
+            '--swift',
+            '--java.basePackage=io.xrails'
+        );
+        expect(exitCode).toBe(0);
+    });
 
     describe("Isolated", () => {
         
@@ -25,7 +30,7 @@ describe("Main", () => {
         
         beforeEach(function(this: This) {
             this.moduleConstructor = spyOn(ast, 'Module').and.callFake(() => { return {emit: () => {}} });
-            this.compilerConstructor = spyOn(compiler, 'Compiler').and.callFake(() => { return {compile: () => {}} });;
+            this.compilerConstructor = spyOn(compiler, 'Compiler').and.callFake(() => { return {compile: () => {}} });
         });
 
         it("fails when no args given and no package manifest file in working directory", function(this: This) {
@@ -50,7 +55,7 @@ describe("Main", () => {
                 return readFileSync(file, encoding);
             });
             expect(main(
-                "--swift"
+                "--swift",
             )).toBe(0);
             expect(this.moduleConstructor).toHaveBeenCalledWith('package.js', undefined, undefined, "package.d.ts", jasmine.anything(), jasmine.anything());
         });
@@ -59,12 +64,14 @@ describe("Main", () => {
             let main = require('../../src/main');
             let readFileSync = fs.readFileSync;
             spyOn(fs, 'readFileSync').and.callFake((file: string, encoding: string) => {
+                console.log(file, encoding);
+                if(file == 'package.json') throw {code: 'ENOENT'};
                 if(file == 'bower.json') return JSON.stringify({main: 'bower.js'});
                 if(file == 'bower.js') return "";
                 return readFileSync(file, encoding);
             });
             expect(main(
-                "--swift"
+                "--swift",
             )).toBe(0);
             expect(this.moduleConstructor).toHaveBeenCalledWith('bower.js', undefined, undefined, undefined, jasmine.anything(), jasmine.anything());
         });
@@ -81,7 +88,7 @@ describe("Main", () => {
             });
             expect(main(
                 "package.json",
-                "--swift"
+                "--swift",
             )).toBe(0);
             expect(this.moduleConstructor).toHaveBeenCalledWith('package.js', undefined, undefined, "package.d.ts", jasmine.anything(), jasmine.anything());
         });

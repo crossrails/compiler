@@ -2,6 +2,8 @@
   "testFramework": "jasmine",
   "files": [
       "src/**/*.ts",
+      "src/**/*.swift",
+      "src/**/*.java",
       "tests/input/*"
   ],
   "tests": [
