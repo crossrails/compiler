@@ -8,7 +8,7 @@ describe("MemberDeclaration", () => {
 
     it("considers global declarations static", function() {
         let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
-        expect(sourceFile.declarations[0].static).toBe(true);
+        expect((sourceFile.declarations[0] as AST.VariableDeclaration).static).toBe(true);
     });
 
 });
