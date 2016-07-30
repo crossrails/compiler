@@ -121,10 +121,6 @@ decorate(FunctionType, ({prototype}) => prototype.emit = function(this: Function
     return optional ? `Optional<${typeSignature}>` : typeSignature;    
 })
 
-decorate(DeclaredType, ({prototype}) => prototype.typeName = function(this: DeclaredType): string {
-    return this.declaration ? this.declaration.declarationName() : this.name;
-})
-
 decorate(VoidType, ({prototype}) => prototype.typeName = function(this: VoidType): string {
     return 'void';  
 })
