@@ -59,7 +59,20 @@ export class Log {
                 message = `${path}(${pos.line+line+1},${pos.character+1}): ${message}`;
             }
             message = `${Log.Level[level]}: ${message}`;
-            console.log(message);    
+            switch(level) {
+                case Log.Level.ERROR:
+                    console.error(message);
+                    break;
+                case Log.Level.WARNING:
+                    console.warn(message);
+                    break;
+                case Log.Level.INFO:
+                    console.info(message);
+                    break;
+                case Log.Level.DEBUG:
+                    console.log(message);
+                    break;
+            }    
         }
     }
 }
