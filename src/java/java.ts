@@ -28,12 +28,12 @@ declare module "../ast" {
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootOutDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
-    let outDir = path.join(rootOutDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
+    let outDir = path.join(rootOutDir, options.basePackage.replace('.', path.sep));
     let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
-    let globals = this.declarations.filter(d => !(d instanceof TypeDeclaration));
+    let globals = this.declarations.filter(d => d instanceof MemberDeclaration && !(d instanceof TypeDeclaration)) as MemberDeclaration[];
     let writtenModuleFile = false;  
     for(let type of this.declarations.filter(d => d instanceof TypeDeclaration) as TypeDeclaration[]) {               
-        let filename = path.join(outDir, path.relative(path.join(this.src.dir, this.sourceRoot), type.sourceFile.path.dir), `${type.declarationName()}.java`);
+        let filename = path.join(outDir, path.relative(this.sourceRoot, type.sourceFile.path.dir), `${type.declarationName()}.java`);
         let file: SourceFile = Object.create(SourceFile.prototype, {
             isModuleFile: { value: filename == moduleFilename},
             name: { value: type.name },

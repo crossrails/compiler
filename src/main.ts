@@ -134,8 +134,10 @@ function main(...args: string[]): number {
         let module = new Module(filename, options.sourceMap, options.declarationFile, options.typings, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
-        // }, 4));       
-        compiler.compile(module);        
+        // }, 4));
+        if(log.errorCount === 0) {       
+            compiler.compile(module); 
+        }       
     }
     
     return log.errorCount;
@@ -145,9 +147,11 @@ function readPackageFile(filename: string, options: {typings?: string, charset: 
     try {
         log.debug(`Attempting to open package manifest file at ${path.relative('.', filename)}`);
         let json = JSON.parse(readFileSync(filename, options.charset));
-        options.typings = json.typings; 
+        if(json.typings) {
+            options.typings = path.join(path.dirname(filename), json.typings); 
+        }
         log.debug(`Using main source file ${path.relative('.', json.main)} specified in manifest file`);
-        return json.main;
+        return path.join(path.dirname(filename), json.main);
     } catch(error) {
         if(error.code != 'ENOENT') {
             throw error;
@@ -164,3 +168,4 @@ if(require.main === module) {
 } else {
     yargs.exitProcess(false);
 }
+

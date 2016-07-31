@@ -29,8 +29,8 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, o
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
-    for(let file of this.files as Array<ast.SourceFile>) {            
-        let filename = `${path.join(outDir, path.relative(path.join(this.src.dir, this.sourceRoot), file.path.dir), file.path.name)}.swift`;
+    for(let file of this.files as Array<ast.SourceFile>) {
+        let filename = `${path.join(outDir, path.relative(this.sourceRoot, file.path.dir), file.path.name)}.swift`;
         Object.defineProperty(file, 'isModuleFile', { writable: false, value: filename == moduleFilename});
         writeFile(filename, file.emit());                
         writtenModuleFile = writtenModuleFile || file.isModuleFile;

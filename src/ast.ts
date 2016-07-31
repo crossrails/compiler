@@ -309,16 +309,18 @@ export class Module {
         this.name = this.src.name;
         let sourceMap = this.mapSources(src, sourceMapFile, declarationFile, typings, charset);
         this.sourceRoot = sourceMap.sourceRoot;
-        let context: Context = {queue: [], typeDeclarations: new Map(), thrownTypes: new Set(), identifiers: new Set()};
+        let program = ts.createProgram(sourceMap.sources.map((s) => path.join(this.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset});
+        //diagnostics = diagnostics.concat(program.getGlobalDiagnostics()).concat(program.getOptionsDiagnostics()).concat(program.getDeclarationDiagnostics()).concat(program.getSemanticDiagnostics()).concat(program.getSyntacticDiagnostics());
+        log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         let files: SourceFile[] = [];
-        for (let source of sourceMap.sources) {
-            let filename = path.join(this.src.dir, this.sourceRoot, source);
-            log.info(`Parsing ${path.relative('.', filename)}`);
-            let sourceFile = new SourceFile(ts.createSourceFile(filename, readFileSync(filename, charset), ts.ScriptTarget.ES6, true), implicitExport, this, context);
+        let context: Context = {queue: [], typeDeclarations: new Map(), thrownTypes: new Set(), identifiers: new Set(), typeChecker: program.getTypeChecker()};
+        for (let file of program.getSourceFiles()) if(!path.relative(this.sourceRoot, file.path).startsWith('..')) {
+            log.info(`Parsing ${path.relative('.', file.path)}`);
+            let sourceFile = new SourceFile(file, implicitExport, this, context);
             if(sourceFile.declarations.length) {
                 files.push(sourceFile);
             } else {
-                log.info(`No exported declarations found in ${path.relative('.', filename)}`);            
+                log.info(`No exported declarations found in ${path.relative('.', file.path)}`);            
             }
         }
         this.files = files;
@@ -335,6 +337,7 @@ export class Module {
             let sourceMap = sourceMapFile || `${src}.map`;
             log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
             let map = JSON.parse(readFileSync(sourceMap, charset));
+            map.sourceRoot = path.join(path.dirname(src), map.sourceRoot); 
             log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
             return map;
         } catch(error) {
@@ -348,14 +351,14 @@ export class Module {
             log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
             accessSync(file, R_OK);
             log.debug(`Declaration file (.d.ts) found`);
-            return  {sourceRoot: '.', sources: [file] };
+            return  {sourceRoot: path.dirname(file), sources: [path.basename(file)] }; 
         } catch(error) {
             if(declarationFile || error.code != 'ENOENT') {
                 throw error;
             }
             log.info(`No declaration file (.d.ts) file found`);
         }
-        return { sourceRoot: '.', sources: [src] };
+        return { sourceRoot: path.dirname(src), sources: [path.basename(src)] }; 
     } 
 
     get declarations(): ReadonlyArray<MemberDeclaration> {

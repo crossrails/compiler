@@ -3,6 +3,7 @@ import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as AST from "../../src/ast"
 import {log} from "../../src/log"
+import {mockSourceFile} from "./mocks"
 
 describe("Type", () => {
     
@@ -130,7 +131,7 @@ describe("Type", () => {
 
     it("correctly identifies typescript declared types and links the declaration", function(this: This) {
         let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
-        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export interface Custom {}; export let c: Custom`, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        let sourceFile = mockSourceFile(false, `export interface Custom {}; export let c: Custom`);
         context.queue.forEach(f => f())
         expect(log.errorCount).toBe(0);
         expect((sourceFile.declarations[1] as AST.VariableDeclaration).type.constructor.name).toBe('DeclaredType');

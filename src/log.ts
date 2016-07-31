@@ -49,6 +49,24 @@ export class Log {
         this.log(Log.Level.ERROR, message, node, line);
         this._errorCount++;
     }
+
+    public logDiagnostics(diagnostics: ts.Diagnostic[]) {
+        for(let diagnostic of diagnostics) {
+            const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
+            const node = diagnostic.file ? {pos: diagnostic.start, getSourceFile: () => diagnostic.file} : undefined; 
+            switch(diagnostic.category) {
+                case ts.DiagnosticCategory.Error:
+                    this.error(message, node as ts.Node);
+                    break;
+                case ts.DiagnosticCategory.Warning:
+                    this.warn(message, node as ts.Node);
+                    break;
+                case ts.DiagnosticCategory.Message:
+                    this.info(message, node as ts.Node);
+                    break;
+            }
+        }        
+    }
     
     public log(level: Log.Level, message: any, node?: ts.Node, line: number = 0) {
         if(level >= this.level) {

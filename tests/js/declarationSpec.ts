@@ -3,26 +3,12 @@ import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as AST from "../../src/ast"
 import {log} from "../../src/log"
-
-function withSource(implicitExport: boolean, source: string): AST.SourceFile {
-    const services = ts.createLanguageService({
-        getScriptFileNames: () => ['source.ts'],
-        getScriptVersion: (fileName) => '0',
-        getScriptSnapshot: (fileName) => ts.ScriptSnapshot.fromString(source),
-        getCurrentDirectory: () => process.cwd(),
-        getCompilationSettings: () => { return {allowJS: true, noLib: true} },
-        getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
-    }, ts.createDocumentRegistry())
-    let context = {typeChecker: services.getProgram().getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-    const file = new AST.SourceFile(services.getProgram().getSourceFile('source.ts'), implicitExport, {} as any, context as any);
-    context.queue.forEach(f => f())
-    return file;
-}
+import {mockSourceFile, mockProgram} from "./mocks"
 
 describe("MemberDeclaration", () => {
 
     it("considers global declarations static", function() {
-        let sourceFile = withSource(false, "export let declaration");
+        let sourceFile = mockSourceFile(false, "export let declaration");
         expect((sourceFile.declarations[0] as AST.VariableDeclaration).static).toBe(true);
     });
 
@@ -31,7 +17,7 @@ describe("MemberDeclaration", () => {
 describe("TypeDeclaration", () => {
 
     it("skips private member declarations", function() {
-        let sourceFile = withSource(true, `
+        let sourceFile = mockSourceFile(true, `
             export class MyClass {
                 publicVar;
                 private privateKeywordUsed;
@@ -55,7 +41,7 @@ describe("InterfaceDeclaration", () => {
 
     it("merges members from two declarations of the same interface", function() {
         log.setLevel('debug')
-        let sourceFile = withSource(true, `
+        let sourceFile = mockSourceFile(true, `
             interface MyInterface {
                 firstMember;
             }
@@ -72,14 +58,14 @@ describe("InterfaceDeclaration", () => {
 describe("FunctionDeclaration", () => {
 
     it("assumes void for return types and any for argument types when none specified", function() {
-        let sourceFile = withSource(false, "export function myfunc(a) {}");
+        let sourceFile = mockSourceFile(false, "export function myfunc(a) {}");
         let myfunc = sourceFile.declarations[0] as AST.FunctionDeclaration;
         expect(myfunc.signature.returnType.constructor.name).toBe('VoidType');
         expect(myfunc.signature.parameters[0].type.constructor.name).toBe('AnyType');
     });
 
     it("correctly parses throw tags from the jsdoc comment ", function() {
-        let sourceFile = withSource(false, `
+        let sourceFile = mockSourceFile(false, `
             export class BigError {}
             /**
              * @throws
@@ -127,12 +113,16 @@ describe("VariableDeclaration", () => {
     });
     
     it("has an any type when missing type information", function(this: This) {
-        let sourceFile = withSource(false, "export let declaration");
+        let program = mockProgram([['source.ts', "export let declaration"]]);
+        let context = {typeChecker: program.getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
+        let sourceFile = new this.ast.SourceFile(program.getSourceFile('source.ts'), false, {} as any, context as any)
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
-        let sourceFile = withSource(false, "export let declaration: string");
+        let program = mockProgram([['source.ts', "export let declaration: string"]]);
+        let context = {typeChecker: program.getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
+        let sourceFile = new this.ast.SourceFile(program.getSourceFile('source.ts'), false, {} as any, context as any)
         expect(this.typeFromMethod).toHaveBeenCalledTimes(1);
     });
 

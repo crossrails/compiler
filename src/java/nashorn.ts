@@ -22,7 +22,7 @@ declare module "../ast" {
 }
 
 decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module, outDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
-    outDir = path.join(outDir, this.sourceRoot, options.basePackage.replace('.', path.sep));
+    outDir = path.join(outDir, options.basePackage.replace('.', path.sep));
     writeFile(path.join(outDir, 'JS.java'), readFileSync(path.join(__dirname, 'nashorn.java'), 'utf8'));
 })
 
@@ -125,7 +125,7 @@ ${indent}        if(constructor instanceof ScriptObjectMirror) {
 ${indent}            Object name = ((ScriptObjectMirror)constructor).get("name");
 ${indent}            if(name instanceof String) switch ((String)name) {${
                          thrownDeclaredTypes.reduce((out, type) => `
-${out}${indent}                case "${type.name}":
+${out}${indent}                case "${type.name!}":
 ${indent}                    throw new ${type.typeName()}((ScriptObjectMirror)e.getEcmaError());`, '')}
 ${indent}            }
 ${indent}        }

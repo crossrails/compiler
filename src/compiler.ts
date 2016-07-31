@@ -64,9 +64,9 @@ export class Compiler {
         require(path.join(__dirname, language, engine));
         let writeFile = (filename: string, data: string) => {
             if(!engineOptions.emit) {
-                log.info(`Skipping emit of file ${filename}`);
+                log.info(`Skipping emit of file ${path.relative('.', filename)}`);
             } else {
-                log.info(`Emitting file ${filename}`);
+                log.info(`Emitting file ${path.relative('.', filename)}`);
                 mkdirp.sync(path.parse(filename).dir)
                 writeFileSync(filename, data);            
             }

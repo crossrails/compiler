@@ -4,7 +4,8 @@
       "src/**/*.ts",
       "src/**/*.swift",
       "src/**/*.java",
-      "tests/input/*"
+      "tests/input/*",
+      "tests/js/mock*"
   ],
   "tests": [
       "tests/js/**/*Spec.ts"

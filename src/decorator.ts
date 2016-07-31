@@ -82,7 +82,7 @@ Declaration.prototype.declarationName = function(this: Declaration): string {
 }
 
 DeclaredType.prototype.typeName = function(this: DeclaredType): string {
-    return this.declaration ? this.declaration.declarationName() : this.name;
+    return this.declaration ? this.declaration.declarationName() : this.name!;
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
