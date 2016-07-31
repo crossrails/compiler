@@ -4,10 +4,25 @@ import * as ts from "typescript";
 import * as AST from "../../src/ast"
 import {log} from "../../src/log"
 
+function withSource(implicitExport: boolean, source: string): AST.SourceFile {
+    const services = ts.createLanguageService({
+        getScriptFileNames: () => ['source.ts'],
+        getScriptVersion: (fileName) => '0',
+        getScriptSnapshot: (fileName) => ts.ScriptSnapshot.fromString(source),
+        getCurrentDirectory: () => process.cwd(),
+        getCompilationSettings: () => { return {allowJS: true, noLib: true} },
+        getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
+    }, ts.createDocumentRegistry())
+    let context = {typeChecker: services.getProgram().getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
+    const file = new AST.SourceFile(services.getProgram().getSourceFile('source.ts'), implicitExport, {} as any, context as any);
+    context.queue.forEach(f => f())
+    return file;
+}
+
 describe("MemberDeclaration", () => {
 
     it("considers global declarations static", function() {
-        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = withSource(false, "export let declaration");
         expect((sourceFile.declarations[0] as AST.VariableDeclaration).static).toBe(true);
     });
 
@@ -16,8 +31,7 @@ describe("MemberDeclaration", () => {
 describe("TypeDeclaration", () => {
 
     it("skips private member declarations", function() {
-        let context = {identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', `
+        let sourceFile = withSource(true, `
             export class MyClass {
                 publicVar;
                 private privateKeywordUsed;
@@ -30,8 +44,27 @@ describe("TypeDeclaration", () => {
                  */            
                 accessTagUsed;
             }
-        `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        `);
+        console.log(sourceFile);
         expect((sourceFile.declarations[0] as AST.TypeDeclaration).members.length).toBe(1);
+    });
+
+});
+
+describe("InterfaceDeclaration", () => {
+
+    it("merges members from two declarations of the same interface", function() {
+        log.setLevel('debug')
+        let sourceFile = withSource(true, `
+            interface MyInterface {
+                firstMember;
+            }
+            interface MyInterface {
+                secondMember;
+            }
+        `);
+        expect(sourceFile.declarations.length).toBe(1);
+        expect((sourceFile.declarations[0] as AST.InterfaceDeclaration).members.length).toBe(2);
     });
 
 });
@@ -39,15 +72,14 @@ describe("TypeDeclaration", () => {
 describe("FunctionDeclaration", () => {
 
     it("assumes void for return types and any for argument types when none specified", function() {
-        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', "export function myfunc(a) {}", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = withSource(false, "export function myfunc(a) {}");
         let myfunc = sourceFile.declarations[0] as AST.FunctionDeclaration;
         expect(myfunc.signature.returnType.constructor.name).toBe('VoidType');
         expect(myfunc.signature.parameters[0].type.constructor.name).toBe('AnyType');
     });
 
     it("correctly parses throw tags from the jsdoc comment ", function() {
-        let context = {identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-        let sourceFile = new AST.SourceFile(ts.createSourceFile('source.js', `
+        let sourceFile = withSource(false, `
             export class BigError {}
             /**
              * @throws
@@ -62,8 +94,7 @@ describe("FunctionDeclaration", () => {
              * @throws {SmallError}
              */            
             export function throwsSeveral() {}
-        `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
-        context.queue.forEach(f => f())
+        `);
         let justThrows = sourceFile.declarations[1] as AST.FunctionDeclaration;
         expect(justThrows.signature.thrownTypes.length).toBe(1);
         expect(justThrows.signature.thrownTypes[0].constructor.name).toBe('AnyType');
@@ -83,26 +114,26 @@ describe("VariableDeclaration", () => {
     
     interface This {
         ast: typeof AST & rewire.Rewire;
-        typeOfMethod: jasmine.Spy;            
+        typeFromMethod: jasmine.Spy;            
         anyTypeConstructor: jasmine.Spy;            
     }
     
     beforeEach(function(this: This) {
         this.ast = rewire<typeof AST>('../../src/ast');
-        this.typeOfMethod = jasmine.createSpy('Type.of');
-        this.ast.__set__('Type.from', this.typeOfMethod);
+        this.typeFromMethod = jasmine.createSpy('Type.from');
+        this.ast.__set__('Type.from', this.typeFromMethod);
         this.anyTypeConstructor = jasmine.createSpy('AnyType');
         this.ast.__set__('AnyType', this.anyTypeConstructor);
     });
     
     it("has an any type when missing type information", function(this: This) {
-        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.js', "export let declaration", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
+        let sourceFile = withSource(false, "export let declaration");
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
-        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', "export let declaration: string;", ts.ScriptTarget.ES6, true), false, {} as any, {identifiers: new Set()} as any);
-        expect(this.typeOfMethod).toHaveBeenCalledTimes(1);
+        let sourceFile = withSource(false, "export let declaration: string");
+        expect(this.typeFromMethod).toHaveBeenCalledTimes(1);
     });
 
 });

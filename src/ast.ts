@@ -6,6 +6,7 @@ import * as ts from "typescript";
 import {log, Log} from "./log"
 
 interface Context {
+    readonly typeChecker: ts.TypeChecker;
     readonly queue: Array<() => void>;
     readonly typeDeclarations: Map<string, TypeDeclaration>;
     readonly thrownTypes: Set<string>;
@@ -151,7 +152,7 @@ export class VariableDeclaration extends MemberDeclaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration|ts.PropertyDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.VariableDeclaration|ts.PropertyDeclaration|ts.PropertySignature, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
@@ -186,27 +187,32 @@ export abstract class TypeDeclaration extends MemberDeclaration {
     constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         let members: MemberDeclaration[] = [];
-        for (let member of node.members) {
-            let comment = new Comment(member);
-            if(member.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private')) {
-                log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
-            } else switch(member.kind) {
-                case ts.SyntaxKind.PropertyDeclaration:
-                    members.push(new VariableDeclaration(member as ts.PropertyDeclaration, comment, this, context));
-                    break;         
-                case ts.SyntaxKind.MethodSignature:
-                    members.push(new FunctionDeclaration(member as ts.MethodSignature, comment, this, context));
-                    break;                
-                case ts.SyntaxKind.MethodDeclaration:
-                    members.push(new FunctionDeclaration(member as ts.MethodDeclaration, comment, this, context));
-                    break;                
-                case ts.SyntaxKind.Constructor:
-                    members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, comment, this, context));
-                    break;                
-                default:
-                    log.warn(`Skipping ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
-                    log.info(`This syntax element is not currently support by crossrails`, member)
-            }            
+        for(let declaration of context.typeChecker.getSymbolAtLocation(node.name!).declarations!) {
+            for (let member of (declaration as any).members) {
+                let comment = new Comment(member);
+                if(member.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private')) {
+                    log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
+                } else switch(member.kind) {
+                    case ts.SyntaxKind.PropertyDeclaration:
+                        members.push(new VariableDeclaration(member as ts.PropertyDeclaration, comment, this, context));
+                        break;         
+                    case ts.SyntaxKind.PropertySignature:
+                        members.push(new VariableDeclaration(member as ts.PropertySignature, comment, this, context));
+                        break;         
+                    case ts.SyntaxKind.MethodSignature:
+                        members.push(new FunctionDeclaration(member as ts.MethodSignature, comment, this, context));
+                        break;                
+                    case ts.SyntaxKind.MethodDeclaration:
+                        members.push(new FunctionDeclaration(member as ts.MethodDeclaration, comment, this, context));
+                        break;                
+                    case ts.SyntaxKind.Constructor:
+                        members.push(new ConstructorDeclaration(member as ts.ConstructorDeclaration, comment, this, context));
+                        break;                
+                    default:
+                        log.warn(`Skipping ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
+                        log.info(`This syntax element is not currently support by crossrails`, member)
+                }            
+            }
         }
         this.members = members;
         context.typeDeclarations.set(this.name, this);
@@ -255,7 +261,7 @@ export class SourceFile {
             let comment = new Comment(statement);
             if(!implicitExport && !(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
                 log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
-            } else switch(statement.kind) {
+            } else if(!this.isPreviouslyDeclared(statement, context)) switch(statement.kind) {
                 case ts.SyntaxKind.VariableStatement:
                     for (let declaration of (statement as ts.VariableStatement).declarationList.declarations) {
                         declarations.push(new VariableDeclaration(declaration, comment, this, context));
@@ -278,6 +284,13 @@ export class SourceFile {
         this.declarations = declarations;
     }
         
+    private isPreviouslyDeclared(statement: ts.Statement, context: Context): boolean {
+        const declaration = (statement as ts.DeclarationStatement);
+        if(declaration.name === undefined) return false;
+        const symbol = context.typeChecker.getSymbolAtLocation(declaration.name);
+        return symbol.declarations!.length > 1 && declaration !== symbol.declarations![0];
+    }
+
     get sourceFile(): SourceFile {
         return this;
     }
@@ -490,7 +503,7 @@ export class DeclaredType extends GenericType {
         })
     }     
 
-    static isTypeReferenceNode(type: ts.TypeReferenceNode | Comment.Tag.Type): type is ts.TypeReferenceNode {
+    private static isTypeReferenceNode(type: ts.TypeReferenceNode | Comment.Tag.Type): type is ts.TypeReferenceNode {
         return (type as ts.TypeReferenceNode).typeName !== undefined;
     }
 

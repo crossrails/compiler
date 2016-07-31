@@ -13,5 +13,5 @@
       "type": "node",
       "runner": "node"      
   },
-  "reportConsoleErrorAsError": true
+  "reportConsoleErrorAsError": false
 }
