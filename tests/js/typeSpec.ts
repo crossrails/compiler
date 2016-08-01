@@ -3,7 +3,7 @@ import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as AST from "../../src/ast"
 import {log} from "../../src/log"
-import {mockSourceFile} from "./mocks"
+import {mockSourceFile, mockProgram} from "./mocks"
 
 describe("Type", () => {
     
@@ -32,21 +32,21 @@ describe("Type", () => {
     });
 
     it("erases to any on typescript intersection types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true,), false, {} as any, context as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });  
     
     it("erases to any on unsupported typescript union types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });    
 
     it("correctly identifies typescript optional types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `
             export let a: any | null;
             export let b: null | any;
@@ -58,13 +58,13 @@ describe("Type", () => {
     });
     
     it("correctly identifies typescript function types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `
             export let run: () => void;
             export let supplier: () => ReturnValue;
             export let consumer: (n :Arg) => void;
         `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
-        context.queue.forEach(f => f())
+        context.finalize();
         let run = (sourceFile.declarations[0] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(run.constructor.name).toBe('FunctionType');
         expect(run.signature.returnType.constructor.name).toBe('VoidType');
@@ -83,7 +83,7 @@ describe("Type", () => {
     });
     
     it("correctly identifies typescript array types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `
             export let numbers: number[];
             export let strings: Array<string>;
@@ -104,7 +104,7 @@ describe("Type", () => {
     });    
     
     it("correctly identifies typescript basic types", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `
             export let s: string;
             export let b: boolean;
@@ -130,9 +130,7 @@ describe("Type", () => {
     });
 
     it("correctly identifies typescript declared types and links the declaration", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
         let sourceFile = mockSourceFile(false, `export interface Custom {}; export let c: Custom`);
-        context.queue.forEach(f => f())
         expect(log.errorCount).toBe(0);
         expect((sourceFile.declarations[1] as AST.VariableDeclaration).type.constructor.name).toBe('DeclaredType');
         let type = (sourceFile.declarations[1] as AST.VariableDeclaration).type as AST.DeclaredType;
@@ -140,9 +138,9 @@ describe("Type", () => {
     });
 
     it("errors when an typescript undeclared type is referenced", function(this: This) {
-        let context = {identifiers: new Set(), queue: [], typeDeclarations: new Map()};
+        let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let c: Custom`, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
-        context.queue.forEach(f => f())
+        context.finalize();
         expect(log.errorCount).toBe(1);
     });
 

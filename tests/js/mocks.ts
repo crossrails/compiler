@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as rewire from 'rewire';
 import * as ts from "typescript";
 import {readFileSync} from 'fs';
-import {SourceFile} from "../../src/ast"
+import {SourceFile, Context} from "../../src/ast"
 
 export function mockProgram(files: [string, string][], noLib: boolean = false) {
     const map = new Map(files);
@@ -19,8 +19,8 @@ export function mockProgram(files: [string, string][], noLib: boolean = false) {
 
 export function mockSourceFile(implicitExport: boolean, source: string): SourceFile {
     const program = mockProgram([['source.ts', source]], true);
-    let context = {typeChecker: program.getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
-    const file = new SourceFile(program.getSourceFile('source.ts'), implicitExport, {} as any, context as any);
-    context.queue.forEach(f => f())
+    let context = new Context(program);
+    const file = new SourceFile(program.getSourceFile('source.ts'), implicitExport, {} as any, context);
+    context.finalize();
     return file;
 }

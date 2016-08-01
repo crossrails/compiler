@@ -72,12 +72,12 @@ describe("TypeDeclaration", () => {
                 firstMember: any;
             }
             namespace Foo {
-                var firstMember: any;
-                function secondMember() {};
+                export var firstMember: any;
+                export function secondMember() {};
             }
         `);
         expect(sourceFile.declarations.length).toBe(1);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(2);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(3);
     });
 
 });
@@ -141,14 +141,14 @@ describe("VariableDeclaration", () => {
     
     it("has an any type when missing type information", function(this: This) {
         let program = mockProgram([['source.ts', "export let declaration"]]);
-        let context = {typeChecker: program.getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
+        let context = new this.ast.Context(program);
         let sourceFile = new this.ast.SourceFile(program.getSourceFile('source.ts'), false, {} as any, context as any)
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
     });
 
     it("retains type information when specified in the source", function(this: This) {
         let program = mockProgram([['source.ts', "export let declaration: string"]]);
-        let context = {typeChecker: program.getTypeChecker(), identifiers: new Set(), queue: [], thrownTypes: new Set(), typeDeclarations: new Map()}
+        let context = new this.ast.Context(program);
         let sourceFile = new this.ast.SourceFile(program.getSourceFile('source.ts'), false, {} as any, context as any)
         expect(this.typeFromMethod).toHaveBeenCalledTimes(1);
     });
