@@ -63,21 +63,24 @@ describe("TypeDeclaration", () => {
         `);
         expect(sourceFile.declarations.length).toBe(1);
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(2);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].abstract).toBe(true);
     });
 
     it("merges members from a namepace into a class if one exists with the same name", function() {
         log.setLevel('debug')
         let sourceFile = mockSourceFile(true, `
-            class Foo {
-                firstMember: any;
-            }
             namespace Foo {
                 export var firstMember: any;
                 export function secondMember() {};
             }
+            class Foo {
+                firstMember: any;
+            }
         `);
         expect(sourceFile.declarations.length).toBe(1);
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(3);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[0].static).toBe(true);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].static).toBe(true);
     });
 
 });

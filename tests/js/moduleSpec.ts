@@ -33,9 +33,9 @@ describe("Module", () => {
     });
 
     it("throws file not found when sourcemap specified but does not exist", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
             if(file == 'missingfile.js.map') throw {code: 'ENOENT'};
-            return "";    
+            return this.readFileSync(file, encoding);    
         });
         try {
             let module = new AST.Module("missingfile.js", "missingfile.js.map", undefined, undefined, false, "utf8");
@@ -46,9 +46,9 @@ describe("Module", () => {
     });
 
     it("throws file not found when declaration specified but does not exist", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
             if(file == 'missingfile.d.ts') throw {code: 'ENOENT'};
-            return "";    
+            return this.readFileSync(file, encoding);    
         });
         try {
             let module = new AST.Module("missingfile.js", undefined, "missingfile.d.ts", undefined, false, "utf8");
@@ -59,9 +59,9 @@ describe("Module", () => {
     });
 
     it("reads the sourcemap if one is passed in and throws if not found", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
             if(file == 'different.js.map') throw {code: 'ENOENT'};
-            return "";    
+            return this.readFileSync(file, encoding);    
         });
         try {
             let module = new AST.Module("src.js", "different.js.map", undefined, undefined, false, "utf8");
@@ -72,17 +72,17 @@ describe("Module", () => {
     });
     
     it("prefers sourcemap over typings file", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
             if(file == 'src.js.map') return JSON.stringify({sources: ['src.js'], sourceRoot: ""});
-            return "";    
+            return this.readFileSync(file, encoding);    
         });
         let module = new AST.Module("src.js", undefined, undefined, "typings.d.ts", false, "utf8");
         expect(this.createProgramMethod).toHaveBeenCalledWith(['src.js'], jasmine.anything())
     });
     
     it("reads the declaration file over typings file if both passed in", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
-            return "";    
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
+            return this.readFileSync(file, encoding);    
         });
         this.accessMethod.and.callFake(() => {
             return true;
@@ -92,9 +92,9 @@ describe("Module", () => {
     });
     
     it("attempts to read the sourcemap, then the declaration file beside the input file if none specified", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
             if(file == 'src.js.map') throw {code: 'ENOENT'};
-            return "";    
+            return this.readFileSync(file, encoding);    
         });
         this.accessMethod.and.callFake(() => {
             return true;
@@ -105,16 +105,18 @@ describe("Module", () => {
     });
     
     it("parses the supplied file if source map and declaration file not found", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
-            throw {code: 'ENOENT'};
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
+            if(file.startsWith('src')) throw {code: 'ENOENT'};
+            return this.readFileSync(file, encoding);    
         });
         let module = new AST.Module("src.js", undefined, undefined, undefined, false, "utf8");
         expect(this.createProgramMethod).toHaveBeenCalledWith(['src.js'], jasmine.anything())
     });
 
     it("parses the files specified in the source map if found", function(this: This) {
-        this.readFileMethod.and.callFake((file: string) => {
-            return file != 'transpiled.js.map' ? '' : '{"sourceRoot": "", "sources": ["source1.ts", "source2.ts"]}';    
+        this.readFileMethod.and.callFake((file: string, encoding: string) => {
+            if(file == 'transpiled.js.map') return '{"sourceRoot": "", "sources": ["source1.ts", "source2.ts"]}';    
+            return this.readFileSync(file, encoding);    
         });
         let module = new AST.Module("transpiled.js", undefined, undefined, undefined, false, "utf8");
         expect(this.createProgramMethod).toHaveBeenCalledWith(['source1.ts', 'source2.ts'], jasmine.anything())
@@ -128,6 +130,7 @@ describe("Module", () => {
         const program = mockProgram([['src.ts', 'export let declaration']]);
         this.createProgramMethod.and.callFake(() => program);
         let module = new AST.Module("src.ts", undefined, undefined, undefined, false, "utf8");
+        expect(log.errorCount).toBe(0);
         expect(module.files.length).toBe(1);
         expect(module.files[0].path.base).toBe("src.ts");
     });
@@ -137,9 +140,10 @@ describe("Module", () => {
             if(file.startsWith('src')) throw {code: 'ENOENT'};
             return this.readFileSync(file, encoding);    
         });
-        const program = mockProgram([['src.js', 'let declaration']]);
+        const program = mockProgram([['src.ts', 'let declaration']]);
         this.createProgramMethod.and.callFake(() => program);
-        let module = new AST.Module("src.js", undefined, undefined, undefined, false, "utf8");
+        let module = new AST.Module("src.ts", undefined, undefined, undefined, false, "utf8");
+        expect(log.errorCount).toBe(0);
         expect(module.files.length).toBe(0);
     });
 });

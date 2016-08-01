@@ -31,41 +31,40 @@ export class Context {
         return symbol ? symbol.declarations! : [declaration];        
     }
  
-    createDeclarations<T extends Declaration>(node: ts.Node, comment: Comment, parent: TypeDeclaration|SourceFile): T[] {
-        let declaration = this.declarationsFor(node as ts.Declaration)[0];
-        let declarations: Declaration[] = [];
-        if(node == declaration) switch(node.kind) {
+    createDeclarations<T extends Declaration>(node: ts.Node, comment: Comment, parent: Declaration|SourceFile): T[] {
+        let declarations = this.declarationsFor(node as ts.Declaration);
+        let created: Declaration[] = [];
+        if(node == declarations.reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main)) switch(node.kind) {
             case ts.SyntaxKind.VariableStatement:
-                declarations.push(...(node as ts.VariableStatement).declarationList.declarations.map(d => this.createDeclarations(d, comment, parent)[0]));
+                created.push(...(node as ts.VariableStatement).declarationList.declarations.map(d => this.createDeclarations(d, comment, parent)[0]));
                 break;   
             case ts.SyntaxKind.VariableDeclaration:
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.PropertySignature:
-                declarations.push(new VariableDeclaration(node as ts.VariableDeclaration, comment, parent, this));
+                created.push(new VariableDeclaration(node as ts.VariableDeclaration, comment, parent, this));
                 break;
             case ts.SyntaxKind.FunctionDeclaration:
-                declarations.push(new FunctionDeclaration(node as ts.FunctionDeclaration, comment, parent, this));
+            case ts.SyntaxKind.MethodDeclaration:
+            case ts.SyntaxKind.MethodSignature:
+                created.push(new FunctionDeclaration(node as ts.SignatureDeclaration, comment, parent, this));
                 break;                
             case ts.SyntaxKind.ClassDeclaration:
-                declarations.push(new ClassDeclaration(node as ts.ClassDeclaration, comment, parent, this));
+                created.push(new ClassDeclaration(node as ts.ClassDeclaration, comment, parent, this));
                 break;
             case ts.SyntaxKind.InterfaceDeclaration:
-                declarations.push(new InterfaceDeclaration(node as ts.InterfaceDeclaration, comment, parent, this));
+                created.push(new InterfaceDeclaration(node as ts.InterfaceDeclaration, comment, parent, this));
                 break;
-            case ts.SyntaxKind.MethodSignature:
-                declarations.push(new FunctionDeclaration(node as ts.MethodSignature, comment, parent, this));
-                break;                
-            case ts.SyntaxKind.MethodDeclaration:
-                declarations.push(new FunctionDeclaration(node as ts.MethodDeclaration, comment, parent, this));
-                break;                
             case ts.SyntaxKind.Constructor:
-                declarations.push(new ConstructorDeclaration(node as ts.ConstructorDeclaration, comment, parent, this));
-                break;                
+                created.push(new ConstructorDeclaration(node as ts.ConstructorDeclaration, comment, parent, this));
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                created.push(new NamespaceDeclaration(node as ts.ModuleDeclaration, comment, parent, this));
+                break;
             default:
-                log.warn(`Skipping ${ts.SyntaxKind[node.kind]} named ${(declaration.name as ts.Identifier || {text:"\b"}).text}`, node);
+                log.warn(`Skipping ${ts.SyntaxKind[node.kind]} named ${(declarations[0].name as ts.Identifier || {text:"\b"}).text}`, node);
                 log.info(`This syntax element is not currently support by crossrails`, node)
         }     
-        return declarations as T[];       
+        return created as T[];       
     } 
     
 }
@@ -135,10 +134,10 @@ export abstract class MemberDeclaration extends Declaration {
     readonly static: boolean;
     readonly abstract: boolean
 
-    constructor(node: ts.Declaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.Declaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, parent);
         this.protected = (node.flags & ts.NodeFlags.Protected) != 0 || comment.isTagged('protected') || comment.isTagged('access', 'protected');
-        this.static =  parent == this.sourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
+        this.static =  parent == this.sourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock || (node.kind == ts.SyntaxKind.VariableDeclaration && node.parent!.parent!.parent!.kind == ts.SyntaxKind.ModuleBlock) || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
         this.abstract = node.parent!.kind == ts.SyntaxKind.InterfaceDeclaration || (node.flags & ts.NodeFlags.Abstract) != 0 || comment.isTagged('abstract') || comment.isTagged('virtual');
         if(node.name) {
             context.identifiers.add(this);
@@ -181,14 +180,14 @@ export class FunctionDeclaration extends MemberDeclaration {
     readonly signature: FunctionSignature
     readonly typeParameters: ReadonlyArray<Type>
 
-    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.SignatureDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         this.signature = new FunctionSignature(node, comment, this, context);
     }
 }
 
 export class ConstructorDeclaration extends FunctionDeclaration {
-    constructor(node: ts.ConstructorDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.ConstructorDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
     }
 
@@ -205,7 +204,7 @@ export class VariableDeclaration extends MemberDeclaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.VariableDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
@@ -237,21 +236,14 @@ export class ParameterDeclaration extends Declaration {
 export abstract class TypeDeclaration extends MemberDeclaration {
     readonly members: ReadonlyArray<MemberDeclaration>;
     
-    constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         let members: MemberDeclaration[] = [];
         for(let declaration of context.declarationsFor(node)) {
             switch(declaration.kind) {
                 case ts.SyntaxKind.ModuleDeclaration:
-                    const body = (declaration as ts.ModuleDeclaration).body as ts.ModuleBlock;
-                    if(body.statements) for (let statement of body.statements) {
-                        let comment = new Comment(statement);
-                        if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
-                            log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
-                            continue;                
-                        } 
-                        members.push(...context.createDeclarations<MemberDeclaration>(statement, comment, this));
-                    }
+                    const namespace = new NamespaceDeclaration(declaration as ts.ModuleDeclaration, comment, parent, context);
+                    members.push(...namespace.declarations as MemberDeclaration[]);
                     break;
                 default:
                     for (let member of (declaration as ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration).members) {
@@ -272,7 +264,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
 export class InterfaceDeclaration extends TypeDeclaration {
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(node: ts.InterfaceDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.InterfaceDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
     }
 }
@@ -282,7 +274,7 @@ export class ClassDeclaration extends TypeDeclaration {
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(node: ts.ClassDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
+    constructor(node: ts.ClassDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
         context.queue(() => {
             this._isThrown = context.thrownTypes.has(this.name); 
@@ -293,6 +285,27 @@ export class ClassDeclaration extends TypeDeclaration {
         return this._isThrown
     }
 }
+
+export class NamespaceDeclaration extends Declaration { 
+    readonly declarations: ReadonlyArray<Declaration> 
+    readonly module: Module; 
+     
+    constructor(node: ts.ModuleDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) { 
+        super(node, parent); 
+        let declarations: Declaration[] = [];
+        const body = node.body as ts.ModuleBlock;
+        if(body.statements) for (let statement of body.statements) {
+            let comment = new Comment(statement);
+            if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
+                log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
+                continue;                
+            } 
+            declarations.push(...context.createDeclarations(statement, comment, this));
+        }
+        this.declarations = declarations;
+    }     
+} 
+ 
 
 export class SourceFile {
     readonly path: path.ParsedPath;    
