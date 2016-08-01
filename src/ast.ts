@@ -293,14 +293,16 @@ export class NamespaceDeclaration extends Declaration {
     constructor(node: ts.ModuleDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) { 
         super(node, parent); 
         let declarations: Declaration[] = [];
-        const body = node.body as ts.ModuleBlock;
-        if(body.statements) for (let statement of body.statements) {
-            let comment = new Comment(statement);
-            if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
-                log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
-                continue;                
-            } 
-            declarations.push(...context.createDeclarations(statement, comment, this));
+        for(let declaration of context.declarationsFor(node) as ts.ModuleDeclaration[]) {
+            const body = declaration.body as ts.ModuleBlock;
+            if(body.statements) for (let statement of body.statements) {
+                let comment = new Comment(statement);
+                if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
+                    log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
+                    continue;                
+                } 
+                declarations.push(...context.createDeclarations(statement, comment, this));
+            }
         }
         this.declarations = declarations;
     }     

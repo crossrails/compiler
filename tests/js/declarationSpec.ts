@@ -83,6 +83,22 @@ describe("TypeDeclaration", () => {
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].static).toBe(true);
     });
 
+    it("merges members from two declarations of the same namepace", function() {
+        log.setLevel('debug')
+        let sourceFile = mockSourceFile(true, `
+            namespace Foo {
+                export var firstMember: any;
+                export function secondMember() {};
+            }
+
+            namespace Foo {
+                export function secondMember() {};
+                export var thirdMember: any;
+            }
+        `);
+        expect(sourceFile.declarations.length).toBe(1);
+        expect((sourceFile.declarations[0] as AST.NamespaceDeclaration).declarations.length).toBe(3);
+    });
 });
 
 describe("FunctionDeclaration", () => {
