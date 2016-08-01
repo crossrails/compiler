@@ -15,6 +15,7 @@ describe("Module", () => {
     }
     
     beforeEach(function(this: This) {
+        log.resetCounters();
         this.readFileSync = fs.readFileSync;
         this.readFileMethod = spyOn(fs, 'readFileSync');
         this.accessMethod = spyOn(fs, 'accessSync').and.callThrough();

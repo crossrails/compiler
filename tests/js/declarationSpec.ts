@@ -35,22 +35,49 @@ describe("TypeDeclaration", () => {
         expect((sourceFile.declarations[0] as AST.TypeDeclaration).members.length).toBe(1);
     });
 
-});
-
-describe("InterfaceDeclaration", () => {
-
     it("merges members from two declarations of the same interface", function() {
         log.setLevel('debug')
         let sourceFile = mockSourceFile(true, `
-            interface MyInterface {
-                firstMember;
+            interface Foo {
+                firstMember: any;
             }
-            interface MyInterface {
-                secondMember;
+            interface Foo {
+                firstMember: any;
+                secondMember: any;
             }
         `);
         expect(sourceFile.declarations.length).toBe(1);
         expect((sourceFile.declarations[0] as AST.InterfaceDeclaration).members.length).toBe(2);
+    });
+
+    it("merges members from an interface into a class if one exists with the same name", function() {
+        log.setLevel('debug')
+        let sourceFile = mockSourceFile(true, `
+            class Foo {
+                firstMember: any;
+            }
+            interface Foo {
+                firstMember: any;
+                secondMember: any;
+            }
+        `);
+        expect(sourceFile.declarations.length).toBe(1);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(2);
+    });
+
+    it("merges members from a namepace into a class if one exists with the same name", function() {
+        log.setLevel('debug')
+        let sourceFile = mockSourceFile(true, `
+            class Foo {
+                firstMember: any;
+            }
+            namespace Foo {
+                var firstMember: any;
+                function secondMember() {};
+            }
+        `);
+        expect(sourceFile.declarations.length).toBe(1);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(2);
     });
 
 });

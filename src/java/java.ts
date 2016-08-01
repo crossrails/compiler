@@ -93,11 +93,11 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this:
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: FunctionDeclaration): string {
-    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected ' : 'public '}${this.static ? 'static ' : this.abstract ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected ' : 'public '}${this.static ? 'static ' : this.abstract && !(this.parent instanceof InterfaceDeclaration) ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: FunctionDeclaration): string {
-    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.hasBody ? '' : ';'}`;
+    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.abstract ? '' : ';'}`;
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ConstructorDeclaration): string {

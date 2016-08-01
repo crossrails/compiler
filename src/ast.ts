@@ -13,6 +13,12 @@ interface Context {
     readonly identifiers: Set<Declaration>;
 }
 
+function isPreviouslyDeclared(declaration: ts.Declaration, context: Context): boolean {
+    if(declaration.name === undefined) return false;
+    const symbol = context.typeChecker.getSymbolAtLocation(declaration.name);
+    return symbol.declarations!.length > 1 && declaration !== symbol.declarations![0];
+}
+
 namespace Comment {
     export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
     export namespace Tag {
@@ -76,11 +82,13 @@ export abstract class MemberDeclaration extends Declaration {
     readonly comment: string
     readonly protected: boolean;
     readonly static: boolean;
+    readonly abstract: boolean
 
     constructor(node: ts.Declaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, parent);
         this.protected = (node.flags & ts.NodeFlags.Protected) != 0 || comment.isTagged('protected') || comment.isTagged('access', 'protected');
         this.static = this.parent == this.sourceFile || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
+        this.abstract = node.parent!.kind == ts.SyntaxKind.InterfaceDeclaration || (node.flags & ts.NodeFlags.Abstract) != 0 || comment.isTagged('abstract') || comment.isTagged('virtual');
         if(node.name) {
             context.identifiers.add(this);
         }
@@ -119,18 +127,12 @@ export class FunctionSignature {
 }
 
 export class FunctionDeclaration extends MemberDeclaration {
-    readonly abstract: boolean
     readonly signature: FunctionSignature
     readonly typeParameters: ReadonlyArray<Type>
 
     constructor(node: ts.SignatureDeclaration, comment: Comment, parent: TypeDeclaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
-        this.abstract = (node.flags & ts.NodeFlags.Abstract) != 0;
         this.signature = new FunctionSignature(node, comment, this, context);
-    }
-
-    get hasBody(): boolean {
-        return !(this.abstract || this.parent instanceof InterfaceDeclaration);
     }
 }
 
@@ -192,7 +194,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                 let comment = new Comment(member);
                 if(member.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private')) {
                     log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);                
-                } else switch(member.kind) {
+                } else if(!isPreviouslyDeclared(member, context)) switch(member.kind) {
                     case ts.SyntaxKind.PropertyDeclaration:
                         members.push(new VariableDeclaration(member as ts.PropertyDeclaration, comment, this, context));
                         break;         
@@ -261,7 +263,7 @@ export class SourceFile {
             let comment = new Comment(statement);
             if(!implicitExport && !(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
                 log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]}`, statement);                
-            } else if(!this.isPreviouslyDeclared(statement, context)) switch(statement.kind) {
+            } else if(!isPreviouslyDeclared(statement as ts.DeclarationStatement, context)) switch(statement.kind) {
                 case ts.SyntaxKind.VariableStatement:
                     for (let declaration of (statement as ts.VariableStatement).declarationList.declarations) {
                         declarations.push(new VariableDeclaration(declaration, comment, this, context));
@@ -284,13 +286,6 @@ export class SourceFile {
         this.declarations = declarations;
     }
         
-    private isPreviouslyDeclared(statement: ts.Statement, context: Context): boolean {
-        const declaration = (statement as ts.DeclarationStatement);
-        if(declaration.name === undefined) return false;
-        const symbol = context.typeChecker.getSymbolAtLocation(declaration.name);
-        return symbol.declarations!.length > 1 && declaration !== symbol.declarations![0];
-    }
-
     get sourceFile(): SourceFile {
         return this;
     }

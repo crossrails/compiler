@@ -86,7 +86,7 @@ DeclaredType.prototype.typeName = function(this: DeclaredType): string {
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
-    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.hasBody ? ` ${this.body(indent)}\n` : '\n'}`;
+    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.abstract ? ` ${this.body(indent)}\n` : '\n'}`;
 }
 
 TypeDeclaration.prototype.emit = function (this: TypeDeclaration, indent?: string): string {
