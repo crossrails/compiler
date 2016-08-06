@@ -220,9 +220,11 @@ export class VariableDeclaration extends MemberDeclaration {
 export class ParameterDeclaration extends Declaration {
     readonly type: Type;
     readonly parent: Declaration;
+    readonly optional: boolean;
     
     constructor(node: ts.ParameterDeclaration, parent: Declaration, context: Context) {
         super(node, parent);
+        this.optional = node.questionToken !== undefined;
         if(node.type) {
             this.type = Type.from(node.type, false, this, context);
         } else {

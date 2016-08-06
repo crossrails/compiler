@@ -37,7 +37,7 @@ public class SimpleObject : Equatable {
         }
     }
 
-    public init(v: Double) {
+    public init(v: Double? = nil) {
         self.this = try! SimpleObject.this.construct(SimpleObject.this.valueOf(v)) 
         self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
             "numberSingleObjectArgMethod": { args in 

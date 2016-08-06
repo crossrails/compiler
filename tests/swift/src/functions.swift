@@ -21,7 +21,7 @@ public func numberMultipleArgFunction(a: Double, b: Double) -> Double {
     return Double(try! this[.numberMultipleArgFunction](this.valueOf(a), this.valueOf(b)))
 }
 
-public var stringNoArgLambda :() -> (String) {
+public var stringNoArgLambda :() -> String {
     get {
         let function :JSFunction = this[.stringNoArgLambda]
         return { () in return String(try! function.call(this)) }

@@ -4,7 +4,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType
 } from "../ast"
 
 export interface SwiftOptions extends CompilerOptions {
@@ -25,12 +25,12 @@ declare module "../ast" {
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, outDir: string, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
-    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.pathForResource("${this.src.name}", ofType: "${this.src.ext.substr(1)}")!`);
+    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.path(forResource: "${this.src.name}", ofType: "${this.src.ext.substr(1)}")!`);
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
     for(let file of this.files as Array<ast.SourceFile>) {
-        let filename = `${path.join(outDir, path.relative(this.sourceRoot, file.path.dir), file.path.name)}.swift`;
+        let filename = `${path.join(outDir, path.relative(this.sourceRoot, file.path.dir), file.path.base.substr(0, file.path.base.indexOf('.')))}.swift`;
         Object.defineProperty(file, 'isModuleFile', { writable: false, value: filename == moduleFilename});
         writeFile(filename, file.emit());                
         writtenModuleFile = writtenModuleFile || file.isModuleFile;
@@ -74,7 +74,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: 
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}`;
+    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.optional ? '? = nil' : ''}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
@@ -82,7 +82,7 @@ decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: ast.FunctionDeclaration): string {
-    return `${this.signature.returnType instanceof ast.VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;
+    return `${this.signature.returnType instanceof VoidType ? '' : ` -> ${this.signature.returnType.emit()}`}${this.signature.thrownTypes.length ? ' throws' : ''}`;
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ast.ConstructorDeclaration): string {
@@ -117,10 +117,18 @@ decorate(NumberType, ({prototype}) => prototype.typeName = function(this: ast.Nu
     return 'Double'    
 })
 
+decorate(DateType, ({prototype}) => prototype.typeName = function(this: ast.DateType): string {
+    return 'Date';  
+})
+
+decorate(VoidType, ({prototype}) => prototype.typeName = function(this: ast.VoidType): string {
+    return 'Void';  
+})
+
 decorate(ArrayType, ({prototype}) => prototype.typeName = function(this: ast.ArrayType): string {
     return `[${this.typeArguments[0].emit()}]`;    
 })
 
 decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: ast.FunctionType): string {
-    return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> (${this.signature.returnType.emit()})`;
+    return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> ${this.signature.returnType.emit()}`; 
 })
