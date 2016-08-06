@@ -190,12 +190,12 @@ describe("Playground", () => {
 
 //     })
 
-    it("Example", function() {
-        generateDocumentation(['test.ts'], {
-            target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS
-        });
+    // it("Example", function() {
+    //     generateDocumentation(['test.ts'], {
+    //         target: ts.ScriptTarget.ES5, module: ts.ModuleKind.CommonJS
+    //     });
 
-    })
+    // })
 })
 
 /*

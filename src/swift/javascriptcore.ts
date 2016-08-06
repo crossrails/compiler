@@ -28,7 +28,7 @@ decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module
 })
 
 decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceFile): string {
-    return `import Foundation\n${!this.isModuleFile  ? '' : `\nvar this :JSInstance = try! JSContext().eval(${this.module.resourcePath})`}`;
+    return `import Foundation\n${!this.isModuleFile  ? '' : `\nvar this :JSInstance = try! JSContext().eval(${this.module.resourcePath})\n`}`;
 })
 
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {

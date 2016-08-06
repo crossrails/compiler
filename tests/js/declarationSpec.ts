@@ -31,12 +31,10 @@ describe("TypeDeclaration", () => {
                 accessTagUsed;
             }
         `);
-        console.log(sourceFile);
         expect((sourceFile.declarations[0] as AST.TypeDeclaration).members.length).toBe(1);
     });
 
     it("merges members from two declarations of the same interface", function() {
-        log.setLevel('debug')
         let sourceFile = mockSourceFile(true, `
             interface Foo {
                 firstMember: any;
@@ -51,7 +49,6 @@ describe("TypeDeclaration", () => {
     });
 
     it("merges members from an interface into a class if one exists with the same name", function() {
-        log.setLevel('debug')
         let sourceFile = mockSourceFile(true, `
             class Foo {
                 firstMember: any;
@@ -66,38 +63,40 @@ describe("TypeDeclaration", () => {
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].abstract).toBe(true);
     });
 
-    it("merges members from a namepace into a class if one exists with the same name", function() {
-        log.setLevel('debug')
+    it("merges members from a namespace into a class if one exists with the same name", function() {
         let sourceFile = mockSourceFile(true, `
             namespace Foo {
-                export var firstMember: any;
-                export function secondMember() {};
+                export var firstMember: any
+                export function secondMember() {}
             }
             class Foo {
-                firstMember: any;
+                firstMember: any
+                static firstMember: any
             }
         `);
         expect(sourceFile.declarations.length).toBe(1);
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(3);
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[0].static).toBe(true);
         expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].static).toBe(true);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[2].static).toBe(false);
     });
 
-    it("merges members from two declarations of the same namepace", function() {
-        log.setLevel('debug')
+    it("merges members from two declarations of the same namespace", function() {
         let sourceFile = mockSourceFile(true, `
             namespace Foo {
                 export var firstMember: any;
-                export function secondMember() {};
+                export function secondMember(): any {};
+                export var thirdMember: any;
             }
 
             namespace Foo {
-                export function secondMember() {};
-                export var thirdMember: any;
+                export var firstMember: any;
+                export function secondMember(): any {};
+                export var fourMember: any;
             }
         `);
         expect(sourceFile.declarations.length).toBe(1);
-        expect((sourceFile.declarations[0] as AST.NamespaceDeclaration).declarations.length).toBe(3);
+        expect((sourceFile.declarations[0] as AST.NamespaceDeclaration).declarations.length).toBe(4);
     });
 });
 

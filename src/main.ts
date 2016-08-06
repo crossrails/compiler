@@ -135,9 +135,9 @@ function main(...args: string[]): number {
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
-        if(log.errorCount === 0) {       
+        // if(log.errorCount === 0) {       
             compiler.compile(module); 
-        }       
+        // }       
     }
     
     return log.errorCount;

@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as AST from "../../src/ast"
-import {log} from "../../src/log"
+import {log, Log} from "../../src/log"
 import {mockSourceFile, mockProgram} from "./mocks"
 
 describe("Type", () => {
@@ -28,6 +28,7 @@ describe("Type", () => {
         this.ast.__set__('NumberType', this.numberTypeConstructor);
         this.errorTypeConstructor = jasmine.createSpy('ErrorType');
         this.ast.__set__('ErrorType', this.errorTypeConstructor);
+        log.level = Log.Level.DEBUG;
         log.resetCounters();
     });
 
@@ -52,19 +53,17 @@ describe("Type", () => {
             export let b: null | any;
             export let c: any | undefined;
             export let d: undefined | any;
-        `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        `, ts.ScriptTarget.ES6, true), false, {} as any, context);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(4);
         expect(this.anyTypeConstructor).not.toHaveBeenCalledWith(false);
     });
     
     it("correctly identifies typescript function types", function(this: This) {
-        let context = new this.ast.Context(mockProgram([]));
-        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `
+        let sourceFile = mockSourceFile(false, `
             export let run: () => void;
             export let supplier: () => ReturnValue;
             export let consumer: (n :Arg) => void;
-        `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
-        context.finalize();
+        `);
         let run = (sourceFile.declarations[0] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(run.constructor.name).toBe('FunctionType');
         expect(run.signature.returnType.constructor.name).toBe('VoidType');
@@ -73,7 +72,7 @@ describe("Type", () => {
         expect(supplier.constructor.name).toBe('FunctionType');
         expect(supplier.signature.returnType.constructor.name).toBe('DeclaredType');
         expect((supplier.signature.returnType as AST.DeclaredType).name).toBe('ReturnValue');
-        expect(run.signature.parameters.length).toBe(0);
+        expect(supplier.signature.parameters.length).toBe(0);
         let consumer = (sourceFile.declarations[2] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(consumer.constructor.name).toBe('FunctionType');
         expect(consumer.signature.returnType.constructor.name).toBe('VoidType');
@@ -138,9 +137,7 @@ describe("Type", () => {
     });
 
     it("errors when an typescript undeclared type is referenced", function(this: This) {
-        let context = new this.ast.Context(mockProgram([]));
-        let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let c: Custom`, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
-        context.finalize();
+        let sourceFile = mockSourceFile(false, `export let c: Custom`);
         expect(log.errorCount).toBe(1);
     });
 

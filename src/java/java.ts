@@ -3,7 +3,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature
 } from "../ast"
 
 export interface JavaOptions extends CompilerOptions {
@@ -72,6 +72,39 @@ decorate(TypeDeclaration, ({prototype}) => prototype.suffix = function (this: Ty
     return '';
 })
 
+decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
+    return this.members.reduce<MemberDeclaration[]>((members, member, memberIndex) => {
+        if(member instanceof FunctionDeclaration && !(member instanceof ConstructorDeclaration)) {
+            let parameters = member.signature.parameters;
+            let startOfOptionals = parameters.reduceRight((start, p, i) => p.optional ? i : start, parameters.length);
+            for(let index = startOfOptionals; index < parameters.length; index++) {
+                //skip adding overload if it already exists
+                if(([...members, ...this.members.slice(memberIndex)] as FunctionDeclaration[]).some(
+                    m => m.constructor.name === 'FunctionDeclaration' && m.name === member.name && m.signature.parameters.length==index && m.signature.parameters.every(
+                        (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
+                    )
+                )) continue;
+                members.push(Object.create(FunctionDeclaration.prototype, {
+                    name: { value: member.name},
+                    parent: { value: member.parent },
+                    comment: { value: member.comment},
+                    protected: { value: member.protected },
+                    static: { value: member.static },
+                    abstract: { value: member.abstract },
+                    typeParameters: { value: member.typeParameters },
+                    signature: { value: Object.create(FunctionSignature.prototype, {
+                        thrownTypes: { value: member.signature.thrownTypes},
+                        returnType: { value: member.signature.returnType },
+                        parameters: { value: member.signature.parameters.slice(0, index) }
+                    })},
+                }));
+            }
+        }
+        members.push(member);
+        return members;
+    }, []);
+})
+
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ClassDeclaration): string {
     return this.isThrown ? ' extends Exception' : '';
 })
@@ -97,7 +130,7 @@ decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: FunctionDeclaration): string {
-    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.abstract ? '' : ';'}`;
+    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.abstract ? ';' : ''}`;
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ConstructorDeclaration): string {
@@ -147,6 +180,10 @@ decorate(ArrayType, ({prototype}) => prototype.typeName = function(this: ArrayTy
 
 decorate(ErrorType, ({prototype}) => prototype.typeName = function(this: ErrorType): string {
     return 'Exception';  
+})
+
+decorate(DateType, ({prototype}) => prototype.typeName = function(this: DateType): string {
+    return 'Date';  
 })
 
 decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: FunctionType): string {

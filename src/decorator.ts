@@ -1,4 +1,4 @@
-import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration} from "./ast"
 import * as assert from "assert"
 
 let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
@@ -56,6 +56,7 @@ declare module "./ast" {
     }
 
     interface TypeDeclaration {
+        typeMembers(): ReadonlyArray<MemberDeclaration>
         keyword(): string
         typeName(): string
         suffix(): string
@@ -86,7 +87,15 @@ DeclaredType.prototype.typeName = function(this: DeclaredType): string {
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
-    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.abstract ? ` ${this.body(indent)}\n` : '\n'}`;
+    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.abstract ? '\n' : ` ${this.body(indent)}\n`}`;
+}
+
+TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
+    return this.members;
+}
+
+ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
+    return "class";
 }
 
 TypeDeclaration.prototype.emit = function (this: TypeDeclaration, indent?: string): string {
@@ -95,7 +104,7 @@ ${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
 
 ${this.header(`${indent}    `)}
 
-${this.members.reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
+${this.typeMembers().reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
 ${this.footer(`${indent}    `)}
 ${indent}}
     `.replace(/\n{3}/g, '\n').substr(1);

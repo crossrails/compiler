@@ -10,7 +10,7 @@ export class Context {
     private readonly typeChecker: ts.TypeChecker;
     readonly typeDeclarations: Map<string, TypeDeclaration> = new Map();
     readonly thrownTypes: Set<string> = new Set(); 
-    readonly identifiers: Set<Declaration> = new Set();
+    readonly identifiers: Map<string, Declaration> = new Map();
  
     constructor(program: ts.Program) { 
         this.typeChecker = program.getTypeChecker(); 
@@ -22,7 +22,7 @@ export class Context {
  
     finalize(): ReadonlyArray<Declaration> { 
         this.queued.forEach(f => f()); 
-        return Array.from(this.identifiers);
+        return Array.from(this.identifiers.values());
     } 
 
     declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
@@ -30,41 +30,52 @@ export class Context {
         const symbol = this.typeChecker.getSymbolAtLocation(declaration.name);
         return symbol ? symbol.declarations! : [declaration];        
     }
+
+    private isMainDeclaration(node: ts.Node): boolean {
+        let declarations = this.declarationsFor(node as ts.Declaration);
+        return node === declarations.reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main);
+    }
  
     createDeclarations<T extends Declaration>(node: ts.Node, comment: Comment, parent: Declaration|SourceFile): T[] {
-        let declarations = this.declarationsFor(node as ts.Declaration);
-        let created: Declaration[] = [];
-        if(node == declarations.reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main)) switch(node.kind) {
+        let declarations: Declaration[] = [];
+        switch(node.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+                if(!this.isMainDeclaration(node)) break;
+                declarations.push(new ClassDeclaration(node as ts.ClassDeclaration, comment, parent, this));
+                break;
+            case ts.SyntaxKind.InterfaceDeclaration:
+                if(!this.isMainDeclaration(node)) break;
+                declarations.push(new InterfaceDeclaration(node as ts.InterfaceDeclaration, comment, parent, this));
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                if(!this.isMainDeclaration(node)) break;
+                declarations.push(new NamespaceDeclaration(node as ts.ModuleDeclaration, comment, parent, this));
+                break;
             case ts.SyntaxKind.VariableStatement:
-                created.push(...(node as ts.VariableStatement).declarationList.declarations.map(d => this.createDeclarations(d, comment, parent)[0]));
+                for(let declaration of (node as ts.VariableStatement).declarationList.declarations) {
+                    declarations.push(...this.createDeclarations(declaration, comment, parent));
+                }
                 break;   
             case ts.SyntaxKind.VariableDeclaration:
             case ts.SyntaxKind.PropertyDeclaration:
             case ts.SyntaxKind.PropertySignature:
-                created.push(new VariableDeclaration(node as ts.VariableDeclaration, comment, parent, this));
+                if(!this.isMainDeclaration(node)) break;
+                declarations.push(new VariableDeclaration(node as ts.VariableDeclaration, comment, parent, this));
                 break;
             case ts.SyntaxKind.FunctionDeclaration:
             case ts.SyntaxKind.MethodDeclaration:
             case ts.SyntaxKind.MethodSignature:
-                created.push(new FunctionDeclaration(node as ts.SignatureDeclaration, comment, parent, this));
+                if(!this.isMainDeclaration(node)) break;
+                declarations.push(new FunctionDeclaration(node as ts.SignatureDeclaration, comment, parent, this));
                 break;                
-            case ts.SyntaxKind.ClassDeclaration:
-                created.push(new ClassDeclaration(node as ts.ClassDeclaration, comment, parent, this));
-                break;
-            case ts.SyntaxKind.InterfaceDeclaration:
-                created.push(new InterfaceDeclaration(node as ts.InterfaceDeclaration, comment, parent, this));
-                break;
             case ts.SyntaxKind.Constructor:
-                created.push(new ConstructorDeclaration(node as ts.ConstructorDeclaration, comment, parent, this));
-                break;
-            case ts.SyntaxKind.ModuleDeclaration:
-                created.push(new NamespaceDeclaration(node as ts.ModuleDeclaration, comment, parent, this));
+                declarations.push(new ConstructorDeclaration(node as ts.ConstructorDeclaration, comment, parent, this));
                 break;
             default:
-                log.warn(`Skipping ${ts.SyntaxKind[node.kind]} named ${(declarations[0].name as ts.Identifier || {text:"\b"}).text}`, node);
+                log.warn(`Skipping ${ts.SyntaxKind[node.kind]} named ${((node as ts.Declaration).name as ts.Identifier || {text:"\b"}).text}`, node);
                 log.info(`This syntax element is not currently support by crossrails`, node)
         }     
-        return created as T[];       
+        return declarations as T[];       
     } 
     
 }
@@ -140,7 +151,7 @@ export abstract class MemberDeclaration extends Declaration {
         this.static =  parent == this.sourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock || (node.kind == ts.SyntaxKind.VariableDeclaration && node.parent!.parent!.parent!.kind == ts.SyntaxKind.ModuleBlock) || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
         this.abstract = node.parent!.kind == ts.SyntaxKind.InterfaceDeclaration || (node.flags & ts.NodeFlags.Abstract) != 0 || comment.isTagged('abstract') || comment.isTagged('virtual');
         if(node.name) {
-            context.identifiers.add(this);
+            context.identifiers.set(this.name, this);
         }
     }
 }
@@ -296,8 +307,9 @@ export class NamespaceDeclaration extends Declaration {
         super(node, parent); 
         let declarations: Declaration[] = [];
         for(let declaration of context.declarationsFor(node) as ts.ModuleDeclaration[]) {
+            if(declaration.kind !== ts.SyntaxKind.ModuleDeclaration) continue;
             const body = declaration.body as ts.ModuleBlock;
-            if(body.statements) for (let statement of body.statements) {
+            for (let statement of body.statements) {
                 let comment = new Comment(statement);
                 if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
                     log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
@@ -456,7 +468,7 @@ export abstract class Type {
                     return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional, parent, context);
                 case ts.SyntaxKind.FunctionType:
                     return new FunctionType(type as ts.FunctionTypeNode, optional, parent, context);
-                case ts.SyntaxKind.TypeReference:
+                case ts.SyntaxKind.TypeReference:   
                     return Type.fromReference(type as ts.TypeReferenceNode, optional, parent, context);
                 case ts.SyntaxKind.UnionType:
                     return Type.fromUnion(type as ts.UnionTypeNode, parent, context);
@@ -464,6 +476,7 @@ export abstract class Type {
                     throw `Unsupported type ${ts.SyntaxKind[type.kind]}`;                
             }
         } catch(error) {
+            if(typeof error !== 'string') throw error;
             log.warn(`${error}, erasing to Any`, type);
             log.info(`This type is not supported by crossrails`, type)
             return new AnyType(optional, parent);
@@ -564,6 +577,9 @@ export class VoidType extends Type {
         super(false, parent);
     }
 }
+
+export class DateType extends Type { 
+} 
 
 export class ErrorType extends Type {
 }
