@@ -72,13 +72,20 @@ describe("TypeDeclaration", () => {
             class Foo {
                 firstMember: any
                 static firstMember: any
+                thirdMember: any;
             }
         `);
         expect(sourceFile.declarations.length).toBe(1);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(3);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[0].static).toBe(true);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].static).toBe(true);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[2].static).toBe(false);
+        let members = (sourceFile.declarations[0] as AST.ClassDeclaration).members;
+        expect(members.length).toBe(4);
+        expect(members[0].name).toBe('firstMember');
+        expect(members[0].static).toBe(true);
+        expect(members[1].name).toBe('secondMember');
+        expect(members[1].static).toBe(true);
+        expect(members[2].name).toBe('firstMember');
+        expect(members[2].static).toBe(false);
+        expect(members[3].name).toBe('thirdMember');
+        expect(members[3].static).toBe(false);
     });
 
     it("merges members from two declarations of the same namespace", function() {

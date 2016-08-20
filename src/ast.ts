@@ -8,9 +8,8 @@ import {log, Log} from "./log"
 export class Context { 
     private readonly queued: Array<() => void> = []; 
     private readonly typeChecker: ts.TypeChecker;
-    readonly typeDeclarations: Map<string, TypeDeclaration> = new Map();
-    readonly thrownTypes: Set<string> = new Set(); 
-    readonly identifiers: Map<string, Declaration> = new Map();
+    private readonly typeDeclarations: Map<string, TypeDeclaration> = new Map();
+    private readonly identifiers: Map<string, Declaration> = new Map();
  
     constructor(program: ts.Program) { 
         this.typeChecker = program.getTypeChecker(); 
@@ -24,6 +23,18 @@ export class Context {
         this.queued.forEach(f => f()); 
         return Array.from(this.identifiers.values());
     } 
+
+    addIdentifier(declaration: MemberDeclaration) {
+        this.identifiers.set(declaration.name, declaration);
+    }
+
+    declareType(declaration: TypeDeclaration) {
+        this.typeDeclarations.set(declaration.name, declaration);
+    }
+
+    getDeclarationForType(type: DeclaredType) {
+        return this.typeDeclarations.get(type.name);
+    }
 
     declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
         if(declaration.name === undefined) return [declaration];
@@ -151,7 +162,7 @@ export abstract class MemberDeclaration extends Declaration {
         this.static =  parent == this.sourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock || (node.kind == ts.SyntaxKind.VariableDeclaration && node.parent!.parent!.parent!.kind == ts.SyntaxKind.ModuleBlock) || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
         this.abstract = node.parent!.kind == ts.SyntaxKind.InterfaceDeclaration || (node.flags & ts.NodeFlags.Abstract) != 0 || comment.isTagged('abstract') || comment.isTagged('virtual');
         if(node.name) {
-            context.identifiers.set(this.name, this);
+            context.addIdentifier(this);
         }
     }
 }
@@ -179,8 +190,7 @@ export class FunctionSignature {
             if(!tag.type) {
                 thrownTypes.push(new AnyType(false, parent))
             } else {
-                thrownTypes.push(Type.fromComment(tag.type, parent, context))
-                context.thrownTypes.add(tag.type.name!);
+                thrownTypes.push(Type.fromComment(tag.type, true, parent, context))
             }
         }
         this.thrownTypes = thrownTypes;
@@ -270,7 +280,7 @@ export abstract class TypeDeclaration extends MemberDeclaration {
             }
         }
         this.members = members;
-        context.typeDeclarations.set(this.name, this);
+        context.declareType(this);
     }
 }
 
@@ -283,19 +293,12 @@ export class InterfaceDeclaration extends TypeDeclaration {
 }
 
 export class ClassDeclaration extends TypeDeclaration {
-    private _isThrown: boolean;
+    readonly isThrown: boolean;
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
     constructor(node: ts.ClassDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
-        context.queue(() => {
-            this._isThrown = context.thrownTypes.has(this.name); 
-        });
-    }
-
-    get isThrown(): boolean {
-        return this._isThrown
     }
 }
 
@@ -366,7 +369,6 @@ export class Module {
         let sourceMap = this.mapSources(src, sourceMapFile, declarationFile, typings, charset);
         this.sourceRoot = sourceMap.sourceRoot;
         let program = ts.createProgram(sourceMap.sources.map((s) => path.join(this.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset});
-        //diagnostics = diagnostics.concat(program.getGlobalDiagnostics()).concat(program.getOptionsDiagnostics()).concat(program.getDeclarationDiagnostics()).concat(program.getSemanticDiagnostics()).concat(program.getSyntacticDiagnostics());
         log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         let context = new Context(program);
         let files: SourceFile[] = [];
@@ -432,7 +434,7 @@ export abstract class Type {
         this.parent = parent;
     }
 
-    static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
+    static fromComment(type: Comment.Tag.Type, thrown: boolean, parent: Declaration, context: Context): Type {
         switch(type.type) {
             case 'NameExpression':
                 switch(type.name) {
@@ -445,7 +447,7 @@ export abstract class Type {
                     case 'Error':
                         return new ErrorType(false, parent);
                     default:
-                        return new DeclaredType(type, false, parent, context);
+                        return new DeclaredType(type, false, thrown, parent, context);
                 }
         }
         return new AnyType(false, parent);
@@ -492,7 +494,7 @@ export abstract class Type {
             case 'ReadonlyArray':
                 return new ArrayType(reference.typeArguments, optional, parent, context);
             default:
-                return new DeclaredType(reference, optional, parent, context);
+                return new DeclaredType(reference, optional, false, parent, context);
         }
     }
         
@@ -541,7 +543,7 @@ export class DeclaredType extends GenericType {
     private _declaration?: TypeDeclaration;
     readonly name: string
 
-    constructor(type: ts.TypeReferenceNode | Comment.Tag.Type, optional: boolean, parent: Declaration, context: Context) {
+    constructor(type: ts.TypeReferenceNode | Comment.Tag.Type, optional: boolean, thrown: boolean, parent: Declaration, context: Context) {
         if(DeclaredType.isTypeReferenceNode(type)) {
             super(type.typeArguments, optional, parent, context);
             this.name = (type.typeName as ts.Identifier).text;  
@@ -550,8 +552,10 @@ export class DeclaredType extends GenericType {
             this.name = type.name!;
         }    
         context.queue(() => {
-            this._declaration = context.typeDeclarations.get(this.name);
-            if(!this._declaration) {
+            this._declaration = context.getDeclarationForType(this);
+            if(this._declaration) {
+                 Reflect.set(this._declaration, 'isThrown', true);
+            } else {
                 let msg = `Cannot find type ${this.name}`;
                 if(DeclaredType.isTypeReferenceNode(type)) {
                     log.error(msg, type);

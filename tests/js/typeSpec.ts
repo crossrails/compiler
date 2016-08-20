@@ -60,20 +60,22 @@ describe("Type", () => {
     
     it("correctly identifies typescript function types", function(this: This) {
         let sourceFile = mockSourceFile(false, `
+            export interface ReturnValue {}
+            export interface Arg {}
             export let run: () => void;
             export let supplier: () => ReturnValue;
             export let consumer: (n :Arg) => void;
         `);
-        let run = (sourceFile.declarations[0] as AST.VariableDeclaration).type as AST.FunctionType;
+        let run = (sourceFile.declarations[2] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(run.constructor.name).toBe('FunctionType');
         expect(run.signature.returnType.constructor.name).toBe('VoidType');
         expect(run.signature.parameters.length).toBe(0);
-        let supplier = (sourceFile.declarations[1] as AST.VariableDeclaration).type as AST.FunctionType;
+        let supplier = (sourceFile.declarations[3] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(supplier.constructor.name).toBe('FunctionType');
         expect(supplier.signature.returnType.constructor.name).toBe('DeclaredType');
         expect((supplier.signature.returnType as AST.DeclaredType).name).toBe('ReturnValue');
         expect(supplier.signature.parameters.length).toBe(0);
-        let consumer = (sourceFile.declarations[2] as AST.VariableDeclaration).type as AST.FunctionType;
+        let consumer = (sourceFile.declarations[4] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(consumer.constructor.name).toBe('FunctionType');
         expect(consumer.signature.returnType.constructor.name).toBe('VoidType');
         expect(consumer.signature.parameters.length).toBe(1);
@@ -138,7 +140,7 @@ describe("Type", () => {
 
     it("errors when an typescript undeclared type is referenced", function(this: This) {
         let sourceFile = mockSourceFile(false, `export let c: Custom`);
-        expect(log.errorCount).toBe(1);
+        expect(log.errorCount).toBe(2);
     });
 
 });
