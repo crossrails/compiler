@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 var git = require('gulp-git');
 var del = require('del');
-var shell = require('gulp-shell');
+var run = require('gulp-run');
 
 gulp.task('build-wrappers', function() {
   del(['temp']).then(paths => {
@@ -22,8 +22,6 @@ gulp.task('build-wrappers', function() {
 });
 
 gulp.task('gen-markdown', function() {
-  gulp.src('.')
-    .pipe(shell([
-        'node src/main --help > spec.md'
-    ]));
+  return run('cd wiki && javac Wiki.java && java Wiki').exec()
 });
+

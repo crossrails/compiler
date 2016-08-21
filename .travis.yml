@@ -22,6 +22,7 @@ install:
   - "npm run upload-code-coverage"
   - "npm run codacy"
   - "cd tests/java/ && gradle test && cd .. && cd .."
+  - "gulp gen-markdown"
 language: objective-c
 osx_image: xcode8
 script:
