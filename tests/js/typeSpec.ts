@@ -35,6 +35,7 @@ describe("Type", () => {
     it("erases to any on typescript intersection types", function(this: This) {
         let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string & number`, ts.ScriptTarget.ES6, true,), false, {} as any, context as any);
+        expect(log.errorCount).toBe(0);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });  
@@ -42,6 +43,7 @@ describe("Type", () => {
     it("erases to any on unsupported typescript union types", function(this: This) {
         let context = new this.ast.Context(mockProgram([]));
         let sourceFile = new this.ast.SourceFile(ts.createSourceFile('source.ts', `export let s: string | number`, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        expect(log.errorCount).toBe(0);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.anyTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));
     });    
@@ -54,6 +56,7 @@ describe("Type", () => {
             export let c: any | undefined;
             export let d: undefined | any;
         `, ts.ScriptTarget.ES6, true), false, {} as any, context);
+        expect(log.errorCount).toBe(0);
         expect(this.anyTypeConstructor).toHaveBeenCalledTimes(4);
         expect(this.anyTypeConstructor).not.toHaveBeenCalledWith(false);
     });
@@ -66,6 +69,7 @@ describe("Type", () => {
             export let supplier: () => ReturnValue;
             export let consumer: (n :Arg) => void;
         `);
+        expect(log.errorCount).toBe(0);
         let run = (sourceFile.declarations[2] as AST.VariableDeclaration).type as AST.FunctionType;
         expect(run.constructor.name).toBe('FunctionType');
         expect(run.signature.returnType.constructor.name).toBe('VoidType');
@@ -90,6 +94,7 @@ describe("Type", () => {
             export let strings: Array<string>;
             export let booleans: ReadonlyArray<boolean>;
         `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        expect(log.errorCount).toBe(0);
         //let numbers: number[]
         expect(this.numberTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.numberTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 'numbers'}));
@@ -113,6 +118,7 @@ describe("Type", () => {
             export let a: any;
             export let e: Error;
         `, ts.ScriptTarget.ES6, true), false, {} as any, context as any);
+        expect(log.errorCount).toBe(0);
         //let s: string
         expect(this.stringTypeConstructor).toHaveBeenCalledTimes(1);
         expect(this.stringTypeConstructor).toHaveBeenCalledWith(false, jasmine.objectContaining({name: 's'}));

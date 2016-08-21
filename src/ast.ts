@@ -36,10 +36,23 @@ export class Context {
         return this.typeDeclarations.get(type.name);
     }
 
+    getTypeName(node: ts.Node): string {
+        return this.typeChecker.typeToString(this.typeChecker.getTypeAtLocation(node))
+    }
+
     declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
         if(declaration.name === undefined) return [declaration];
         const symbol = this.typeChecker.getSymbolAtLocation(declaration.name);
-        return symbol ? symbol.declarations! : [declaration];        
+        return symbol == undefined ?  [declaration] : symbol.declarations!.filter( d => { 
+            switch(declaration.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration || ((d as ts.FunctionDeclaration).parameters.length == (declaration as ts.FunctionDeclaration).parameters.length &&
+                        (d as ts.FunctionDeclaration).parameters.reduce((typesMatch, p, i) => typesMatch && p.type == (declaration as ts.FunctionDeclaration).parameters[i].type, true));
+                case ts.SyntaxKind.ModuleDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration;
+            }
+            return true;
+        });        
     }
 
     private isMainDeclaration(node: ts.Node): boolean {
@@ -488,6 +501,10 @@ export abstract class Type {
     static fromReference(reference: ts.TypeReferenceNode, optional: boolean, parent: Declaration, context: Context) {
         let identifier = reference.typeName as ts.Identifier
         switch(identifier.text) {
+            case 'Object': 
+                return new AnyType(optional, parent); 
+            case 'Date': 
+                return new DateType(optional, parent); 
             case 'Error':
                 return new ErrorType(optional, parent);
             case 'Array':
@@ -546,7 +563,7 @@ export class DeclaredType extends GenericType {
     constructor(type: ts.TypeReferenceNode | Comment.Tag.Type, optional: boolean, thrown: boolean, parent: Declaration, context: Context) {
         if(DeclaredType.isTypeReferenceNode(type)) {
             super(type.typeArguments, optional, parent, context);
-            this.name = (type.typeName as ts.Identifier).text;  
+            this.name = context.getTypeName(type);  
         } else {
             super([], optional, parent, context);
             this.name = type.name!;
@@ -554,7 +571,7 @@ export class DeclaredType extends GenericType {
         context.queue(() => {
             this._declaration = context.getDeclarationForType(this);
             if(this._declaration) {
-                 Reflect.set(this._declaration, 'isThrown', true);
+                 Reflect.set(this._declaration, 'isThrown', thrown);
             } else {
                 let msg = `Cannot find type ${this.name}`;
                 if(DeclaredType.isTypeReferenceNode(type)) {
