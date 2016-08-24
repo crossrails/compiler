@@ -24,3 +24,8 @@ gulp.task('build-wrappers', function() {
 gulp.task('gen-markdown', function() {
   return run('cd wiki && javac Wiki.java && java Wiki && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m "Updated compiler options" && git push && cd .. && rm -R compiler.wiki/ ').exec();
 });
+
+gulp.task('run-java-tests', function() {
+  return run('cd tests/java/ && gradle test').exec();
+});
+  
