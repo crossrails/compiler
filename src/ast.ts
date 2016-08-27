@@ -328,7 +328,7 @@ export class NamespaceDeclaration extends Declaration {
             for (let statement of body.statements) {
                 let comment = new Comment(statement);
                 if(!(statement.flags & ts.NodeFlags.Export) && !comment.isTagged('export')) {
-                    log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namspace ${this.name}`, statement);
+                    log.debug(`Skipping unexported ${ts.SyntaxKind[statement.kind]} in namespace ${this.name}`, statement);
                     continue;                
                 } 
                 declarations.push(...context.createDeclarations(statement, comment, this));

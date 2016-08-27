@@ -76,7 +76,7 @@ ${indent}}`
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
-    let members = this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration');
+    let members = this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration');
     return `{
 ${indent}    self.this = try! ${this.thisName()}.construct(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}) 
 ${indent}    self.proxy = ${members.length == 0 ? 'this' : `self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
@@ -141,7 +141,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.footer = function (thi
 extension ${this.declarationName()} {
     func eval(_ context: JSContext) -> JSValue {
         return JSObject(context, callbacks: [
-${this.members.reduce((out, m) => 
+${this.declarations.reduce((out, m) => 
         `${out}"${m.name}": { args in
                 self.${m.declarationName()}()
                 return nil
@@ -162,7 +162,7 @@ class JS_${this.declarationName()} : ${this.declarationName()} {
     deinit {
         this.unbind(self)
     }
-${this.members.reduce((out, m) => `${out}
+${this.declarations.reduce((out, m) => `${out}
     func ${m.declarationName()}() {
         try! this[.${m.declarationName()}]()
     }

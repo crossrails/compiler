@@ -38,7 +38,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.footer = function (thi
     return '';
 })
 
-decorate(ClassDeclaration, ({prototype}) => prototype.imports = function (this: ClassDeclaration) {
+decorate(Declaration, ({prototype}) => prototype.imports = function (this: Declaration) {
     return `
 import java.util.*;
 import java.util.function.*;
@@ -52,9 +52,9 @@ decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: C
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
 ${indent}static final ScriptObjectMirror global = JS.eval("${this.module.src.base}");`.substr(1)
-}${!this.members.some(m => m.parent != m.sourceFile) ? '' : `
+}${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
-}${!this.members.some(m => !m.static) ? '' : `
+}${!this.declarations.some(m => !m.static) ? '' : `
 ${indent}private final ScriptObjectMirror prototype;
 ${indent}private final JSObject mirror;
 
@@ -68,7 +68,7 @@ ${indent}}
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ClassDeclaration, indent?: string) {
-    return !this.members.some(m => !m.static) ? '' : `
+    return !this.declarations.some(m => !m.static) ? '' : `
 ${indent}@Override
 ${indent}public String toString() {
 ${indent}    return mirror.toString();
@@ -143,7 +143,7 @@ ${indent}    prototype = (ScriptObjectMirror)classMirror.newObject(${this.signat
 ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
 ${indent}        @Override 
 ${indent}        void build(BiConsumer<String, Function<Object[], Object>> builder) { 
-${this.parent.members.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
+${this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
 ${indent}            builder.accept("${m.name}", args -> ${m.signature.returnType instanceof VoidType ? 
                      `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
                      `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`

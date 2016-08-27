@@ -1,4 +1,4 @@
-import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration, NamespaceDeclaration} from "./ast"
 import * as assert from "assert"
 
 let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
@@ -64,6 +64,13 @@ declare module "./ast" {
         footer(indent?: string): string
     }
 
+    interface NamespaceDeclaration {
+        keyword(): string
+        suffix(): string
+        header(indent?: string): string
+        footer(indent?: string): string
+    }
+
     interface Type {
         emit(optional?: boolean): string;
         typeName(): string;
@@ -91,7 +98,7 @@ FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent
 }
 
 TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
-    return this.members;
+    return this.declarations;
 }
 
 ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
@@ -114,11 +121,43 @@ ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
     return "class";
 }
 
+TypeDeclaration.prototype.suffix = function (this: TypeDeclaration): string {
+    return '';
+}
+
 TypeDeclaration.prototype.header = function (this: TypeDeclaration, indent?: string): string {
     return "";
 }
 
 TypeDeclaration.prototype.footer = function (this: TypeDeclaration, indent?: string): string {
+    return "";
+}
+
+NamespaceDeclaration.prototype.emit = function (this: NamespaceDeclaration, indent?: string): string {
+    return `
+${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
+
+${this.header(`${indent}    `)}
+
+${this.declarations.reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
+${this.footer(`${indent}    `)}
+${indent}}
+    `.replace(/\n{3}/g, '\n').substr(1);
+}
+
+NamespaceDeclaration.prototype.declarationName = function (this: NamespaceDeclaration): string {
+    return `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}`;
+}
+
+NamespaceDeclaration.prototype.suffix = function (this: NamespaceDeclaration): string {
+    return '';
+}
+
+NamespaceDeclaration.prototype.header = function (this: NamespaceDeclaration, indent?: string): string {
+    return "";
+}
+
+NamespaceDeclaration.prototype.footer = function (this: NamespaceDeclaration, indent?: string): string {
     return "";
 }
 

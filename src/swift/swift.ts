@@ -4,7 +4,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
 } from "../ast"
 
 export interface SwiftOptions extends CompilerOptions {
@@ -46,10 +46,6 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, o
     }
 })
 
-decorate(TypeDeclaration, ({prototype}) => prototype.suffix = function (this: ast.TypeDeclaration): string {
-    return '';
-})
-
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
     return ` : Equatable${this.isThrown ? ', ErrorProtocol' : ''}`;
 })
@@ -59,6 +55,10 @@ decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: a
 
 public func ==(lhs: ${this.declarationName()}, rhs: ${this.declarationName()}) -> Bool { 
     return lhs as AnyObject == rhs as AnyObject`;
+})
+
+decorate(NamespaceDeclaration, ({prototype}) => prototype.keyword = function (this: NamespaceDeclaration): string {
+    return "struct";
 })
 
 decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (this: ast.InterfaceDeclaration): string {
