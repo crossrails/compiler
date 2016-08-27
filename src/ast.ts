@@ -288,7 +288,6 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                             log.debug(`Skipping private ${ts.SyntaxKind[member.kind]} named ${(member.name as ts.Identifier || {text:"\b"}).text} of class ${this.name}`, member);
                             continue;                
                         }      
-                        members.push(...context.createDeclarations<MemberDeclaration>(member, comment, this));
                         let members = context.createDeclarations<MemberDeclaration>(member, comment, this);
                         declarations.push(...members);
                     }
