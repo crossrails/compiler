@@ -270,16 +270,16 @@ export class ParameterDeclaration extends Declaration {
 }
 
 export abstract class TypeDeclaration extends MemberDeclaration {
-    readonly members: ReadonlyArray<MemberDeclaration>;
+    readonly declarations: ReadonlyArray<MemberDeclaration>;
     
     constructor(node: ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration, comment: Comment, parent: Declaration|SourceFile, context: Context) {
         super(node, comment, parent, context);
-        let members: MemberDeclaration[] = [];
+        let declarations: MemberDeclaration[] = [];
         for(let declaration of context.declarationsFor(node)) {
             switch(declaration.kind) {
                 case ts.SyntaxKind.ModuleDeclaration:
                     const namespace = new NamespaceDeclaration(declaration as ts.ModuleDeclaration, comment, parent, context);
-                    members.push(...namespace.declarations as MemberDeclaration[]);
+                    declarations.push(...namespace.declarations as MemberDeclaration[]);
                     break;
                 default:
                     for (let member of (declaration as ts.ClassDeclaration|ts.InterfaceDeclaration|ts.EnumDeclaration).members) {
@@ -289,10 +289,12 @@ export abstract class TypeDeclaration extends MemberDeclaration {
                             continue;                
                         }      
                         members.push(...context.createDeclarations<MemberDeclaration>(member, comment, this));
+                        let members = context.createDeclarations<MemberDeclaration>(member, comment, this);
+                        declarations.push(...members);
                     }
             }
         }
-        this.members = members;
+        this.declarations = declarations;
         context.declareType(this);
     }
 }
