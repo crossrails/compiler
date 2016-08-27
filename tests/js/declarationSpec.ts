@@ -7,7 +7,7 @@ import {mockSourceFile, mockProgram} from "./mocks"
 
 describe("MemberDeclaration", () => {
 
-    beforeEach(function(this: This) {
+    beforeEach(function() {
         log.resetCounters();
     });
     
@@ -21,7 +21,7 @@ describe("MemberDeclaration", () => {
 
 describe("TypeDeclaration", () => {
 
-    beforeEach(function(this: This) {
+    beforeEach(function() {
         log.resetCounters();
     });
     
@@ -41,7 +41,7 @@ describe("TypeDeclaration", () => {
             }
         `);
         expect(log.errorCount).toBe(0);
-        expect((sourceFile.declarations[0] as AST.TypeDeclaration).members.length).toBe(1);
+        expect((sourceFile.declarations[0] as AST.TypeDeclaration).declarations.length).toBe(1);
     });
 
     it("merges members from two declarations of the same interface", function() {
@@ -56,7 +56,7 @@ describe("TypeDeclaration", () => {
         `);
         expect(log.errorCount).toBe(0);
         expect(sourceFile.declarations.length).toBe(1);
-        expect((sourceFile.declarations[0] as AST.InterfaceDeclaration).members.length).toBe(2);
+        expect((sourceFile.declarations[0] as AST.InterfaceDeclaration).declarations.length).toBe(2);
     });
 
     it("merges members from an interface into a class if one exists with the same name", function() {
@@ -71,8 +71,8 @@ describe("TypeDeclaration", () => {
         `);
         expect(log.errorCount).toBe(0);
         expect(sourceFile.declarations.length).toBe(1);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members.length).toBe(2);
-        expect((sourceFile.declarations[0] as AST.ClassDeclaration).members[1].abstract).toBe(true);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).declarations.length).toBe(2);
+        expect((sourceFile.declarations[0] as AST.ClassDeclaration).declarations[1].abstract).toBe(true);
     });
 
     it("merges members from a namespace into a class if one exists with the same name", function() {
@@ -88,7 +88,7 @@ describe("TypeDeclaration", () => {
         `);
         expect(log.errorCount).toBe(0);
         expect(sourceFile.declarations.length).toBe(1);
-        let members = (sourceFile.declarations[0] as AST.ClassDeclaration).members;
+        let members = (sourceFile.declarations[0] as AST.ClassDeclaration).declarations;
         expect(members.length).toBe(4);
         expect(members[0].name).toBe('firstMember');
         expect(members[0].static).toBe(false);
@@ -121,7 +121,7 @@ describe("TypeDeclaration", () => {
 
 describe("FunctionDeclaration", () => {
 
-    beforeEach(function(this: This) {
+    beforeEach(function() {
         log.resetCounters();
     });
     
