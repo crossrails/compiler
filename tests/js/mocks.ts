@@ -12,7 +12,7 @@ export function mockProgram(files: [string, string][]) {
         getScriptFileNames: () => Array.from(map.keys()),
         getScriptVersion: (fileName) => '0',
         getScriptSnapshot: (fileName) => ts.ScriptSnapshot.fromString(map.get(fileName) || readFileSync(fileName, 'utf8')),
-        getCurrentDirectory: () => process.cwd(),
+        getCurrentDirectory: () => '.',
         getCompilationSettings: () => { return {allowJS: true} },
         getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
     }, ts.createDocumentRegistry())

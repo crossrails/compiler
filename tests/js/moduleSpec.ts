@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as AST from "../../src/ast"
-import {log} from "../../src/log"
+import {log, Log} from "../../src/log"
 import {mockProgram} from "./mocks"
 
 describe("Module", () => {
@@ -15,6 +15,7 @@ describe("Module", () => {
     }
     
     beforeEach(function(this: This) {
+        log.level = Log.Level.DEBUG;
         log.resetCounters();
         this.readFileSync = fs.readFileSync;
         this.readFileMethod = spyOn(fs, 'readFileSync');

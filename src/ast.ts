@@ -385,7 +385,8 @@ export class Module {
         log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         let context = new Context(program);
         let files: SourceFile[] = [];
-        for (let file of program.getSourceFiles()) if(!path.relative(this.sourceRoot, file.path).startsWith('..')) {
+        for (let file of program.getSourceFiles()) {
+            if(path.relative(this.sourceRoot, file.path).startsWith('..')) continue;
             log.info(`Parsing ${path.relative('.', file.path)}`);
             let sourceFile = new SourceFile(file, implicitExport, this, context);
             if(sourceFile.declarations.length) {
@@ -399,7 +400,6 @@ export class Module {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
             log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
         }
-        ;
         this.identifiers = context.finalize();
     }   
 
