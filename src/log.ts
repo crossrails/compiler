@@ -85,7 +85,7 @@ export class Log {
                     console.warn(message);
                     break;
                 case Log.Level.INFO:
-                    console.info(message);
+                    console.log(message);
                     break;
                 case Log.Level.DEBUG:
                     console.log(message);
