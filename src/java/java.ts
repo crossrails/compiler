@@ -38,7 +38,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             isModuleFile: { value: filename == moduleFilename},
             name: { value: declaration.name },
             packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
-            declarations: { value: [ filename != moduleFilename ? declaration : Object.create(declaration, { declarations: { value: declaration.declarations.concat(globals) }})] }
+            declarations: { value: [ filename != moduleFilename ? declaration : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
         });
         writeFile(filename, file.emit());
         writtenModuleFile = writtenModuleFile || file.isModuleFile;
