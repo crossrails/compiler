@@ -128,67 +128,79 @@ function generateDocumentation(fileNames: string[], options: ts.CompilerOptions)
 
 describe("Playground", () => {
     
-//     it("TypeChecker", function() {
-//         // Create the language service host to allow the LS to communicate with the host
-//         const servicesHost: ts.LanguageServiceHost = {
-//             getScriptFileNames: () => ['main.ts'],
-//             getScriptVersion: (fileName) => '0',
-//             getScriptSnapshot: (fileName) => {
-//                 return ts.ScriptSnapshot.fromString(`
-                
-//                     export interface Foo { 
-//                         protected foo: void
-//                     }
-//                     /**
-//                      * @type {!Array<number>}
-//                      */                    
-//                     export interface Foo { bar;};
-//                     /**
-//                      * @type {!Array<number>}
-//                      */                    
-//                     export class Foo {
-//                         bam;
-//                     }
+    it("TypeChecker", function() {
+        // Create the language service host to allow the LS to communicate with the host
+        const servicesHost: ts.LanguageServiceHost = {
+            getScriptFileNames: () => ['main.js'],
+            getScriptVersion: (fileName) => '0',
+            getScriptKind: (fileName: string) => ts.ScriptKind.JS,
+            getScriptSnapshot: (fileName) => {
+                return ts.ScriptSnapshot.fromString(`
+class Dave {}
 
-//                     export namespace Foo {
-//                         export class Dave {
+// /**
+//  * @type {Dave} 
+//  */
+// var dave;
 
-//                         }
-//                     }
+// // namespace Tony {
+// //     export interface Ant {}
+// // }
+// // var ant:Tony.Ant
+                `);
+            },
+            getCurrentDirectory: () => process.cwd(),
+            getCompilationSettings: () => { return {allowJS: true, removeComments: false}; },
+            getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
+        };
 
-//                     export class Raa {
-                        
-//                     }
-//                 `);
-//             },
-//             getCurrentDirectory: () => process.cwd(),
-//             getCompilationSettings: () => { return {allowJS: true}; },
-//             getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
-//         };
+        // Create the language service files
+        const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
+        const program = services.getProgram();
+        const checker = program.getTypeChecker();
 
-//         // Create the language service files
-//         const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
-//         const program = services.getProgram();
-//         const checker = program.getTypeChecker();
-//         const file = program.getSourceFile('main.ts');
-//         const first = file.statements[0];
-//         const second = file.statements[1];
-//         const symbols = checker.getExportsOfModule(checker.getSymbolAtLocation(file));
-//         console.log(symbols.length);
-//         console.log(symbols[0]);
-//         const properties = checker.getExportsOfModule(symbols[0]);
-//         console.log(properties.length);
-//         console.log(properties[0]);
-//         const exports = checker.getPropertiesOfType(checker.getDeclaredTypeOfSymbol(symbols[0]));
-//         console.log(exports.length);
-//         console.log(exports[0].name);
-//         const type = checker.getDeclaredTypeOfSymbol(exports[0])
-//         console.log(checker.typeToString(type));
-//         console.log(checker.symbolToString(exports[0]));
-//         const comment = symbols[0].getDocumentationComment();
-//         console.log(comment);
+        const map = new Map<string, Set<ts.Symbol>>();
 
-//     })
+        function visit(node: ts.Node) {
+            console.log(ts.SyntaxKind[node.kind]);
+            ts.forEachChild(node, visit);            
+            const symbol = checker.getSymbolAtLocation(node);
+            if(symbol == undefined) return;
+            console.log(symbol.getDocumentationComment());
+            const type = checker.getTypeOfSymbolAtLocation(symbol, node);
+            if(type.symbol == undefined) return;
+            const name = checker.typeToString(type, node.getSourceFile());
+            console.log(name);
+            for(let declaration of type.symbol!.declarations!) {
+                let set = map.get(name);
+                if(set == undefined) {
+                    set = new Set();
+                    map.set(name, set);
+                }
+                set.add(symbol);
+                console.log(set.size);
+            }
+        }
+
+        for (const sourceFile of program.getSourceFiles()) {
+            visit(sourceFile);
+        }
+        // console.log(map.size);
+        // console.log(map.entries().next());
+        // console.log(map.values().next().value.size);
+
+        const file = program.getSourceFiles()[0];
+        // const declaration = file.statements[0] as ts.InterfaceDeclaration;
+        // console.log(map.get(checker.symbolToString(checker.getSymbolAtLocation(declaration.name), declaration.getSourceFile()))!.forEach(
+        //     t => console.log(t.name)))
+        const reference = (file.statements[1] as ts.VariableStatement).declarationList.declarations[0];
+        // const symbols = checker.getSymbolsInScope(file, ts.SymbolFlags.Type|ts.SymbolFlags.Namespace);
+        // console.log(symbols.reduce((out, s) => `${out}${s.name}, `, ''));
+        console.log((checker.getTypeAtLocation(reference).getSymbol().declarations![0].name as ts.Identifier).text)
+         console.log(checker.getSymbolAtLocation(reference.name).getDocumentationComment());
+        // console.log((declaration.name as ts.Identifier).text)
+        // expect(checker.getTypeAtLocation(reference).getSymbol().declarations![0].pos).toEqual(declaration.pos)
+    })
 
     // it("Example", function() {
     //     generateDocumentation(['test.ts'], {
