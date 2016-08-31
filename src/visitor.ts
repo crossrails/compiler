@@ -1,9 +1,10 @@
 import * as ts from "typescript";
 
-type VariableDeclaration = ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature;
-type FunctionDeclaration = ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature;
+export type VariableDeclaration = ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature;
+export type FunctionDeclaration = ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature;
 
 export interface NodeVisitor<T> {
+    shouldVisit?(node: ts.Node): boolean
     visitSourceFile?(node: ts.SourceFile): T
     visitClass?(node: ts.ClassDeclaration): T
     visitInterface?(node: ts.InterfaceDeclaration): T
@@ -16,8 +17,10 @@ export interface NodeVisitor<T> {
     visitNode?(node: ts.Node): T
 }
 
-export function walk<T>(node: ts.Node, visitor: NodeVisitor<T>, thisArg: any = visitor): T[] {
+export function walk<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRoot: boolean = true, thisArg: any = visitor): T[] {
     const visit = <N extends ts.Node>(visitMethod: ((node: N) => T) | undefined, node: N, visitChildren: (node: N) => T[] = (node) => []) => {
+        if(!visitRoot) return visitChildren(node);
+        if((visitMethod || visitor.visitNode) && visitor.shouldVisit && !visitor.shouldVisit(node)) return [];
         if(!visitMethod) return visitor.visitNode ? Function.call(visitor.visitNode, thisArg, node) : [];
         const result = Function.call(visitMethod, thisArg, node);
         return result ? [result] : visitChildren(node);
@@ -28,7 +31,6 @@ export function walk<T>(node: ts.Node, visitor: NodeVisitor<T>, thisArg: any = v
                 return node.statements.reduce((t: T[], n: ts.Node) => [...t, ...walk(n, visitor)], [])                
             });        
         case ts.SyntaxKind.VariableStatement:
-            if(!visitor.visitVariable) return [];
             const variables = (node as ts.VariableStatement).declarationList.declarations;
             return variables.reduce((t: T[], n: ts.Node) => [...t, ...walk(n, visitor)], []);
         case ts.SyntaxKind.VariableDeclaration:
