@@ -25,7 +25,7 @@ declare module "../ast" {
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, outDir: string, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
-    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.path(forResource: "${this.src.name}", ofType: "${this.src.ext.substr(1)}")!`);
+    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.path(forResource: "${this.sourcePath.name}", ofType: "$sourcePath.ext.substr(1)}")!`);
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  

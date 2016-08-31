@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import * as path from 'path';
+import * as ts from "typescript";
 import {log} from "./log"
 import {Module} from "./ast"
-import {readFileSync} from 'fs';
+import {createFactory} from "./factory"
+import {readFileSync, accessSync, R_OK} from 'fs';
 import {Compiler, CompilerOptions} from "./compiler"
 
 import yargs = require('yargs');
@@ -115,7 +117,7 @@ function main(...args: string[]): number {
     let compiler = new Compiler(options, [
         [`swift`,   [`javascriptcore`]], 
         ['java',    [`nashorn`, 'j2v8']],
-        [`cs`,      [`chakracore`]], 
+        [`c#`,      [`chakracore`]], 
         [`php`,     [`v8`]], 
     ]);
 
@@ -131,18 +133,49 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        let module = new Module(filename, options.sourceMap, options.declarationFile, options.typings, options.implicitExport, options.charset);
+        let sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
+        let program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: options.charset, skipDefaultLibCheck: true});
+        log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
         // if(log.errorCount === 0) {       
-            compiler.compile(module); 
+            compiler.compile(filename, new Module(program, sourceMap.sourceRoot, createFactory(program, options.implicitExport))); 
         // }       
     }
     
     return log.errorCount;
 }
 
+function mapSources(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, charset: string) : {sourceRoot: string, sources: string[]} {
+    if(sourceMapFile || !declarationFile) try {                
+        let sourceMap = sourceMapFile || `${src}.map`;
+        log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
+        let map = JSON.parse(readFileSync(sourceMap, charset));
+        map.sourceRoot = path.join(path.dirname(src), map.sourceRoot); 
+        log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
+        return map;
+    } catch(error) {
+        if(sourceMapFile || error.code != 'ENOENT') {
+            throw error;
+        }
+        log.info(`No sourcemap found`);
+    }
+    try {
+        let file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
+        log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
+        accessSync(file, R_OK);
+        log.debug(`Declaration file (.d.ts) found`);
+        return  {sourceRoot: path.dirname(file), sources: [path.basename(file)] }; 
+    } catch(error) {
+        if(declarationFile || error.code != 'ENOENT') {
+            throw error;
+        }
+        log.info(`No declaration file (.d.ts) file found`);
+    }
+    return { sourceRoot: path.dirname(src), sources: [path.basename(src)] }; 
+} 
+    
 function readPackageFile(filename: string, options: {typings?: string, charset: string}): string|undefined {
     try {
         log.debug(`Attempting to open package manifest file at ${path.relative('.', filename)}`);

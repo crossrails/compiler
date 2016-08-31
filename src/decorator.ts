@@ -1,5 +1,7 @@
 import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration, NamespaceDeclaration} from "./ast"
 import * as assert from "assert"
+import {ParsedPath} from 'path';
+
 
 let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
 
@@ -33,6 +35,8 @@ export function undecorate() {
 declare module "./ast" {
 
     interface Module {
+        name: string
+        sourcePath: ParsedPath
         emit<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
         emitWrapper<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
     }
@@ -90,7 +94,7 @@ Declaration.prototype.declarationName = function(this: Declaration): string {
 }
 
 DeclaredType.prototype.typeName = function(this: DeclaredType): string {
-    return this.declaration ? this.declaration.declarationName() : this.name!;
+    return this.name!;
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {

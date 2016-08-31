@@ -1,18 +1,33 @@
 import * as ts from "typescript";
+import {log} from "./log"
 import {walk, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
-import {Factory, Comment, Declaration, SourceFile, NamespaceDeclaration} from "./ast"
+import {Factory as AbstractFactory, Comment, Declaration, SourceFile, NamespaceDeclaration, Type} from "./ast"
 
-export function createFactory(program: ts.Program, implicitExport: boolean): Factory {
-    const table = new SymbolTable(program, implicitExport);
-    const factory = (node: ts.Node, parent: Declaration|SourceFile) => walk(node, {
-        shouldVisit(node: ts.Declaration): boolean {
-            return table.isExported(node);
-        },
-        visitNamespace(node: ts.ModuleDeclaration) {
-            return new NamespaceDeclaration(node, parent, factory);           
-        }
-    }, false);
-    return factory;
+export class Factory implements AbstractFactory {
+
+    private readonly symbols: SymbolTable;
+    
+    constructor(program: ts.Program, implicitExport: boolean) {
+        this.symbols = new SymbolTable(program, implicitExport);
+    }
+
+    createChildren<T extends Declaration>(node: ts.Node, parent: Declaration|SourceFile): T[] {
+        return walk<Declaration>(node, {
+            shouldVisit(this: Factory, node: ts.Declaration): boolean {
+                if(this.symbols.isExported(node)) return true;
+                log.debug(`Skipping unexported ${ts.SyntaxKind[node.kind]}`, node);
+                return false;
+            },
+            visitNamespace(this: Factory, node: ts.ModuleDeclaration) {
+                const nodes = this.symbols.getDeclarations<ts.ModuleDeclaration>(node, ts.SyntaxKind.ModuleDeclaration);
+                return new NamespaceDeclaration(nodes, parent, this);           
+            }
+        }, false, this) as T[];
+    }
+
+    createType<T extends Type>(node: ts.Node, parent: Declaration|SourceFile): T {
+
+    }
 }
 
 class SymbolTable implements NodeVisitor<boolean> {
@@ -20,7 +35,7 @@ class SymbolTable implements NodeVisitor<boolean> {
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
     private readonly symbols = new Set<string>();
-    private readonly exports = new Set<ts.Declaration>();
+    private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<string>();
 
     constructor(program: ts.Program, implicitExport: boolean) {
@@ -31,6 +46,10 @@ class SymbolTable implements NodeVisitor<boolean> {
 
     isExported(node: ts.Declaration): boolean {
         return this.exports.has(node);
+    }
+
+    getDeclarations<T extends ts.Declaration>(node: ts.Declaration, kind: ts.SyntaxKind): ReadonlyArray<T> {
+        return this.exports.get(node)!.filter(node => node.kind & kind) as T[];
     }
 
     private declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
@@ -70,7 +89,8 @@ class SymbolTable implements NodeVisitor<boolean> {
         if(this.symbols.has(name)) return true;        
         const comment = new Comment(node.parent!);
         this.symbols.add(name);
-        this.exports.add(symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main));
+        const declaration = symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main); 
+        this.exports.set(declaration, symbol.getDeclarations());
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
         const unexported = !this.symbols.has(this.checker.getFullyQualifiedName(type.getSymbol()));

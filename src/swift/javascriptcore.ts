@@ -178,7 +178,7 @@ decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: Ar
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType, accessor: string = this.parent.accessor()): string {
-    return `${this.declaration instanceof InterfaceDeclaration ? 'JS_' : ''}${Type.prototype.toNativeValue.call(this, accessor)}`;    
+    return `${this.abstract ? 'JS_' : ''}${Type.prototype.toNativeValue.call(this, accessor)}`;    
 })
 
 decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type, accessor: string = this.parent.accessor()) {
@@ -216,7 +216,7 @@ decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: 
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType, argumentName: string = this.parent.argumentName()) {
-    return this.optional || !(this.declaration instanceof InterfaceDeclaration) ? Type.prototype.fromNativeValue.call(this) : 
+    return this.optional || !this.abstract ? Type.prototype.fromNativeValue.call(this) : 
         `${this.parent.thisName()}.valueOf(${argumentName}, with: ${argumentName}.eval)`;    
 })
 
@@ -233,6 +233,6 @@ decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.genericFromNativeValue = function(this: DeclaredType) {
-    return !(this.declaration instanceof InterfaceDeclaration) ? Type.prototype.fromNativeValue.call(this) : 
+    return !this.abstract ? Type.prototype.fromNativeValue.call(this) : 
         `{ ${this.parent.thisName()}.valueOf($0, with: ${this.parent.argumentName()}.eval) }`;    
 })

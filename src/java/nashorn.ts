@@ -51,7 +51,7 @@ import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("${this.module.src.base}");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");`.substr(1)
 }${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${!this.declarations.some(m => !m.static) ? '' : `
@@ -163,7 +163,7 @@ decorate(AnyType, ({prototype}) => prototype.toNativeValue = function(this: AnyT
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType) {
-    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.declaration instanceof InterfaceDeclaration ? '.class' : '::new'})`;    
+    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.abstract ? '.class' : '::new'})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: ArrayType) {
@@ -187,7 +187,7 @@ decorate(Type, ({prototype}) => prototype.fromNativeValue = function(this: Type)
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType) {
-    return this.declaration instanceof InterfaceDeclaration ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
+    return this.abstract ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: ArrayType) {

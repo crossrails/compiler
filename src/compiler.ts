@@ -23,8 +23,10 @@ export class Compiler {
         this.languages = new Map(languages);
     }
     
-    compile(module: Module): number {
+    compile(sourceFile: string, module: Module): number {
         let emittedOutput = false;  
+        const sourcePath = path.parse(sourceFile);
+        module = Object.create(module, {name: sourcePath.name, sourcePath: sourcePath});
         for(let [language, engines] of this.languages) {
             emittedOutput = this.emitLanguage(module, language, engines) || emittedOutput;            
         }
@@ -76,8 +78,8 @@ export class Compiler {
             module.emitWrapper(typeof options.emitWrapper === 'boolean' ? outDir : options.emitWrapper, engineOptions, writeFile);
         }                
         if(options.emitJS) {
-            let src = path.join(typeof options.emitJS === 'boolean' ? outDir : options.emitJS, module.src.base);
-            let dest = path.join(module.src.dir, module.src.base);
+            let src = path.join(typeof options.emitJS === 'boolean' ? outDir : options.emitJS, module.sourcePath.base);
+            let dest = path.join(module.sourcePath.dir, module.sourcePath.base);
             if(src != dest) {
                 writeFile(src, readFileSync(dest, 'utf8'));
             }
