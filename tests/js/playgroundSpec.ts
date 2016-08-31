@@ -1,5 +1,7 @@
 import * as ts from "typescript";
 import * as fs from "fs";
+import * as ast from "../../src/ast"
+
 
 interface DocEntry {
     name?: string,
@@ -48,7 +50,7 @@ function generateDocumentation(fileNames: string[], options: ts.CompilerOptions)
             `);
         },
         getCurrentDirectory: () => process.cwd(),
-        getCompilationSettings: () => { return {allowJS: true}; },
+        getCompilationSettings: () => { return {allowJS: true, skipLibCheck: true, skipDefaultLibCheck: true}; },
         getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
     };
 
@@ -127,13 +129,14 @@ function generateDocumentation(fileNames: string[], options: ts.CompilerOptions)
 
 
 describe("Playground", () => {
+
     
     it("TypeChecker", function() {
         // Create the language service host to allow the LS to communicate with the host
         const servicesHost: ts.LanguageServiceHost = {
-            getScriptFileNames: () => ['main.js'],
+            getScriptFileNames: () => ['main.ts'],
             getScriptVersion: (fileName) => '0',
-            getScriptKind: (fileName: string) => ts.ScriptKind.JS,
+            getScriptKind: (fileName: string) => ts.ScriptKind.TS,
             getScriptSnapshot: (fileName) => {
                 return ts.ScriptSnapshot.fromString(`
 class Dave {}
@@ -141,7 +144,7 @@ class Dave {}
 // /**
 //  * @type {Dave} 
 //  */
-// var dave;
+export var dave: Dave;
 
 // // namespace Tony {
 // //     export interface Ant {}
@@ -150,7 +153,7 @@ class Dave {}
                 `);
             },
             getCurrentDirectory: () => process.cwd(),
-            getCompilationSettings: () => { return {allowJS: true, removeComments: false}; },
+            getCompilationSettings: () => { return {allowJS: true, skipLibCheck: true, skipDefaultLibCheck: true, removeComments: false}; },
             getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
         };
 
@@ -166,40 +169,44 @@ class Dave {}
             ts.forEachChild(node, visit);            
             const symbol = checker.getSymbolAtLocation(node);
             if(symbol == undefined) return;
-            console.log(symbol.getDocumentationComment());
+            if(symbol.flags & ts.SymbolFlags.Type) {
+                if(symbol.flags & ts.SymbolFlags.Export) {
+                    const name = checker.symbolToString(symbol, node.getSourceFile());
+                    map.set(name, map.get(name) || new Set());
+                }
+                return;
+            }
             const type = checker.getTypeOfSymbolAtLocation(symbol, node);
-            if(type.symbol == undefined) return;
+            if(!type.symbol || !type.symbol.declarations![0].getSourceFile().name) return;
             const name = checker.typeToString(type, node.getSourceFile());
             console.log(name);
-            for(let declaration of type.symbol!.declarations!) {
-                let set = map.get(name);
-                if(set == undefined) {
-                    set = new Set();
-                    map.set(name, set);
-                }
-                set.add(symbol);
-                console.log(set.size);
+            let set = map.get(name);
+            if(set == undefined) {
+                set = new Set();
+                map.set(name, set);
             }
+            set.add(symbol);
+            console.log(set.size);
         }
 
         for (const sourceFile of program.getSourceFiles()) {
             visit(sourceFile);
         }
-        // console.log(map.size);
-        // console.log(map.entries().next());
-        // console.log(map.values().next().value.size);
+        console.log(map.size);
+        console.log(map.entries().next());
+        console.log(map.values().next().value.size);
 
-        const file = program.getSourceFiles()[0];
-        // const declaration = file.statements[0] as ts.InterfaceDeclaration;
-        // console.log(map.get(checker.symbolToString(checker.getSymbolAtLocation(declaration.name), declaration.getSourceFile()))!.forEach(
-        //     t => console.log(t.name)))
-        const reference = (file.statements[1] as ts.VariableStatement).declarationList.declarations[0];
-        // const symbols = checker.getSymbolsInScope(file, ts.SymbolFlags.Type|ts.SymbolFlags.Namespace);
-        // console.log(symbols.reduce((out, s) => `${out}${s.name}, `, ''));
-        console.log((checker.getTypeAtLocation(reference).getSymbol().declarations![0].name as ts.Identifier).text)
-         console.log(checker.getSymbolAtLocation(reference.name).getDocumentationComment());
-        // console.log((declaration.name as ts.Identifier).text)
-        // expect(checker.getTypeAtLocation(reference).getSymbol().declarations![0].pos).toEqual(declaration.pos)
+        // const file = program.getSourceFiles()[0];
+        // // const declaration = file.statements[0] as ts.InterfaceDeclaration;
+        // // console.log(map.get(checker.symbolToString(checker.getSymbolAtLocation(declaration.name), declaration.getSourceFile()))!.forEach(
+        // //     t => console.log(t.name)))
+        // const reference = (file.statements[1] as ts.VariableStatement).declarationList.declarations[0];
+        // // const symbols = checker.getSymbolsInScope(file, ts.SymbolFlags.Type|ts.SymbolFlags.Namespace);
+        // // console.log(symbols.reduce((out, s) => `${out}${s.name}, `, ''));
+        // console.log((checker.getTypeAtLocation(reference).getSymbol().declarations![0].name as ts.Identifier).text)
+        //  console.log(checker.getSymbolAtLocation(reference.name).getDocumentationComment());
+        // // console.log((declaration.name as ts.Identifier).text)
+        // // expect(checker.getTypeAtLocation(reference).getSymbol().declarations![0].pos).toEqual(declaration.pos)
     })
 
     // it("Example", function() {

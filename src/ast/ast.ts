@@ -3,7 +3,169 @@ import * as path from 'path';
 import * as assert from 'assert';
 import * as doctrine from 'doctrine';
 import * as ts from "typescript";
-import {log, Log} from "./log"
+import {log, Log} from "../log"
+
+namespace Comment {
+    export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
+    export namespace Tag {
+        export type Type = doctrine.Type & {node: ts.Node}
+    }
+}
+
+class Comment {
+    private readonly tags: Map<string, Comment.Tag[]> = new Map();
+
+    readonly description: string = '';
+
+    constructor(node: ts.Node) {
+        let text = node.getFullText();
+        let comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
+        if(comment) {
+            let parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
+            this.description = parsed.description;
+            for(let tag of parsed.tags) {
+                tag['node'] = node;
+                if(tag.type) {
+                    tag.type['node'] = node;
+                }
+                this.tags.set(tag.title, [tag as Comment.Tag, ...(this.tags.get(tag.title) || [])]);
+            }
+        }
+    }
+
+    isTagged(title: string, value?: string): boolean {
+        let tags = this.tags.get(title);
+        return tags != undefined && (!value || tags.some(tag => tag[title] == value));
+    }
+
+    tagsNamed(title: string): Comment.Tag[] {
+        return this.tags.get(title) || [];
+    }
+}
+
+
+export class DeclarationBuilder {
+    private readonly checker: ts.TypeChecker;
+    private readonly exports = new Set<string>();
+    private readonly thrown = new Set<string>();
+
+    constructor(program: ts.Program, implicitExport: boolean) {
+        this.checker = program.getTypeChecker(); 
+        const visit = (node: ts.Node, visitor: Visitor<void>) => this.visit(node, visitor);
+        const isVisible = (node: ts.Node): boolean => {
+            const comment = new Comment(node);
+            return !(node.flags & ts.NodeFlags.Private) && !comment.isTagged('private') && !comment.isTagged('access', 'private');
+        }
+        const addExport = (node: ts.Node): boolean => {
+            let name = this.checker.getFullyQualifiedName(this.checker.getSymbolAtLocation(node))
+            if(this.exports.has(name)) return false;
+            this.exports.add(name);
+            return true;
+        }
+        const addTypeReference = (node: ts.Node, visitor: Visitor<void>): void => {
+            const type = this.checker.getTypeAtLocation(node);
+            const name = this.checker.getFullyQualifiedName(type.symbol!);
+            const exists = this.exports.has(name);
+            this.exports.add(name);
+            if(!exists) type.symbol!.declarations!.forEach((child: ts.Node | undefined) => {
+                for(let node = child; node; node = node.parent) visit(node, visitor);
+            });
+        } 
+        const addThrown = (node: ts.Node): void => {
+            new Comment(node).tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
+        }
+        const visitor: Visitor<void> = {
+            visitClass(node: ts.ClassDeclaration): void {
+                if(addExport(node.name!)) {
+                    node.members.filter(node => isVisible(node)).forEach(node => visit(node, visitor));
+                }    
+            },
+            visitInterface(node: ts.InterfaceDeclaration): void {
+                if(addExport(node.name)) {
+                    node.members.filter(node => isVisible(node)).forEach(node => visit(node, visitor));
+                }    
+            },
+            visitNamespace(node: ts.ModuleDeclaration): void {
+                if(addExport(node.name)) {
+                    const body = node.body as ts.ModuleBlock;
+                    body.statements.filter(node => node.flags & ts.NodeFlags.Export).forEach(node => visit(node, visitor));
+                }    
+            },
+            visitVariable(node: ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature): void {
+                if(addExport(node.name)) {
+                    addTypeReference(node.name, visitor);
+                }
+            },
+            visitFunction(node: ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature): void {
+                if(addExport(node.name!)) {
+                    addTypeReference(node.name!, visitor);
+                    node.parameters.forEach(param => addTypeReference(param.name, visitor));                
+                    addThrown(node);                    
+                }        
+            },
+            visitConstructor(node: ts.ConstructorDeclaration): void {
+                if(addExport(node.name!)) {
+                    node.parameters.forEach(param => addTypeReference(param.name, visitor));                
+                    addThrown(node);
+                }                
+            }
+        };
+        let nodes = program.getSourceFiles().reduce((statements, file) => [...statements, ...file.statements], [] as ts.Node[]);
+        if(!implicitExport) {
+            nodes = nodes.filter(node => (node.flags & ts.NodeFlags.Export) || new Comment(node).isTagged('export'))
+        }
+        nodes.forEach(node => this.visit(node, visitor));
+    }
+
+    declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
+        if(declaration.name === undefined) return [declaration];
+        const symbol = this.checker.getSymbolAtLocation(declaration.name);
+        return symbol == undefined ?  [declaration] : symbol.declarations!.filter( d => { 
+            switch(declaration.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration || ((d as ts.FunctionDeclaration).parameters.length == (declaration as ts.FunctionDeclaration).parameters.length &&
+                        (d as ts.FunctionDeclaration).parameters.reduce((typesMatch, p, i) => typesMatch && p.type == (declaration as ts.FunctionDeclaration).parameters[i].type, true));
+                case ts.SyntaxKind.ModuleDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration;
+            }
+            return true;
+        });        
+    }
+
+    build<T extends Declaration>(node: ts.Node, parent: Declaration|SourceFile): T[] {
+        const isMainDeclaration = (node: ts.Node): boolean => {
+            let declarations = this.declarationsFor(node as ts.Declaration);
+            return node === declarations.reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main);
+        }
+        return nodes.filter(node => isMainDeclaration(node)).reduce((declarations: T[], node: ts.Node) => [...declarations, ...this.visit(node, {
+            visitClass(node: ts.ClassDeclaration): T {
+                return new ClassDeclaration(node, parent, this);
+            }
+            visitInterface(node: ts.InterfaceDeclaration): T {
+
+            }
+            visitNamespace(node: ts.ModuleDeclaration): T {
+
+            }
+            visitVariable(node: ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature): T {
+
+            }
+            visitFunction(node: ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature): T {
+
+            }
+            visitConstructor(node: ts.ConstructorDeclaration): T {
+                
+            }    
+        }, []);
+    }
+    public contains(symbol: string) {
+        return this.exports.has(symbol);
+    }
+
+    public isThrown(symbol: string) {
+        return this.thrown.has(symbol);
+    }
+}
 
 export class Context { 
     private readonly queued: Array<() => void> = []; 
@@ -102,44 +264,6 @@ export class Context {
         return declarations as T[];       
     } 
     
-}
-
-namespace Comment {
-    export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
-    export namespace Tag {
-        export type Type = doctrine.Type & {node: ts.Node}
-    }
-}
-
-class Comment {
-    private readonly tags: Map<string, Comment.Tag[]> = new Map();
-
-    readonly description: string = '';
-
-    constructor(node: ts.Node) {
-        let text = node.getFullText();
-        let comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
-        if(comment) {
-            let parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
-            this.description = parsed.description;
-            for(let tag of parsed.tags) {
-                tag['node'] = node;
-                if(tag.type) {
-                    tag.type['node'] = node;
-                }
-                this.tags.set(tag.title, [tag as Comment.Tag, ...(this.tags.get(tag.title) || [])]);
-            }
-        }
-    }
-
-    isTagged(title: string, value?: string): boolean {
-        let tags = this.tags.get(title);
-        return tags != undefined && (!value || tags.some(tag => tag[title] == value));
-    }
-
-    tagsNamed(title: string): Comment.Tag[] {
-        return this.tags.get(title) || [];
-    }
 }
 
 export abstract class Declaration {
@@ -382,7 +506,7 @@ export class Module {
         this.name = this.src.name;
         let sourceMap = this.mapSources(src, sourceMapFile, declarationFile, typings, charset);
         this.sourceRoot = sourceMap.sourceRoot;
-        let program = ts.createProgram(sourceMap.sources.map((s) => path.join(this.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset});
+        let program = ts.createProgram(sourceMap.sources.map((s) => path.join(this.sourceRoot, s)), {allowJS: true, skipLibCheck: true, skipDefaultLibCheck: true, strictNullChecks: true, charset: charset});
         log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         let context = new Context(program);
         let files: SourceFile[] = [];

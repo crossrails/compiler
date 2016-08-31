@@ -58,7 +58,7 @@ function main(...args: string[]): number {
             },
             'swift.javascriptcore': { 
                 group: 'Swift options:',
-                desc: 'Compile source to use the JavaScriptCore engine under the hood [default]',
+                desc: 'Compile source to use the JavaScriptCore engine under the hood [default engine]',
             },
             'swift.bundleId': { 
                 group: 'Swift options:',
