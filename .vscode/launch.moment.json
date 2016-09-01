@@ -9,12 +9,12 @@
 			"cwd": "${workspaceRoot}/tests/input",
 			"args": [
 				// "--help"
-                "C:/Users/nbran/Documents/node_modules/moment/package.json",
+                "C:/Users/nbran/OneDrive/Documents/node_modules/moment/package.json",
 				"--implicitExport",
 				"--logLevel=debug",
-				"--swift.emit=C:/Users/nbran/Documents/node_modules/moment/",
+				"--swift.emit=C:/Users/nbran/OneDrive/Documents/node_modules/moment/",
 				"--swift.bundleId=com.momentjs",				
-				"--java.emit=C:/Users/nbran/Documents/node_modules/moment/",
+				"--java.emit=C:/Users/nbran/OneDrive/Documents/node_modules/moment/",
 				"--java.basePackage=com.momentjs"
             ],
 			"preLaunchTask": "build",

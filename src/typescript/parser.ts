@@ -22,7 +22,7 @@ export class Parser {
     }
 
     parse(sourceRoot: string): Module {
-        return new Module(sourceRoot, visitNodes(this.program.getSourceFiles(), this.createDeclarations, true, this) as SourceFile[]);
+        return new Module(sourceRoot, visitNodes(this.program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this.createDeclarations, true, this) as SourceFile[]);
     }
 
     private readonly createDeclarations: NodeVisitor<Declaration> = {
@@ -37,16 +37,18 @@ export class Parser {
             // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => { 
             //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value; 
             // }, 4)); 
-            return new SourceFile(node.fileName, visitNode(node, this.createDeclarations, false));
+            return new SourceFile(node.fileName, visitNode(node, this.createDeclarations, false, this));
         },
 
         visitNamespace(this: Parser, node: ts.ModuleDeclaration): Declaration {
-            return new NamespaceDeclaration(node.name!.text, getFlags(node), visitNodes(this.symbols.getExports(node), this.createDeclarations, false));           
+            return new NamespaceDeclaration(node.name!.text, getFlags(node), visitNodes(this.symbols.getExports(node), this.createDeclarations, false, this));           
         },
 
         visitClass(this: Parser, node: ts.ClassDeclaration): Declaration {
-            return new ClassDeclaration(node.name!.text, getFlags(node), visitNodes(this.symbols.getExports(node), this.createDeclarations, false), visitNodes(node.typeParameters!, this.createTypes));           
+            return new ClassDeclaration(node.name!.text, getFlags(node), visitNodes(this.symbols.getExports(node), this.createDeclarations, false, this), visitNodes(node.typeParameters || [], this.createTypes, true, this));           
         },
+
+
     }
 
     private readonly createTypes: NodeVisitor<Type> = {

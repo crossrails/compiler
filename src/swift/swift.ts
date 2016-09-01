@@ -29,7 +29,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, o
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
-    for(let file of this.files as Array<ast.SourceFile>) {
+    for(let file of this.files) {
         let filename = `${path.join(outDir, path.relative(this.sourceRoot, file.path.dir), file.path.base.substr(0, file.path.base.indexOf('.')))}.swift`;
         Object.defineProperty(file, 'isModuleFile', { writable: false, value: filename == moduleFilename});
         writeFile(filename, file.emit());                
@@ -97,7 +97,7 @@ decorate(ConstructorDeclaration, ({prototype}) => prototype.suffix = function (t
     return this.signature.thrownTypes.length ? ' throws' : '';
 })
 
-decorate(Type, ({prototype}) => prototype.emit = function(this: ast.Type, optional: boolean = this.optional): string {
+decorate(Type, ({prototype}) => prototype.emit = function(this: ast.Type, optional: boolean = this.isOptional): string {
     return `${this.typeName()}${optional ? '?' : ''}`;    
 })
 

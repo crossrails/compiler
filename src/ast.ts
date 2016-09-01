@@ -4,8 +4,8 @@ import * as doctrine from 'doctrine';
 import * as ts from "typescript";
 import {log, Log} from "./log";
 
-function adopt<T>(child: T, parent: Declaration|SourceFile, propertyKey = 'parent'): T {
-    Array.isArray(child) ? child.forEach(element => adopt(element, parent)) :
+function adopt<T>(child: T, parent: any, propertyKey = 'parent'): T {
+    Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
         Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
     return child;
 }
@@ -227,14 +227,12 @@ export class Module {
     readonly files: ReadonlyArray<SourceFile>;
     
     constructor(sourceRoot: string, files: ReadonlyArray<SourceFile>) {
-        Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         this.sourceRoot = sourceRoot;
-        this.files = files;
+        this.files = adopt(files, this, 'module');
         if(files.length == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
             log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
         }
-        //this.identifiers = factory.finalize();
     }   
 
     get declarations(): ReadonlyArray<Declaration> {
@@ -247,12 +245,15 @@ export class Module {
 }
 
 export abstract class Type {
-    readonly optional: boolean
+    readonly flags: Flags
     readonly parent: Declaration
     
-    constructor(optional: boolean, parent: Declaration) {
-        this.optional = optional;
-        this.parent = parent;
+    constructor(flags: Flags) {
+        this.flags = flags;
+    }
+
+    get isOptional(): boolean {
+        return (this.flags & Flags.Optional) != 0;
     }
 
     // private static fromComment(type: Comment.Tag.Type, parent: Declaration, factory: Factory): Type {
@@ -338,41 +339,36 @@ export abstract class Type {
 export class FunctionType extends Type {
     readonly signature: FunctionSignature
     
-    constructor(type: ts.FunctionTypeNode, optional: boolean, parent: Declaration, factory: Factory) {
-        super(optional, parent);
-        //todo support @callback tags
-        this.signature = new FunctionSignature(type, parent, factory);
+    constructor(flags: Flags, signature: FunctionSignature) {
+        super(flags);
+        this.signature = signature
     }  
 }       
 
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>
     
-    constructor(typeArgs: ts.TypeNode[] | undefined, optional: boolean, parent: Declaration, factory: Factory) {
-        super(optional, parent);
-        let typeArguments: Type[] = [];
-        if(typeArgs) for (let typeArg of typeArgs) {
-            typeArguments.push(factory.createType(typeArg, false, parent, factory))
-        }
+    constructor(flags: Flags, typeArguments: ReadonlyArray<Type>) {
+        super(flags);
         this.typeArguments = typeArguments;      
     }  
 }       
 
 export class DeclaredType extends GenericType {
     readonly name: string
-    readonly abstract: boolean
 
-    constructor(name: string, typeArgs: ts.TypeNode[] | undefined, abstract: boolean, optional: boolean, parent: Declaration, factory: Factory) {
-        super(typeArgs, optional, parent, factory);
+    constructor(flags: Flags, typeArguments: ReadonlyArray<Type>, name: string) {
+        super(flags, typeArguments);
         this.name = name;
-        this.abstract = abstract;
-    }     
+    }
+
+    get isAbstract(): boolean {
+        return (this.flags & Flags.Abstract) != 0;
+    }
+
 }
 
 export class VoidType extends Type {
-    constructor(parent: Declaration) {
-        super(false, parent);
-    }
 }
 
 export class DateType extends Type { 

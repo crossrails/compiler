@@ -25,8 +25,8 @@ export class Compiler {
     
     compile(sourceFile: string, module: Module): number {
         let emittedOutput = false;  
-        const sourcePath = path.parse(sourceFile);
-        module = Object.create(module, {name: sourcePath.name, sourcePath: sourcePath});
+        module.sourcePath = path.parse(sourceFile); 
+        module.name = module.sourcePath.name;
         for(let [language, engines] of this.languages) {
             emittedOutput = this.emitLanguage(module, language, engines) || emittedOutput;            
         }

@@ -93,7 +93,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (th
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.getter = function (this: VariableDeclaration, indent?: string) {
-    let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.toNativeValue()})` : this.type.toNativeValue();
+    let returnValue = this.type.isOptional ? `Optional.ofNullable(${this.type.toNativeValue()})` : this.type.toNativeValue();
     return `{
 ${indent}    return ${returnValue};
 ${indent}}`;        
@@ -162,7 +162,7 @@ decorate(AnyType, ({prototype}) => prototype.toNativeValue = function(this: AnyT
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType) {
-    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.abstract ? '.class' : '::new'})`;    
+    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.isAbstract ? '.class' : '::new'})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: ArrayType) {
@@ -173,11 +173,11 @@ decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type) {
     return `(${this.typeName()})${this.parent.accessor()}`;    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.isOptional) {
     return `o -> new JS.Array<>(o, ${this.typeArguments[0].genericToNativeValue()})`;    
 })
 
-decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.isOptional) {
     return `JS.Array::new`;    
 })
 
@@ -186,17 +186,17 @@ decorate(Type, ({prototype}) => prototype.fromNativeValue = function(this: Type)
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType) {
-    return this.abstract ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
+    return this.isAbstract ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: ArrayType) {
-    return `JS.heap.computeIfAbsent(${this.parent.declarationName()}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].genericFromNativeValue(this.optional)}))`;    
+    return `JS.heap.computeIfAbsent(${this.parent.declarationName()}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].genericFromNativeValue(this.isOptional)}))`;    
 })
 
-decorate(Type, ({prototype}) => prototype.genericFromNativeValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.genericFromNativeValue = function(this: Type, optional: boolean = this.isOptional) {
     return this.parent.declarationName();    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function(this: ArrayType, optional: boolean = this.isOptional) {
     return `${this.parent.declarationName()}, JS.ArrayMirror::new`;    
 })

@@ -1,9 +1,10 @@
+import * as assert from 'assert';
 import * as ts from "typescript";
 import {log} from "../log"
 import {Module, Comment, Declaration, Flags, SourceFile, NamespaceDeclaration, ClassDeclaration, Type} from "../ast"
 import {visitNode, visitNodes, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
 
-export class SymbolTable implements NodeVisitor<boolean> {
+export class SymbolTable implements NodeVisitor<boolean|void> {
 
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
@@ -14,7 +15,7 @@ export class SymbolTable implements NodeVisitor<boolean> {
     constructor(program: ts.Program, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
         this.implicitExport = implicitExport;
-        program.getSourceFiles().forEach(file => visitNode(file, this));
+        visitNodes(program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true);
     } 
 
     isExported(node: ts.Declaration): boolean {
@@ -22,7 +23,8 @@ export class SymbolTable implements NodeVisitor<boolean> {
     }
 
     getExports(node: ts.Declaration): ReadonlyArray<ts.Declaration> {
-        return this.exports.get(node)!;
+        assert(this.isExported(node));
+        return this.exports.get(node) || [];
     }
 
     private declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
@@ -49,31 +51,34 @@ export class SymbolTable implements NodeVisitor<boolean> {
     //     return 
     // }
 
-    visitFunction(node: FunctionDeclaration): boolean {
-        const comment = new Comment(node);
-        comment.tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
-        return false;
+    visitSourceFile(node: ts.SourceFile) {
+        this.exports.set(node, [node]);
     }
 
-    visitIdentifier(node: ts.Identifier): boolean {
+    visitFunction(node: FunctionDeclaration) {
+        const comment = new Comment(node);
+        comment.tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
+    }
+
+    visitIdentifier(node: ts.Identifier): boolean|void {
         const symbol = this.checker.getSymbolAtLocation(node);
-        if(!(symbol.flags & ts.SymbolFlags.Export)) return true;
+        if(!(this.implicitExport || symbol.flags & ts.SymbolFlags.Export)) return true;
         const name = this.checker.getFullyQualifiedName(symbol);
         if(this.symbols.has(name)) return true;        
         const comment = new Comment(node.parent!);
         this.symbols.add(name);
+        log.debug(`Parsed symbol ${name}`, node);
         const declaration = symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main); 
         this.exports.set(declaration, symbol.getDeclarations());
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
-        const unexported = !this.symbols.has(this.checker.getFullyQualifiedName(type.getSymbol()));
-        if(unexported) type.getSymbol().getDeclarations().forEach((child: ts.Node | undefined) => {
+        if(!type.symbol || this.symbols.has(this.checker.getFullyQualifiedName(type.symbol))) return; 
+        type.getSymbol().getDeclarations().forEach((child: ts.Node | undefined) => {
             for(let node = child; node; node = node.parent) {
                 node.flags |= ts.NodeFlags.Export;
             }
-            visitNode(node.getSourceFile(), this);
+            visitNode(node.getSourceFile(), this, true);
         });
-        return false;
     }
 }
 

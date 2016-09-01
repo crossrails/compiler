@@ -35,8 +35,9 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
     for(let declaration of this.declarations.filter(d => d instanceof TypeDeclaration || d instanceof NamespaceDeclaration) as Array<TypeDeclaration|NamespaceDeclaration>) {               
         let filename = path.join(outDir, path.relative(this.sourceRoot, declaration.sourceFile.path.dir), `${declaration.declarationName()}.java`);
         let file: SourceFile = Object.create(SourceFile.prototype, {
-            isModuleFile: { value: filename == moduleFilename},
             name: { value: declaration.name },
+            module: { value: this },
+            isModuleFile: { value: filename == moduleFilename},
             packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
             declarations: { value: [ filename != moduleFilename ? declaration : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
         });
@@ -46,10 +47,11 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
     if(!writtenModuleFile) {
         let name = `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}`;
         let file: SourceFile = Object.create(SourceFile.prototype, {
-            isModuleFile: { value: true},
             name: { value: name },
+            module: { value: this },
+            isModuleFile: { value: true},
             packageName: { value: options.basePackage },
-            declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, module: { value: this }, members: { value: globals }}) ] }
+            declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, module: { value: this }, declarations: { value: globals }}) ] }
         });
         Reflect.set(file.declarations[0], 'parent', file);
         writeFile(moduleFilename, file.emit());
@@ -139,11 +141,11 @@ decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = fu
     return this.parent.declarationName();
 })
 
-decorate(Type, ({prototype}) => prototype.emit = function(this: Type, optional: boolean = this.optional): string {
+decorate(Type, ({prototype}) => prototype.emit = function(this: Type, optional: boolean = this.isOptional): string {
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
 })
 
-decorate(FunctionType, ({prototype}) => prototype.emit = function(this: FunctionType, optional: boolean = this.optional): string {
+decorate(FunctionType, ({prototype}) => prototype.emit = function(this: FunctionType, optional: boolean = this.isOptional): string {
     let typeArguments = this.signature.parameters.map(p => p.type);
     if(!(this.signature.returnType instanceof VoidType)) {
         typeArguments = [this.signature.returnType, ...typeArguments];
