@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as ts from "typescript";
 import {log} from "./log"
 import {Module} from "./ast"
-import {createFactory} from "./factory"
+import {Parser} from "./typescript/parser"
 import {readFileSync, accessSync, R_OK} from 'fs';
 import {Compiler, CompilerOptions} from "./compiler"
 
@@ -136,11 +136,12 @@ function main(...args: string[]): number {
         let sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
         let program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: options.charset, skipDefaultLibCheck: true});
         log.logDiagnostics(ts.getPreEmitDiagnostics(program));
+        const parser = new Parser(program, options.implicitExport);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
         // if(log.errorCount === 0) {       
-            compiler.compile(filename, new Module(program, sourceMap.sourceRoot, createFactory(program, options.implicitExport))); 
+            compiler.compile(filename, parser.parse(sourceMap.sourceRoot)); 
         // }       
     }
     

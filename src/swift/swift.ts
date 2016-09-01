@@ -4,7 +4,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
 } from "../ast"
 
 export interface SwiftOptions extends CompilerOptions {
@@ -70,15 +70,15 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (thi
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
-    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
+    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.optional ? '? = nil' : ''}`;
+    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.isOptional ? '? = nil' : ''}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
-    return `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}func`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: ast.FunctionDeclaration): string {

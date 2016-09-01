@@ -4,15 +4,14 @@ import "./java"
 import {JavaOptions} from "./java"
 import {decorate} from '../decorator';
 
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 
 declare module "../ast" {
     interface Declaration {
         accessor(): string
-    }    
-    interface MemberDeclaration {
         mirror(): string
     }
+
     interface Type {
         genericToNativeValue(optional?: boolean): string;
         toNativeValue(): string;
@@ -54,7 +53,7 @@ ${!this.sourceFile.isModuleFile ? '' : `
 ${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");`.substr(1)
 }${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
-}${!this.declarations.some(m => !m.static) ? '' : `
+}${!this.declarations.some(m => !m.isStatic) ? '' : `
 ${indent}private final ScriptObjectMirror prototype;
 ${indent}private final JSObject mirror;
 
@@ -68,7 +67,7 @@ ${indent}}
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ClassDeclaration, indent?: string) {
-    return !this.declarations.some(m => !m.static) ? '' : `
+    return !this.declarations.some(m => !m.isStatic) ? '' : `
 ${indent}@Override
 ${indent}public String toString() {
 ${indent}    return mirror.toString();
@@ -85,8 +84,8 @@ ${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
 ${indent}}`;
 })
 
-decorate(MemberDeclaration, ({prototype}) => prototype.mirror = function (this: MemberDeclaration) {
-    return this.parent == this.sourceFile ? 'global' : this.static ? 'classMirror' : 'prototype';        
+decorate(Declaration, ({prototype}) => prototype.mirror = function (this: Declaration) {
+    return this.parent == this.sourceFile ? 'global' : this.isStatic ? 'classMirror' : 'prototype';        
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
@@ -108,7 +107,7 @@ ${indent}}`;
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.fromNativeValue());
-    return this.static ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
+    return this.isStatic ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
@@ -143,7 +142,7 @@ ${indent}    prototype = (ScriptObjectMirror)classMirror.newObject(${this.signat
 ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
 ${indent}        @Override 
 ${indent}        void build(BiConsumer<String, Function<Object[], Object>> builder) { 
-${this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
+${this.parent.declarations.filter(m => !m.isStatic && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
 ${indent}            builder.accept("${m.name}", args -> ${m.signature.returnType instanceof VoidType ? 
                      `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
                      `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`

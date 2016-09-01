@@ -3,7 +3,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {CompilerOptions} from "../compiler" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration
 } from "../ast"
 
 export interface JavaOptions extends CompilerOptions {
@@ -30,7 +30,7 @@ declare module "../ast" {
 decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootOutDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
     let outDir = path.join(rootOutDir, options.basePackage.replace('.', path.sep));
     let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
-    let globals = this.declarations.filter(d => d instanceof MemberDeclaration && !(d instanceof TypeDeclaration)) as MemberDeclaration[];
+    let globals = this.declarations.filter(d => !(d instanceof NamespaceDeclaration || d instanceof TypeDeclaration));
     let writtenModuleFile = false;  
     for(let declaration of this.declarations.filter(d => d instanceof TypeDeclaration || d instanceof NamespaceDeclaration) as Array<TypeDeclaration|NamespaceDeclaration>) {               
         let filename = path.join(outDir, path.relative(this.sourceRoot, declaration.sourceFile.path.dir), `${declaration.declarationName()}.java`);
@@ -68,11 +68,11 @@ decorate(ClassDeclaration, ({prototype}) => prototype.declarationName = function
     return this.isThrown && this.name.endsWith('Error') ? `${this.name.slice(0, -5)}Exception` : this.name;
 })
 
-decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
-    return this.declarations.reduce<MemberDeclaration[]>((members, member, memberIndex) => {
+decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
+    return this.declarations.reduce<Declaration[]>((members, member, memberIndex) => {
         if(member instanceof FunctionDeclaration && !(member instanceof ConstructorDeclaration)) {
             let parameters = member.signature.parameters;
-            let startOfOptionals = parameters.reduceRight((start, p, i) => p.optional ? i : start, parameters.length);
+            let startOfOptionals = parameters.reduceRight((start, p, i) => p.isOptional ? i : start, parameters.length);
             for(let index = startOfOptionals; index < parameters.length; index++) {
                 //skip adding overload if it already exists
                 if(([...members, ...this.declarations.slice(memberIndex)] as FunctionDeclaration[]).some(
@@ -84,9 +84,7 @@ decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (thi
                     name: { value: member.name},
                     parent: { value: member.parent },
                     comment: { value: member.comment},
-                    protected: { value: member.protected },
-                    static: { value: member.static },
-                    abstract: { value: member.abstract },
+                    flags: { value: member.flags },
                     typeParameters: { value: member.typeParameters },
                     signature: { value: Object.create(FunctionSignature.prototype, {
                         thrownTypes: { value: member.signature.thrownTypes},
@@ -115,9 +113,9 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration, indent?: string): string {
     return `
-${indent}${this.protected ? 'protected' : 'public'}${this.static ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter(indent)}
+${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter(indent)}
     ${this.constant ? '' : `
-${indent}${this.protected ? 'protected' : 'public'}${this.static ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter(indent)}
+${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter(indent)}
     `}`.substr(1);
 })
 
@@ -126,15 +124,15 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this:
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: FunctionDeclaration): string {
-    return `${this.parent instanceof InterfaceDeclaration ? '' : this.protected ? 'protected ' : 'public '}${this.static ? 'static ' : this.abstract && !(this.parent instanceof InterfaceDeclaration) ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected ' : 'public '}${this.isStatic ? 'static ' : this.isAbstract && !(this.parent instanceof InterfaceDeclaration) ? 'abstract ' : ''}${this.signature.returnType.emit()}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: FunctionDeclaration): string {
-    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.abstract ? ';' : ''}`;
+    return `${this.signature.thrownTypes.length ? ` throws ${Array.from(this.signature.thrownTypes.reduce((set, t) => set.add(t instanceof DeclaredType ? t.typeName() : 'Exception'), new Set())).join(', ')}` : ''}${this.isAbstract ? ';' : ''}`;
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.prefix = function (this: ConstructorDeclaration): string {
-    return this.protected ? 'protected' : 'public';
+    return this.isProtected ? 'protected' : 'public';
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.declarationName = function (this: ConstructorDeclaration): string {

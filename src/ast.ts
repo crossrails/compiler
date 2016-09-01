@@ -4,9 +4,10 @@ import * as doctrine from 'doctrine';
 import * as ts from "typescript";
 import {log, Log} from "./log";
 
-export interface Factory {
-    createChildren<T extends Declaration>(node: ts.Node, parent: Declaration|SourceFile): T[];
-    createType<T>(node: ts.Node, parent: Declaration|SourceFile): T;
+function adopt<T>(child: T, parent: Declaration|SourceFile, propertyKey = 'parent'): T {
+    Array.isArray(child) ? child.forEach(element => adopt(element, parent)) :
+        Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
+    return child;
 }
 
 namespace Comment {
@@ -47,16 +48,24 @@ export class Comment {
     }
 }
 
+export enum Flags {
+    None = 0,
+    Static = 1,
+    Abstract = 2,
+    Protected = 4,
+    Constant = 8,
+    Optional = 16,
+    Thrown = 32
+}
+
 export abstract class Declaration {
     readonly name: string; 
-    readonly parent: Declaration|SourceFile;
+    readonly flags: Flags;
+    readonly comment: string
+    readonly parent: Declaration;
 
-    constructor(node: ts.Declaration, parent: Declaration|SourceFile) {
-        //make parent non-enumerable to avoid circular reference 
-        Object.defineProperty(this, 'parent', { enumerable: false, writable: false, value: parent});
-        if(node.name) {
-            this.name = (node.name as ts.Identifier).text;
-        }
+    constructor(name: string, flags: Flags = Flags.None) {
+        this.name = name;
     }
 
     get module(): Module {
@@ -66,56 +75,53 @@ export abstract class Declaration {
     get sourceFile(): SourceFile {
         return this.parent.sourceFile;
     }
+
+    get isStatic(): boolean {
+        return (this.flags & Flags.Static) != 0;
+    }
+
+    get isAbstract(): boolean {
+        return (this.flags & Flags.Abstract) != 0;
+    }
+
+    get isProtected(): boolean {
+        return (this.flags & Flags.Protected) != 0;
+    }
 }
 
-export abstract class MemberDeclaration extends Declaration {
-    readonly comment: string
-    readonly protected: boolean;
-    readonly static: boolean;
-    readonly abstract: boolean
-
-    constructor(node: ts.Declaration, parent: Declaration|SourceFile, comment = new Comment(node)) {
-        super(node, parent);
-        this.protected = (node.flags & ts.NodeFlags.Protected) != 0 || comment.isTagged('protected') || comment.isTagged('access', 'protected');
-        this.static =  parent == this.sourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock || (node.kind == ts.SyntaxKind.VariableDeclaration && node.parent!.parent!.parent!.kind == ts.SyntaxKind.ModuleBlock) || (node.flags & ts.NodeFlags.Static) != 0 || comment.isTagged('static');
-        this.abstract = node.parent!.kind == ts.SyntaxKind.InterfaceDeclaration || (node.flags & ts.NodeFlags.Abstract) != 0 || comment.isTagged('abstract') || comment.isTagged('virtual');
-    }
+function adoptSignature(child: FunctionSignature, parent: Declaration): FunctionSignature {
+    adopt(child.parameters, parent);
+    adopt(child.returnType, parent);
+    adopt(child.thrownTypes, parent);
+    return child;
 }
 
 export class FunctionSignature {
     readonly parameters: ReadonlyArray<ParameterDeclaration>
     readonly returnType: Type;
-    readonly thrownTypes: Type[];
+    readonly thrownTypes: ReadonlyArray<Type>
 
-    constructor(node: ts.SignatureDeclaration, parent: Declaration, factory: Factory, comment = new Comment(node)) {
-        if(node.type) {
-            this.returnType = factory.createType(node.type, false, parent);
-        } else if(!(parent instanceof ConstructorDeclaration)) {
-            log.warn(`Return type information missing, assuming void`, node);
-            log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, node)
-            this.returnType = new VoidType(parent);
-        } 
-        this.parameters = factory.createChildren<ParameterDeclaration>(node, parent);
-        this.thrownTypes = comment.tagsNamed('throws').map(tag => {
-            return !tag.type ? new AnyType(false, parent) : Type.fromComment(tag.type, parent, factory);
-        });
+    constructor(parameters: ReadonlyArray<ParameterDeclaration>, returnType: Type, thrownTypes: ReadonlyArray<Type>) {
+        this.parameters = parameters;
+        this.returnType = returnType;
+        this.thrownTypes = thrownTypes;
     }
 }
 
-export class FunctionDeclaration extends MemberDeclaration {
+export class FunctionDeclaration extends Declaration {
     readonly signature: FunctionSignature
     readonly typeParameters: ReadonlyArray<Type>
 
-    constructor(node: ts.SignatureDeclaration, parent: Declaration|SourceFile, factory: Factory) {
-        const comment = new Comment(node);
-        super(node, parent, comment);
-        this.signature = new FunctionSignature(node, this, factory, comment);
+    constructor(name: string, flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
+        super(name, flags);
+        this.signature = adoptSignature(signature, this);
+        this.typeParameters = adopt(typeParameters, this);
     }
 }
 
 export class ConstructorDeclaration extends FunctionDeclaration {
-    constructor(node: ts.ConstructorDeclaration, parent: Declaration|SourceFile, factory: Factory) {
-        super(node, parent, factory);
+    constructor(flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
+        super('', flags, signature, typeParameters);
     }
 
     get name(): string {
@@ -127,92 +133,88 @@ export class ConstructorDeclaration extends FunctionDeclaration {
     }
 }
 
-export class VariableDeclaration extends MemberDeclaration {
+export class VariableDeclaration extends Declaration {
     readonly type: Type;
     readonly constant: boolean;
     
-    constructor(node: ts.VariableDeclaration, parent: Declaration|SourceFile, factory: Factory) {
-        super(node, parent);
-        this.constant = (node.parent && node.parent.flags & ts.NodeFlags.Const) != 0
-        if(node.type) {
-            this.type = factory.createType(node.type, false, this);
-        } else {
-            log.warn(`Type information missing for variable declaration, resorting to Any`, node);
-            log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, node)
-            this.type = new AnyType(false, this);
-        } 
-    }    
+    constructor(name: string, flags: Flags, type: Type) {
+        super(name, flags);
+        this.type = adopt(type, this);
+    }
+
+    get isConstant(): boolean {
+        return (this.flags & Flags.Constant) != 0;
+    }
 }
 
 export class ParameterDeclaration extends Declaration {
     readonly type: Type;
-    readonly parent: Declaration;
-    readonly optional: boolean;
     
-    constructor(node: ts.ParameterDeclaration, parent: Declaration, factory: Factory) {
-        super(node, parent);
-        this.optional = node.questionToken !== undefined;
-        if(node.type) {
-            this.type = factory.createType(node.type, false, this);
-        } else {
-            log.warn(`Type information missing for function parameter, resorting to Any`, node);
-            log.info(`Resolve this warning by adding a typescript type annotation or a @param jsdoc tag`, node)
-            this.type = new AnyType(false, this);
-        } 
-    }    
+    constructor(name: string, flags: Flags, type: Type) {
+        super(name, flags);
+        this.type = adopt(type, this);
+    }
+
+    get isOptional(): boolean {
+        return (this.flags & Flags.Optional) != 0;
+    }
+
+    get parent(): Declaration {
+        return super.parent as Declaration;
+    }
 }
 
-export abstract class TypeDeclaration extends MemberDeclaration {
-    readonly declarations: ReadonlyArray<MemberDeclaration>;
+export abstract class TypeDeclaration extends Declaration {
+    readonly declarations: ReadonlyArray<Declaration>
     
-    constructor(nodes: ReadonlyArray<ts.Declaration>, parent: Declaration|SourceFile, factory: Factory) {
-        super(nodes[0], parent);
-        this.declarations = nodes.reduce((reduced, node) => [...reduced, ...factory.createChildren<MemberDeclaration>(node, this)], [] as MemberDeclaration[]);
+    constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>) {
+        super(name, flags);
+        this.declarations = adopt(declarations, this);
     }
 }
 
 export class InterfaceDeclaration extends TypeDeclaration {
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(nodes: ReadonlyArray<ts.Declaration>, parent: Declaration|SourceFile, factory: Factory) {
-        super(nodes, parent, factory);
+    constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>, typeParameters: ReadonlyArray<Type>) {
+        super(name, flags, declarations);
+        this.typeParameters = adopt(typeParameters, this);
     }
 }
 
 export class ClassDeclaration extends TypeDeclaration {
-    readonly isThrown: boolean;
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
-    constructor(nodes: ReadonlyArray<ts.Declaration>, isThrown: boolean, parent: Declaration|SourceFile, factory: Factory) {
-        super(nodes, parent, factory);
-        this.isThrown = isThrown;
+    constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>, typeParameters: ReadonlyArray<Type>) {
+        super(name, flags, declarations);
+        this.typeParameters = adopt(typeParameters, this);
+    }
+    
+    get isThrown(): boolean {
+        return (this.flags & Flags.Thrown) != 0;
     }
 }
 
 export class NamespaceDeclaration extends Declaration { 
     readonly declarations: ReadonlyArray<Declaration> 
      
-    constructor(nodes: ReadonlyArray<ts.ModuleDeclaration>, parent: Declaration|SourceFile, factory: Factory) { 
-        super(nodes[0], parent); 
-        this.declarations = nodes.reduce((reduced, node) => [...reduced, ...factory.createChildren(node, this)], [] as Declaration[]);
+    constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>) {
+        super(name, flags);
+        this.declarations = adopt(declarations, this);
     }     
 } 
  
-
-export class SourceFile {
+export class SourceFile extends Declaration {
     readonly path: path.ParsedPath;    
     readonly comment: string;  
     readonly declarations: ReadonlyArray<Declaration>
     readonly module: Module;
     
-    constructor(node: ts.SourceFile, module: Module, factory: Factory) {
-        // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => {
-        //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value;
-        // }, 4));
-        this.path = path.parse(node.fileName);
-        Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
-        this.declarations = factory.createChildren(node, this);
+    constructor(name: string, declarations: ReadonlyArray<Declaration>) {
+        super(name, Flags.None);
+        this.path = path.parse(name);
+        this.declarations = adopt(declarations, this);
     }
         
     get sourceFile(): SourceFile {
@@ -223,21 +225,10 @@ export class SourceFile {
 export class Module {
     readonly sourceRoot: string;
     readonly files: ReadonlyArray<SourceFile>;
-    readonly identifiers: ReadonlyArray<Declaration>;
     
-    constructor(program: ts.Program, sourceRoot: string, factory: Factory) {
+    constructor(sourceRoot: string, files: ReadonlyArray<SourceFile>) {
+        Object.defineProperty(this, 'module', { enumerable: false, writable: false, value: module});
         this.sourceRoot = sourceRoot;
-        let files: SourceFile[] = [];
-        for (let file of program.getSourceFiles()) {
-            if(path.relative(this.sourceRoot, file.path).startsWith('..')) continue;
-            log.info(`Parsing ${path.relative('.', file.path)}`);
-            let sourceFile = new SourceFile(file, this, factory);
-            if(sourceFile.declarations.length) {
-                files.push(sourceFile);
-            } else {
-                log.info(`No exported declarations found in ${path.relative('.', file.path)}`);            
-            }
-        }
         this.files = files;
         if(files.length == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
@@ -246,9 +237,12 @@ export class Module {
         //this.identifiers = factory.finalize();
     }   
 
-    get declarations(): ReadonlyArray<MemberDeclaration> {
-        return this.files.reduce((declarations: MemberDeclaration[], file: SourceFile) => 
-            declarations.concat(file.declarations as MemberDeclaration[]), []);
+    get declarations(): ReadonlyArray<Declaration> {
+        return this.files.reduce<Declaration[]>((reduced, file) => [...reduced, ...file.declarations], []) 
+    }
+
+    get identifiers(): ReadonlyArray<Declaration> {
+        return [];//this.declarations.map(declaration => declaration.name);
     }
 }
 

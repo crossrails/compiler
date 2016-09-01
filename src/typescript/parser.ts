@@ -1,32 +1,46 @@
 import * as ts from "typescript";
-import {log} from "./log"
+import {log} from "../log"
+import {Module, Comment, Declaration, Flags, SourceFile, NamespaceDeclaration, Type} from "../ast"
 import {walk, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
-import {Factory as AbstractFactory, Comment, Declaration, SourceFile, NamespaceDeclaration, Type} from "./ast"
+import {readFileSync} from 'fs';
 
-export class Factory implements AbstractFactory {
+function getFlags(node: ts.Node): Flags {
+    return (node.flags & ts.NodeFlags.Abstract) ? Flags.Abstract : Flags.None 
+        | (node.flags & ts.NodeFlags.Protected) ? Flags.Protected : Flags.None
+        | (node.flags & ts.NodeFlags.Static) ? Flags.Static : Flags.None
+}
 
+export class Parser implements NodeVisitor<Declaration> {
+
+    private readonly program: ts.Program;
     private readonly symbols: SymbolTable;
     
     constructor(program: ts.Program, implicitExport: boolean) {
+        this.program = program;
         this.symbols = new SymbolTable(program, implicitExport);
     }
 
-    createChildren<T extends Declaration>(node: ts.Node, parent: Declaration|SourceFile): T[] {
-        return walk<Declaration>(node, {
-            shouldVisit(this: Factory, node: ts.Declaration): boolean {
-                if(this.symbols.isExported(node)) return true;
-                log.debug(`Skipping unexported ${ts.SyntaxKind[node.kind]}`, node);
-                return false;
-            },
-            visitNamespace(this: Factory, node: ts.ModuleDeclaration) {
-                const nodes = this.symbols.getDeclarations<ts.ModuleDeclaration>(node, ts.SyntaxKind.ModuleDeclaration);
-                return new NamespaceDeclaration(nodes, parent, this);           
-            }
-        }, false, this) as T[];
+    parse(sourceRoot: string): Module {
+        return new Module(sourceRoot, this.program.getSourceFiles().map(node => walk(node, this)[0] as SourceFile));
     }
 
-    createType<T extends Type>(node: ts.Node, parent: Declaration|SourceFile): T {
+    shouldVisit(node: ts.Declaration): boolean {
+        if(this.symbols.isExported(node)) return true;
+        log.debug(`Skipping unexported ${ts.SyntaxKind[node.kind]}`, node);
+        return false;
+    }
 
+    visitSourceFile(node: ts.SourceFile): Declaration {
+        // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => { 
+        //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value; 
+        // }, 4)); 
+        return new SourceFile(node.fileName, walk(node, this, false));
+    }
+
+    visitNamespace(node: ts.ModuleDeclaration): Declaration {
+        const nodes = this.symbols.getDeclarations<ts.ModuleDeclaration>(node, ts.SyntaxKind.ModuleDeclaration);
+        return new NamespaceDeclaration(node.name!.text, getFlags(node), 
+            nodes.reduce<Declaration[]>((reduced, node) => [...reduced, ...walk(node, this)], []));           
     }
 }
 

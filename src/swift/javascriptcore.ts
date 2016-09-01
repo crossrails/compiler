@@ -4,7 +4,7 @@ import "./swift"
 import {SwiftOptions} from "./swift"
 import {decorate} from '../decorator';
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
 } from "../ast"
 
 
@@ -56,7 +56,7 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.thisName = function (t
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.fromNativeValue());
-    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.static ? '(' : `.call(proxy${args.length ? `, args: ` : ''}`}${args.join(', ')})`;
+    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.isStatic ? '(' : `.call(proxy${args.length ? `, args: ` : ''}`}${args.join(', ')})`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
@@ -76,7 +76,7 @@ ${indent}}`
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
-    let members = this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration');
+    let members = this.parent.declarations.filter(m => !m.isStatic && m.constructor.name === 'FunctionDeclaration');
     return `{
 ${indent}    self.this = try! ${this.thisName()}.construct(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}) 
 ${indent}    self.proxy = ${members.length == 0 ? 'this' : `self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
@@ -96,7 +96,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.argumentName = function
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
-    return `${this.static ? 'this' : 'proxy'}[.${this.declarationName()}]`
+    return `${this.isStatic ? 'this' : 'proxy'}[.${this.declarationName()}]`
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.body = function (this: VariableDeclaration, indent?: string) { 
@@ -106,7 +106,7 @@ ${indent}    get {
 ${indent}        ${this.type instanceof FunctionType ? '': 'return '}${this.type.toNativeValue(this.accessor(), `${indent}    `)}
 ${indent}    }
 ${indent}    set {
-${indent}        ${this.static ? 'this' : 'proxy'}[.${this.declarationName()}] = ${this.type.fromNativeValue()}
+${indent}        ${this.isStatic ? 'this' : 'proxy'}[.${this.declarationName()}] = ${this.type.fromNativeValue()}
 ${indent}    }
 ${indent}}`        
 })

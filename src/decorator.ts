@@ -1,4 +1,4 @@
-import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration, NamespaceDeclaration} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration} from "./ast"
 import * as assert from "assert"
 import {ParsedPath} from 'path';
 
@@ -60,7 +60,7 @@ declare module "./ast" {
     }
 
     interface TypeDeclaration {
-        typeMembers(): ReadonlyArray<MemberDeclaration>
+        typeMembers(): ReadonlyArray<Declaration>
         keyword(): string
         typeName(): string
         suffix(): string
@@ -98,10 +98,10 @@ DeclaredType.prototype.typeName = function(this: DeclaredType): string {
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
-    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.abstract ? '\n' : ` ${this.body(indent)}\n`}`;
+    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.isAbstract ? '\n' : ` ${this.body(indent)}\n`}`;
 }
 
-TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
+TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
     return this.declarations;
 }
 
