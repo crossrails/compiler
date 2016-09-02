@@ -216,84 +216,84 @@ export abstract class Type {
         return (this.flags & Flags.Optional) != 0;
     }
 
-    // private static fromComment(type: Comment.Tag.Type, parent: Declaration, factory: Factory): Type {
-    //     switch(type.type) {
-    //         case 'NameExpression':
-    //             switch(type.name) {
-    //                 case 'boolean':
-    //                     return new BooleanType(false, parent);
-    //                 case 'number':
-    //                     return new NumberType(false, parent);
-    //                 case 'string':
-    //                     return new StringType(false, parent);
-    //                 case 'Error':
-    //                     return new ErrorType(false, parent);
-    //                 default:
-    //                     return new DeclaredType(type, false, parent, factory);
-    //             }
-    //     }
-    //     return new AnyType(false, parent);
-    // }
+    private static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
+        switch(type.type) {
+            case 'NameExpression':
+                switch(type.name) {
+                    case 'boolean':
+                        return new BooleanType(false, parent);
+                    case 'number':
+                        return new NumberType(false, parent);
+                    case 'string':
+                        return new StringType(false, parent);
+                    case 'Error':
+                        return new ErrorType(false, parent);
+                    default:
+                        return new DeclaredType(type, false, parent, factory);
+                }
+        }
+        return new AnyType(false, parent);
+    }
         
-    // private static from(type: ts.TypeNode, optional: boolean, parent: Declaration, factory: Factory): Type {
-    //     try {
-    //         switch(type.kind) {
-    //             case ts.SyntaxKind.VoidKeyword:
-    //                 return new VoidType(parent);
-    //             case ts.SyntaxKind.AnyKeyword:
-    //                 return new AnyType(optional, parent);
-    //             case ts.SyntaxKind.BooleanKeyword:
-    //                 return new BooleanType(optional, parent);
-    //             case ts.SyntaxKind.NumberKeyword:
-    //                 return new NumberType(optional, parent);
-    //             case ts.SyntaxKind.StringKeyword:
-    //                 return new StringType(optional, parent);
-    //             case ts.SyntaxKind.ArrayType:
-    //                 return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional, parent, factory);
-    //             case ts.SyntaxKind.FunctionType:
-    //                 return new FunctionType(type as ts.FunctionTypeNode, optional, parent, factory);
-    //             case ts.SyntaxKind.TypeReference:   
-    //                 return Type.fromReference(type as ts.TypeReferenceNode, optional, parent, factory);
-    //             case ts.SyntaxKind.UnionType:
-    //                 return Type.fromUnion(type as ts.UnionTypeNode, parent, factory);
-    //             default:
-    //                 throw `Unsupported type ${ts.SyntaxKind[type.kind]}`;                
-    //         }
-    //     } catch(error) {
-    //         if(typeof error !== 'string') throw error;
-    //         log.warn(`${error}, erasing to Any`, type);
-    //         log.info(`This type is not supported by crossrails`, type)
-    //         return new AnyType(optional, parent);
-    //     }
-    // }
+    private static from(type: ts.TypeNode, optional: boolean, parent: Declaration, context: Context): Type {
+        try {
+            switch(type.kind) {
+                case ts.SyntaxKind.VoidKeyword:
+                    return new VoidType(parent);
+                case ts.SyntaxKind.AnyKeyword:
+                    return new AnyType(optional, parent);
+                case ts.SyntaxKind.BooleanKeyword:
+                    return new BooleanType(optional, parent);
+                case ts.SyntaxKind.NumberKeyword:
+                    return new NumberType(optional, parent);
+                case ts.SyntaxKind.StringKeyword:
+                    return new StringType(optional, parent);
+                case ts.SyntaxKind.ArrayType:
+                    return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional, parent, factory);
+                case ts.SyntaxKind.FunctionType:
+                    return new FunctionType(type as ts.FunctionTypeNode, optional, parent, factory);
+                case ts.SyntaxKind.TypeReference:   
+                    return Type.fromReference(type as ts.TypeReferenceNode, optional, parent, factory);
+                case ts.SyntaxKind.UnionType:
+                    return Type.fromUnion(type as ts.UnionTypeNode, parent, factory);
+                default:
+                    throw `Unsupported type ${ts.SyntaxKind[type.kind]}`;                
+            }
+        } catch(error) {
+            if(typeof error !== 'string') throw error;
+            log.warn(`${error}, erasing to Any`, type);
+            log.info(`This type is not supported by crossrails`, type)
+            return new AnyType(optional, parent);
+        }
+    }
     
-    // static fromReference(reference: ts.TypeReferenceNode, optional: boolean, parent: Declaration, factory: Factory) {
-    //     let identifier = reference.typeName as ts.Identifier
-    //     switch(identifier.text) {
-    //         case 'Object': 
-    //             return new AnyType(optional, parent); 
-    //         case 'Date': 
-    //             return new DateType(optional, parent); 
-    //         case 'Error':
-    //             return new ErrorType(optional, parent);
-    //         case 'Array':
-    //         case 'ReadonlyArray':
-    //             return new ArrayType(reference.typeArguments, optional, parent, factory);
-    //         default:
-    //             return new DeclaredType(reference, optional, parent, factory);
-    //     }
-    // }
+    static fromReference(reference: ts.TypeReferenceNode, optional: boolean, parent: Declaration, context: Context) {
+        let identifier = reference.typeName as ts.Identifier
+        switch(identifier.text) {
+            case 'Object': 
+                return new AnyType(optional, parent); 
+            case 'Date': 
+                return new DateType(optional, parent); 
+            case 'Error':
+                return new ErrorType(optional, parent);
+            case 'Array':
+            case 'ReadonlyArray':
+                return new ArrayType(reference.typeArguments, optional, parent, factory);
+            default:
+                return new DeclaredType(reference, optional, parent, factory);
+        }
+    }
         
-    // static fromUnion(union: ts.UnionTypeNode, parent: Declaration, factory: Factory) {
-    //     if(union.types.length == 2) {
-    //         if(union.types[0].kind == ts.SyntaxKind.NullKeyword || union.types[0].kind == ts.SyntaxKind.UndefinedKeyword) {
-    //             return Type.from(union.types[1], true, parent, factory);
-    //         } else if(union.types[1].kind == ts.SyntaxKind.NullKeyword || union.types[1].kind == ts.SyntaxKind.UndefinedKeyword) {
-    //             return Type.from(union.types[0], true, parent, factory);                        
-    //         }
-    //     }
-    //     throw `Unsupported type union, only unions between null or undefined and a single type supported`
-    // }  
+    static fromUnion(union: ts.UnionTypeNode, parent: Declaration, context: Context) {
+        if(union.types.length == 2) {
+            if(union.types[0].kind == ts.SyntaxKind.NullKeyword || union.types[0].kind == ts.SyntaxKind.UndefinedKeyword) {
+                return Type.from(union.types[1], true, parent, factory);
+            } else if(union.types[1].kind == ts.SyntaxKind.NullKeyword || union.types[1].kind == ts.SyntaxKind.UndefinedKeyword) {
+                return Type.from(union.types[0], true, parent, factory);                        
+            }
+        }
+        throw `Unsupported type union, only unions between null or undefined and a single type supported`
+    }  
 }  
 
 export class FunctionType extends Type {
