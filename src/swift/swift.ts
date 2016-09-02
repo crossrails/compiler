@@ -70,7 +70,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (thi
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
-    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
+    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}${this.isConstant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {

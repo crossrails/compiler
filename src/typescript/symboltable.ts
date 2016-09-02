@@ -1,7 +1,8 @@
 import * as assert from 'assert';
 import * as ts from "typescript";
 import {log} from "../log"
-import {Module, Comment, Declaration, Flags, SourceFile, NamespaceDeclaration, ClassDeclaration, Type} from "../ast"
+import {Comment} from "../comment"
+import {Module, Declaration, Flags, SourceFile, NamespaceDeclaration, ClassDeclaration, Type} from "../ast"
 import {visitNode, visitNodes, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
 
 export class SymbolTable implements NodeVisitor<boolean|void> {
@@ -11,6 +12,7 @@ export class SymbolTable implements NodeVisitor<boolean|void> {
     private readonly symbols = new Set<string>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<string>();
+    private readonly types = new Map<string, ts.Declaration>();
 
     constructor(program: ts.Program, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
@@ -25,6 +27,11 @@ export class SymbolTable implements NodeVisitor<boolean|void> {
     getExports(node: ts.Declaration): ReadonlyArray<ts.Declaration> {
         assert(this.isExported(node));
         return this.exports.get(node) || [];
+    }
+
+    isThrown(node: ts.ClassDeclaration): boolean {
+        const symbol = this.checker.getSymbolAtLocation(node.name!);
+        return this.thrown.has(this.checker.getFullyQualifiedName(symbol));        
     }
 
     private declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
@@ -63,16 +70,18 @@ export class SymbolTable implements NodeVisitor<boolean|void> {
     visitIdentifier(node: ts.Identifier): boolean|void {
         const symbol = this.checker.getSymbolAtLocation(node);
         if(!(this.implicitExport || symbol.flags & ts.SymbolFlags.Export)) return true;
-        const name = this.checker.getFullyQualifiedName(symbol);
-        if(this.symbols.has(name)) return true;        
+        const symbolName = this.checker.getFullyQualifiedName(symbol);
+        if(this.symbols.has(symbolName)) return true;        
         const comment = new Comment(node.parent!);
-        this.symbols.add(name);
-        log.debug(`Parsed symbol ${name}`, node);
+        this.symbols.add(symbolName);
         const declaration = symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main); 
         this.exports.set(declaration, symbol.getDeclarations());
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
-        if(!type.symbol || this.symbols.has(this.checker.getFullyQualifiedName(type.symbol))) return; 
+        if(!type.symbol) return;
+        const typeName = this.checker.getFullyQualifiedName(type.symbol);
+        if(type.symbol == symbol) this.types.set(typeName, declaration);
+        if(this.symbols.has(typeName)) return; 
         type.getSymbol().getDeclarations().forEach((child: ts.Node | undefined) => {
             for(let node = child; node; node = node.parent) {
                 node.flags |= ts.NodeFlags.Export;

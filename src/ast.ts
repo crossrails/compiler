@@ -1,51 +1,11 @@
 import * as path from 'path';
 import * as assert from 'assert';
-import * as doctrine from 'doctrine';
-import * as ts from "typescript";
 import {log, Log} from "./log";
 
 function adopt<T>(child: T, parent: any, propertyKey = 'parent'): T {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
         Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
     return child;
-}
-
-namespace Comment {
-    export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
-    export namespace Tag {
-        export type Type = doctrine.Type & {node: ts.Node}
-    }
-}
-
-export class Comment {
-    private readonly tags: Map<string, Comment.Tag[]> = new Map();
-
-    readonly description: string = '';
-
-    constructor(node: ts.Node) {
-        let text = node.getFullText();
-        let comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
-        if(comment) {
-            let parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
-            this.description = parsed.description;
-            for(let tag of parsed.tags) {
-                tag['node'] = node;
-                if(tag.type) {
-                    tag.type['node'] = node;
-                }
-                this.tags.set(tag.title, [tag as Comment.Tag, ...(this.tags.get(tag.title) || [])]);
-            }
-        }
-    }
-
-    isTagged(title: string, value?: string): boolean {
-        let tags = this.tags.get(title);
-        return tags != undefined && (!value || tags.some(tag => tag[title] == value));
-    }
-
-    tagsNamed(title: string): Comment.Tag[] {
-        return this.tags.get(title) || [];
-    }
 }
 
 export enum Flags {
@@ -60,12 +20,13 @@ export enum Flags {
 
 export abstract class Declaration {
     readonly name: string; 
-    readonly flags: Flags;
+    protected readonly flags: Flags;
     readonly comment: string
     readonly parent: Declaration;
 
     constructor(name: string, flags: Flags = Flags.None) {
         this.name = name;
+        this.flags = flags;
     }
 
     get module(): Module {
@@ -77,7 +38,7 @@ export abstract class Declaration {
     }
 
     get isStatic(): boolean {
-        return (this.flags & Flags.Static) != 0;
+        return this.parent == this.sourceFile || this.parent instanceof NamespaceDeclaration || (this.flags & Flags.Static) != 0;
     }
 
     get isAbstract(): boolean {
@@ -101,9 +62,9 @@ export class FunctionSignature {
     readonly returnType: Type;
     readonly thrownTypes: ReadonlyArray<Type>
 
-    constructor(parameters: ReadonlyArray<ParameterDeclaration>, returnType: Type, thrownTypes: ReadonlyArray<Type>) {
+    constructor(parameters: ReadonlyArray<ParameterDeclaration>, returnType: Type | undefined, thrownTypes: ReadonlyArray<Type>) {
         this.parameters = parameters;
-        this.returnType = returnType;
+        this.returnType = returnType || new VoidType();
         this.thrownTypes = thrownTypes;
     }
 }
@@ -135,7 +96,6 @@ export class ConstructorDeclaration extends FunctionDeclaration {
 
 export class VariableDeclaration extends Declaration {
     readonly type: Type;
-    readonly constant: boolean;
     
     constructor(name: string, flags: Flags, type: Type) {
         super(name, flags);
@@ -245,10 +205,10 @@ export class Module {
 }
 
 export abstract class Type {
-    readonly flags: Flags
+    protected readonly flags: Flags
     readonly parent: Declaration
     
-    constructor(flags: Flags) {
+    constructor(flags: Flags = Flags.None) {
         this.flags = flags;
     }
 

@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import {log} from "../log"
 
 export type VariableDeclaration = ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature;
 export type FunctionDeclaration = ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature;
@@ -17,6 +18,8 @@ export interface NodeVisitor<T> {
     visitOtherNode?(node: ts.Node): T
 }
 
+export const SkipNodeException = Symbol();
+
 export function visitNodes<T>(nodes: ReadonlyArray<ts.Node>, visitor: NodeVisitor<T>, visitRootNodes: boolean, thisArg: any = visitor): ReadonlyArray<T> {
     return nodes.reduce<T[]>((reduced, node) => [...reduced, ...visitNode<T>(node, visitor, visitRootNodes, thisArg)], []);           
 }
@@ -26,8 +29,13 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
         if(!visitRootNode) return visitChildren(node);
         if(!visitMethod) visitMethod = visitor.visitOtherNode; 
         if(visitMethod && visitor.shouldVisitNode && !visitor.shouldVisitNode.call(thisArg, node)) return [];
-        const result = visitMethod ? visitMethod.call(thisArg, node) : false;
-        return result ? [result] : visitChildren(node);
+        try {
+            const result = visitMethod ? visitMethod.call(thisArg, node) : false;
+            return result ? [result] : visitChildren(node);
+        } catch(error) {
+            if(error  === SkipNodeException) return [];
+            throw error;
+        }
     }
     const visitChild = (node: ts.Node) => visitNode(node, visitor, true, thisArg);
     const visitChildren = (nodes: ReadonlyArray<ts.Node>) => visitNodes(nodes, visitor, true, thisArg);

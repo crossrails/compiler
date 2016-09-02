@@ -100,7 +100,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (th
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.body = function (this: VariableDeclaration, indent?: string) { 
-    return this.constant ? `= ${this.type.toNativeValue()}` : 
+    return this.isConstant ? `= ${this.type.toNativeValue()}` : 
 `{
 ${indent}    get {
 ${indent}        ${this.type instanceof FunctionType ? '': 'return '}${this.type.toNativeValue(this.accessor(), `${indent}    `)}

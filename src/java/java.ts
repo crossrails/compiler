@@ -116,7 +116,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration, indent?: string): string {
     return `
 ${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter(indent)}
-    ${this.constant ? '' : `
+    ${this.isConstant ? '' : `
 ${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter(indent)}
     `}`.substr(1);
 })
