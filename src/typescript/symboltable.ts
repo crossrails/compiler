@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import {log} from "../log"
 import {Comment} from "../comment"
 import {Module, Declaration, Flags, SourceFile, NamespaceDeclaration, ClassDeclaration, Type} from "../ast"
-import {visitNode, visitNodes, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration} from "./visitor"
 
 export class SymbolTable implements NodeVisitor<boolean|void> {
 
@@ -83,9 +83,7 @@ export class SymbolTable implements NodeVisitor<boolean|void> {
         if(type.symbol == symbol) this.types.set(typeName, declaration);
         if(this.symbols.has(typeName)) return; 
         type.getSymbol().getDeclarations().forEach((child: ts.Node | undefined) => {
-            for(let node = child; node; node = node.parent) {
-                node.flags |= ts.NodeFlags.Export;
-            }
+            [...ancestry(node)].forEach(n =>  n.flags |= ts.NodeFlags.Export);
             visitNode(node.getSourceFile(), this, true);
         });
     }

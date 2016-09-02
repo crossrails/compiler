@@ -20,6 +20,10 @@ export interface NodeVisitor<T> {
 
 export const SkipNodeException = Symbol();
 
+export function* ancestry(node: ts.Node) {
+    while(node = node.parent!) yield node;
+}
+
 export function visitNodes<T>(nodes: ReadonlyArray<ts.Node>, visitor: NodeVisitor<T>, visitRootNodes: boolean, thisArg: any = visitor): ReadonlyArray<T> {
     return nodes.reduce<T[]>((reduced, node) => [...reduced, ...visitNode<T>(node, visitor, visitRootNodes, thisArg)], []);           
 }
@@ -55,7 +59,7 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature: 
             return visit(visitor.visitFunction, node as FunctionDeclaration, node =>
-                visitChild(node.name!) || visitChildren(node.parameters));
+                (node.name && visitChild(node.name)) || visitChildren(node.parameters));
 
         case ts.SyntaxKind.Constructor: 
             return visit(visitor.visitConstructor, node as ts.ConstructorDeclaration, node =>
@@ -63,15 +67,15 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
 
         case ts.SyntaxKind.ClassDeclaration:
             return visit(visitor.visitClass, node as ts.ClassDeclaration, node =>
-                visitChild(node.name!) || visitChildren(node.members));
+                (node.name && visitChild(node.name)) || visitChildren(node.members));
 
         case ts.SyntaxKind.InterfaceDeclaration:
             return visit(visitor.visitInterface, node as ts.InterfaceDeclaration, node => 
-                visitChild(node.name!) || visitChildren(node.members));
+                visitChild(node.name) || visitChildren(node.members));
 
         case ts.SyntaxKind.ModuleDeclaration:
             return visit(visitor.visitNamespace, node as ts.ModuleDeclaration, node => 
-                visitChild(node.name!) || visitChildren((node.body as ts.ModuleBlock).statements));
+                visitChild(node.name) || visitChildren((node.body as ts.ModuleBlock).statements));
 
         case ts.SyntaxKind.Parameter: 
             return visit(visitor.visitParameter, node as ts.ParameterDeclaration, node => visitChild(node.name));

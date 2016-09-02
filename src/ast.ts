@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as assert from 'assert';
 import {log, Log} from "./log";
 
-function adopt<T>(child: T, parent: any, propertyKey = 'parent'): T {
+function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
         Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
     return child;
@@ -20,13 +20,17 @@ export enum Flags {
 
 export abstract class Declaration {
     readonly name: string; 
-    protected readonly flags: Flags;
+    readonly flags: Flags;
     readonly comment: string
     readonly parent: Declaration;
 
     constructor(name: string, flags: Flags = Flags.None) {
         this.name = name;
         this.flags = flags;
+    }
+
+    get declaration(): Declaration {
+        return this;
     }
 
     get module(): Module {
@@ -50,7 +54,7 @@ export abstract class Declaration {
     }
 }
 
-function adoptSignature(child: FunctionSignature, parent: Declaration): FunctionSignature {
+function adoptSignature(child: FunctionSignature, parent: Declaration|Type): FunctionSignature {
     adopt(child.parameters, parent);
     adopt(child.returnType, parent);
     adopt(child.thrownTypes, parent);
@@ -205,8 +209,8 @@ export class Module {
 }
 
 export abstract class Type {
-    protected readonly flags: Flags
-    readonly parent: Declaration
+    readonly flags: Flags
+    readonly parent: Declaration|Type
     
     constructor(flags: Flags = Flags.None) {
         this.flags = flags;
@@ -216,84 +220,102 @@ export abstract class Type {
         return (this.flags & Flags.Optional) != 0;
     }
 
-    private static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
-        switch(type.type) {
-            case 'NameExpression':
-                switch(type.name) {
-                    case 'boolean':
-                        return new BooleanType(false, parent);
-                    case 'number':
-                        return new NumberType(false, parent);
-                    case 'string':
-                        return new StringType(false, parent);
-                    case 'Error':
-                        return new ErrorType(false, parent);
-                    default:
-                        return new DeclaredType(type, false, parent, factory);
-                }
-        }
-        return new AnyType(false, parent);
+    get declaration(): Declaration {
+        return this.parent.declaration;
     }
+
+    // private static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
+    //     switch(type.type) {
+    //         case 'NameExpression':
+    //             switch(type.name) {
+    //                 case 'boolean':
+    //                     return new BooleanType(false, parent);
+    //                 case 'number':
+    //                     return new NumberType(false, parent);
+    //                 case 'string':
+    //                     return new StringType(false, parent);
+    //                 case 'Error':
+    //                     return new ErrorType(false, parent);
+    //                 default:
+    //                     return new DeclaredType(type, false, parent, factory);
+    //             }
+    //     }
+    //     return new AnyType(false, parent);
+    // }
+
+    // static returnedFrom(signature: ts.Signature, optional: boolean, parent: Declaration, context: Context) {
+    //     return Type.create(context.checker.getReturnTypeOfSignature(signature), optional, parent, context);        
+    // }
         
-    private static from(type: ts.TypeNode, optional: boolean, parent: Declaration, context: Context): Type {
-        try {
-            switch(type.kind) {
-                case ts.SyntaxKind.VoidKeyword:
-                    return new VoidType(parent);
-                case ts.SyntaxKind.AnyKeyword:
-                    return new AnyType(optional, parent);
-                case ts.SyntaxKind.BooleanKeyword:
-                    return new BooleanType(optional, parent);
-                case ts.SyntaxKind.NumberKeyword:
-                    return new NumberType(optional, parent);
-                case ts.SyntaxKind.StringKeyword:
-                    return new StringType(optional, parent);
-                case ts.SyntaxKind.ArrayType:
-                    return new ArrayType([(type as ts.ArrayTypeNode).elementType], optional, parent, factory);
-                case ts.SyntaxKind.FunctionType:
-                    return new FunctionType(type as ts.FunctionTypeNode, optional, parent, factory);
-                case ts.SyntaxKind.TypeReference:   
-                    return Type.fromReference(type as ts.TypeReferenceNode, optional, parent, factory);
-                case ts.SyntaxKind.UnionType:
-                    return Type.fromUnion(type as ts.UnionTypeNode, parent, factory);
-                default:
-                    throw `Unsupported type ${ts.SyntaxKind[type.kind]}`;                
-            }
-        } catch(error) {
-            if(typeof error !== 'string') throw error;
-            log.warn(`${error}, erasing to Any`, type);
-            log.info(`This type is not supported by crossrails`, type)
-            return new AnyType(optional, parent);
-        }
-    }
+    // static of(symbol: ts.Symbol, optional: boolean, parent: Declaration, context: Context): Type {
+    //     const type = context.checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration!);
+    //     if(!type) {
+    //         log.warn(`Type information missing for ${ts.SyntaxKind[symbol.valueDeclaration!.kind]}, resorting to Any`, symbol.valueDeclaration!);
+    //         log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, symbol.valueDeclaration!)
+    //     } else try {
+    //         return Type.create(type, optional, parent, context);
+    //     } catch(error) {
+    //         if(typeof error !== 'string') throw error;
+    //         log.warn(`${error}, erasing to Any`, symbol.valueDeclaration);
+    //         log.info(`This type is not supported by crossrails`, symbol.valueDeclaration)
+    //     }
+    //     return new AnyType(false, parent);
+    // }
+
+    // protected static create(type: ts.Type, optional: boolean, parent: Declaration, context: Context): Type {
+    //     let flags = `Flags of type ${context.checker.typeToString(type)} are`
+    //     for(let i=1; i < (1<<30); i = i << 1) {
+    //         if(type.flags & i) flags = `${flags} ${ts.TypeFlags[i]}`
+    //     }
+    //     console.log(flags);
+    //     switch(type.flags) {
+    //         case ts.TypeFlags.Void:
+    //             return new VoidType(parent);
+    //         case ts.TypeFlags.Any:
+    //             return new AnyType(optional, parent);
+    //         case ts.TypeFlags.Boolean:
+    //             return new BooleanType(optional, parent);
+    //         case ts.TypeFlags.Number:
+    //             return new NumberType(optional, parent);
+    //         case ts.TypeFlags.String:
+    //             return new StringType(optional, parent);
+    //         case ts.TypeFlags.Narrowable:
+    //             return new FunctionType(context.checker.getSignaturesOfType(type, ts.SignatureKind.Call)[0], optional, parent, context);
+    //         case ts.TypeFlags.Reference:
+    //             return Type.fromReference(type as ts.TypeReference, optional, parent, context);
+    //         case ts.TypeFlags.Union:
+    //             return Type.fromUnion(type as ts.UnionType, parent, context);
+    //         default:
+    //             throw `Unsupported type ${ts.TypeFlags[type.flags]}`;                
+    //     }
+    // }
     
-    static fromReference(reference: ts.TypeReferenceNode, optional: boolean, parent: Declaration, context: Context) {
-        let identifier = reference.typeName as ts.Identifier
-        switch(identifier.text) {
-            case 'Object': 
-                return new AnyType(optional, parent); 
-            case 'Date': 
-                return new DateType(optional, parent); 
-            case 'Error':
-                return new ErrorType(optional, parent);
-            case 'Array':
-            case 'ReadonlyArray':
-                return new ArrayType(reference.typeArguments, optional, parent, factory);
-            default:
-                return new DeclaredType(reference, optional, parent, factory);
-        }
-    }
+    // static fromReference(reference: ts.TypeReference, optional: boolean, parent: Declaration, context: Context) {
+    //     switch(reference.symbol!.name) {
+    //         case 'Object':
+    //             return new AnyType(optional, parent);
+    //         case 'Date':
+    //             return new DateType(optional, parent);
+    //         case 'Error':
+    //             return new ErrorType(optional, parent);
+    //         case 'Array':
+    //         case 'ReadonlyArray':
+    //             return new ArrayType(reference.typeArguments, optional, parent, factory);
+    //         default:
+    //             return new DeclaredType(reference, optional, parent, factory);
+    //     }
+    // }
         
-    static fromUnion(union: ts.UnionTypeNode, parent: Declaration, context: Context) {
-        if(union.types.length == 2) {
-            if(union.types[0].kind == ts.SyntaxKind.NullKeyword || union.types[0].kind == ts.SyntaxKind.UndefinedKeyword) {
-                return Type.from(union.types[1], true, parent, factory);
-            } else if(union.types[1].kind == ts.SyntaxKind.NullKeyword || union.types[1].kind == ts.SyntaxKind.UndefinedKeyword) {
-                return Type.from(union.types[0], true, parent, factory);                        
-            }
-        }
-        throw `Unsupported type union, only unions between null or undefined and a single type supported`
-    }  
+    // static fromUnion(union: ts.UnionType, parent: Declaration, context: Context) {
+    //     if(union.types.length == 2) {
+    //         if(union.types[0].flags == ts.TypeFlags.Null || union.types[0].flags ==  ts.TypeFlags.Undefined) {
+    //             return Type.create(union.types[1], true, parent, context);
+    //         } else if(union.types[1].flags == ts.TypeFlags.Null || union.types[1].flags == ts.TypeFlags.Undefined) {
+    //             return Type.create(union.types[0], true, parent, context);                        
+    //         }
+    //     }
+    //     throw `Unsupported type union, only unions between null or undefined and a single type supported`
+    // }  
 }  
 
 export class FunctionType extends Type {
@@ -301,18 +323,36 @@ export class FunctionType extends Type {
     
     constructor(flags: Flags, signature: FunctionSignature) {
         super(flags);
-        this.signature = signature
+        this.signature = adoptSignature(signature, this);
+
+// =======
+//     constructor(signature: ts.Signature, optional: boolean, parent: Declaration, context: Context) {
+//         super(optional, parent);
+//         // context.queue(() => {
+//         //     //todo support @callback tags
+//         //     this._signature = new FunctionSignature(signature, new Comment(signature.getDocumentationComment()), parent, context);
+//         // });
+// >>>>>>> Stashed changes
     }  
 }       
 
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>
+
     
     constructor(flags: Flags, typeArguments: ReadonlyArray<Type>) {
         super(flags);
-        this.typeArguments = typeArguments;      
+// =======
+//     constructor(typeArgs: ts.Type[] | undefined, optional: boolean, parent: Declaration, context: Context) {
+//         super(optional, parent);
+//         let typeArguments: Type[] = [];
+//         if(typeArgs) for (let typeArg of typeArgs) {
+//             typeArguments.push(Type.create(typeArg, false, parent, context))
+//         }
+// >>>>>>> Stashed changes
+        this.typeArguments = adopt(typeArguments, this);      
     }  
-}       
+}
 
 export class DeclaredType extends GenericType {
     readonly name: string
@@ -320,6 +360,35 @@ export class DeclaredType extends GenericType {
     constructor(flags: Flags, typeArguments: ReadonlyArray<Type>, name: string) {
         super(flags, typeArguments);
         this.name = name;
+// =======
+//     private _declaration?: TypeDeclaration
+//     readonly name: string|undefined
+
+//     constructor(type: ts.TypeReference | Comment.Tag.Type, optional: boolean, parent: Declaration, context: Context) {
+//         if(DeclaredType.isTypeReference(type)) {
+//             super(type.typeArguments, optional, parent, context);
+//             this.name = context.checker.typeToString(type);
+//         } else {
+//             super([], optional, parent, context);
+//             this.name = type.name;
+//         }    
+//         context.queue(() => {
+//             // this._declaration = context.typeDeclarations.get(this.name);
+//             // if(!this._declaration) {
+//             //     let msg = `Cannot find type ${this.name.elements.join('.')}`;
+//             //     if(DeclaredType.isTypeReferenceNode(type)) {
+//             //         log.error(msg, type);
+//             //     } else {
+//             //         log.error(msg, type.node, type.lineNumber);
+//             //     }
+//             //     log.info(`Resolve this error by adding the source for ${this.name.elements.join('.')} to the input file otherwise output will not compile standalone`)
+//             // }
+//         })
+//     }     
+
+//     private static isTypeReference(type: ts.TypeReference|Comment.Tag.Type): type is ts.TypeReference {
+//         return (type as ts.TypeReference).flags !== undefined;
+// >>>>>>> Stashed changes
     }
 
     get isAbstract(): boolean {
