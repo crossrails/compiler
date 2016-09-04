@@ -6,7 +6,7 @@ import {log} from "./log"
 import {Module} from "./ast"
 import {Parser} from "./typescript/parser"
 import {readFileSync, accessSync, R_OK} from 'fs';
-import {Compiler, CompilerOptions} from "./compiler"
+import {Emitter, EmitterOptions} from "./emitter"
 
 import yargs = require('yargs');
 
@@ -106,7 +106,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
-        .parse<CompilerOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
+        .parse<EmitterOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
 
     ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
         options[o] = options[o] == 'true' ? true : options[o] == 'false' ? false : options[o]
@@ -114,7 +114,7 @@ function main(...args: string[]): number {
     
     log.setLevel(options.logLevel);
 
-    const compiler = new Compiler(options, [
+    const emitter = new Emitter(options, [
         [`swift`,   [`javascriptcore`]], 
         ['java',    [`nashorn`, 'j2v8']],
         [`c#`,      [`chakracore`]], 
@@ -141,7 +141,7 @@ function main(...args: string[]): number {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
         // if(log.errorCount === 0) {       
-            compiler.compile(filename, parser.parse(sourceMap.sourceRoot)); 
+            emitter.emit(filename, parser.parse(sourceMap.sourceRoot)); 
         // }       
     }
     

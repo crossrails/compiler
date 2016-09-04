@@ -1,14 +1,14 @@
 import * as path from 'path';
 import {log} from "../log"
 import {decorate} from '../decorator';
-import {CompilerOptions} from "../compiler" 
+import {EmitterOptions} from "../compiler" 
 import {
     Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration
 } from "../ast"
 
-export interface JavaOptions extends CompilerOptions {
-    nashorn?: CompilerOptions 
-    android?: CompilerOptions 
+export interface JavaOptions extends EmitterOptions {
+    nashorn?: EmitterOptions 
+    android?: EmitterOptions 
     basePackage: string
 }
 
