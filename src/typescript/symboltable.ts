@@ -38,22 +38,26 @@ export class SymbolTable implements NodeVisitor<void> {
         return node.name ? this.checker.symbolToString(this.checker.getSymbolAtLocation(node.name)) : '';
     }
 
-    getType(node: ts.Node & {name?: ts.DeclarationName, type?: ts.TypeNode}, defaultType?: ((flags: ast.Flags) => ast.Type)): ast.Type {
-        return this.createType(node, this.checker.getTypeAtLocation(node), ast.Flags.None, defaultType);
+    getType(node: ts.Declaration & {type?: ts.TypeNode}, defaultType?: ((flags: ast.Flags) => ast.Type)): ast.Type {
+        return this.createType(node, this.checker.getTypeAtLocation(node), node.type, ast.Flags.None, defaultType);
     }
 
     getSignature(node: ts.SignatureDeclaration): ast.FunctionSignature {
         return this.createSignature(node, this.checker.getSignatureFromDeclaration(node as ts.SignatureDeclaration));
     }
 
-    private createSignature(node: ts.Node & {name?: ts.DeclarationName, type?: ts.TypeNode}, signature: ts.Signature) {
-        const parameters = signature.parameters.map(p => new ast.ParameterDeclaration(p.name, ast.Flags.None, this.createType(node, this.checker.getTypeOfSymbolAtLocation(p, p.valueDeclaration!))));
-        const returnType = this.createType(node, signature.getReturnType(), ast.Flags.None, (flags) => new ast.VoidType(flags));
+    private createSignature(node: ts.Declaration & {type?: ts.TypeNode}, signature: ts.Signature) {
+        const parameters = signature.parameters.map(parameter => {
+            const declaration = parameter.valueDeclaration as ts.ParameterDeclaration;
+            const type = this.createType(node, this.checker.getTypeOfSymbolAtLocation(parameter, declaration), declaration.type)
+            return new ast.ParameterDeclaration(parameter.name, declaration.questionToken ? ast.Flags.Optional : ast.Flags.None, type);
+        });
+        const returnType = this.createType(node, signature.getReturnType(), signature.declaration.type, ast.Flags.None, (flags) => new ast.VoidType(flags));
         const thrownTypes = new Comment(node).tagsNamed('throws').map(tag => tag.type ? this.createReferenceType(node, tag.type.name!) : new ast.AnyType());
         return new ast.FunctionSignature(parameters, returnType, thrownTypes);        
     }
 
-    private createType(node: ts.Node & {name?: ts.DeclarationName, type?: ts.TypeNode}, type: ts.Type, flags: ast.Flags = ast.Flags.None, defaultType: (flags: ast.Flags) => ast.Type = (flags) => new ast.AnyType(flags)): ast.Type {
+    private createType(node: ts.Declaration & {type?: ts.TypeNode}, type: ts.Type, typeNode: ts.TypeNode | undefined, flags: ast.Flags = ast.Flags.None, defaultType: (flags: ast.Flags) => ast.Type = (flags) => new ast.AnyType(flags)): ast.Type {
         const mask = function* () { for(let i=1; i < (1<<30); i = i << 1) if(type.flags & i) yield i; }
         switch(type.flags) {
             case ts.TypeFlags.Never:
@@ -69,16 +73,18 @@ export class SymbolTable implements NodeVisitor<void> {
             case ts.TypeFlags.Anonymous:
                 return new ast.FunctionType(flags, this.createSignature(node, type.getCallSignatures()[0]));
             case ts.TypeFlags.Any:
-                return new ast.AnyType(node.type && node.type.kind == ts.SyntaxKind.UnionType ? (flags | ast.Flags.Optional) as ast.Flags : flags);
+                return new ast.AnyType(typeNode && typeNode.kind == ts.SyntaxKind.UnionType ? ast.Flags.Optional : ast.Flags.None);
             case ts.TypeFlags.Interface:
                 flags |= ast.Flags.Abstract;
                 //fallthrough
             case ts.TypeFlags.Reference:
             case ts.TypeFlags.Class | ts.TypeFlags.Reference:
-                return this.createReferenceType(node, this.checker.getFullyQualifiedName(type.getSymbol()), flags, (type as ts.TypeReference).typeArguments);
+                return this.createReferenceType(node, this.checker.getFullyQualifiedName(type.getSymbol()), flags, (type as ts.TypeReference).typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
             case ts.TypeFlags.Union: 
                 const nonNullableType = this.checker.getNonNullableType(type);
-                if(nonNullableType != type) return this.createType(node, nonNullableType, ast.Flags.Optional);
+                if(nonNullableType != type) { 
+                    return this.createType(node, nonNullableType, typeNode, typeNode && typeNode.kind == ts.SyntaxKind.UnionType ? ast.Flags.Optional : ast.Flags.None);
+                }
                 //fallthrough
            default:
                 log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
@@ -89,7 +95,7 @@ export class SymbolTable implements NodeVisitor<void> {
         return defaultType(flags);
     }
 
-    private createReferenceType(node: ts.Node & {name?: ts.DeclarationName, type?: ts.TypeNode}, name: string, flags: ast.Flags = ast.Flags.None, typeArguments: ts.Type[] = []) {
+    private createReferenceType(node: ts.Declaration & {type?: ts.TypeNode}, name: string, flags: ast.Flags = ast.Flags.None, typeArguments: ts.Type[] = [], typeArgumentNodes: ts.TypeNode[] = []) {
         switch(name) {
             case 'boolean':
                 return new ast.BooleanType(flags);
@@ -105,14 +111,14 @@ export class SymbolTable implements NodeVisitor<void> {
                 return new ast.ErrorType(flags);
             case 'Array':
             case 'ReadonlyArray':
-                return new ast.ArrayType(flags, typeArguments.map(t => this.createType(node, t, ast.Flags.None)));
+                return new ast.ArrayType(flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
             default:
                 if(!this.knownTypes.has(name)) {
                     log.warn(`Could not find type ${name}`, node); 
                     log.info(`Resolve this error by adding the source for ${name} to the input file otherwise output will not compile standalone`) 
                 }
                 if(this.thrown.has(name)) flags |= ast.Flags.Thrown;
-                return new ast.DeclaredType(name, flags, typeArguments.map(t => this.createType(node, t, ast.Flags.None)));
+                return new ast.DeclaredType(name, flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
         }
     }
 
