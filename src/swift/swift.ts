@@ -74,7 +74,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: 
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.isOptional ? '? = nil' : ''}`;
+    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.isOptional ? `${this.type.isOptional ? '' : '?'} = nil` : ''}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
