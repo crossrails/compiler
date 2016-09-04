@@ -9,7 +9,8 @@
     "noFallthroughCasesInSwitch": false,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
-    "pretty": true
+    "pretty": true,
+    "forceConsistentCasingInFileNames": true
   }, 
   "exclude": [
     "node_modules",

@@ -1,3 +1,4 @@
+import * as path from 'path';
 import * as ts from "typescript";
 import * as ast from "../ast"
 import {readFileSync} from 'fs';
@@ -14,18 +15,21 @@ function getFlags(node: ts.Node): ast.Flags {
     return (isAbstract ? ast.Flags.Abstract : ast.Flags.None) | (isProtected ? ast.Flags.Protected : ast.Flags.None) | (isStatic ? ast.Flags.Static : ast.Flags.None);
 }
 
-export class Parser implements NodeVisitor<ast.Declaration>{
+export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
     private readonly program: ts.Program;
     private readonly symbols: SymbolTable;
+    private readonly sourceRoot: string;
     
-    constructor(program: ts.Program, implicitExport: boolean) {
-        this.program = program;
-        this.symbols = new SymbolTable(program, implicitExport);
+    constructor(sourceMap: {sourceRoot: string, sources: string[]}, implicitExport: boolean, charset: string) {
+        this.sourceRoot = sourceMap.sourceRoot;
+        this.program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset, skipDefaultLibCheck: true});
+        this.symbols = new SymbolTable(this.program, implicitExport);
     }
 
-    parse(sourceRoot: string): ast.Module {
-        return new ast.Module(sourceRoot, visitNodes(this.program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true) as ast.SourceFile[]);
+    parse(): ast.Module {
+        log.logDiagnostics(ts.getPreEmitDiagnostics(this.program));
+        return new ast.Module(this.sourceRoot, visitNodes(this.program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true) as ast.SourceFile[]);
     }
 
     shouldVisitNode(node: ts.Declaration): boolean {

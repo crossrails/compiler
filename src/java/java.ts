@@ -1,7 +1,7 @@
 import * as path from 'path';
 import {log} from "../log"
 import {decorate} from '../decorator';
-import {EmitterOptions} from "../compiler" 
+import {EmitterOptions} from "../emitter" 
 import {
     Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration
 } from "../ast"

@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 
 import * as path from 'path';
-import * as ts from "typescript";
 import {log} from "./log"
 import {Module} from "./ast"
-import {Parser} from "./typescript/parser"
+import {TypeScriptParser} from "./typescript/parser"
 import {readFileSync, accessSync, R_OK} from 'fs';
 import {Emitter, EmitterOptions} from "./emitter"
 
 import yargs = require('yargs');
+
+interface ParserFactory {
+    new(sourceMap: {sourceRoot: string, sources: string[]}, implicitExport: boolean, charset: string): {parse(): Module};
+}
 
 function main(...args: string[]): number {
 
@@ -134,14 +137,13 @@ function main(...args: string[]): number {
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
         const sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
-        const program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: options.charset, skipDefaultLibCheck: true});
-        log.logDiagnostics(ts.getPreEmitDiagnostics(program));
-        const parser = new Parser(program, options.implicitExport);
+        const factory: ParserFactory = TypeScriptParser;
+        const parser = new factory(sourceMap, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
         // if(log.errorCount === 0) {       
-            emitter.emit(filename, parser.parse(sourceMap.sourceRoot)); 
+            emitter.emit(filename, parser.parse()); 
         // }       
     }
     
