@@ -24,8 +24,8 @@ export abstract class Declaration {
     readonly comment: string
     readonly parent: Declaration;
 
-    constructor(name: string, flags: Flags = Flags.None) {
-        this.name = name;
+    constructor(name: string | undefined, flags: Flags = Flags.None) {
+        if(name) this.name = name;
         this.flags = flags;
     }
 
@@ -77,7 +77,7 @@ export class FunctionDeclaration extends Declaration {
     readonly signature: FunctionSignature
     readonly typeParameters: ReadonlyArray<Type>
 
-    constructor(name: string, flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
+    constructor(name: string | undefined, flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
         super(name, flags);
         this.signature = adoptSignature(signature, this);
         this.typeParameters = adopt(typeParameters, this);
@@ -86,7 +86,7 @@ export class FunctionDeclaration extends Declaration {
 
 export class ConstructorDeclaration extends FunctionDeclaration {
     constructor(flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
-        super('', flags, signature, typeParameters);
+        super(undefined, flags, signature, typeParameters);
     }
 
     get name(): string {
@@ -199,12 +199,12 @@ export class Module {
         }
     }   
 
-    get declarations(): ReadonlyArray<Declaration> {
-        return this.files.reduce<Declaration[]>((reduced, file) => [...reduced, ...file.declarations], []) 
-    }
-
-    get identifiers(): ReadonlyArray<Declaration> {
-        return [];//this.declarations.map(declaration => declaration.name);
+    *allDeclarations(): IterableIterator<Declaration> {
+        function *traverse(child: Declaration & { declarations?: ReadonlyArray<Declaration>}): IterableIterator<Declaration> {
+            yield child;
+            if(child.declarations) for(let declaration of child.declarations) yield *traverse(declaration);
+        }
+        for(let file of this.files) yield *traverse(file);
     }
 }
 
@@ -223,99 +223,6 @@ export abstract class Type {
     get declaration(): Declaration {
         return this.parent.declaration;
     }
-
-    // private static fromComment(type: Comment.Tag.Type, parent: Declaration, context: Context): Type {
-    //     switch(type.type) {
-    //         case 'NameExpression':
-    //             switch(type.name) {
-    //                 case 'boolean':
-    //                     return new BooleanType(false, parent);
-    //                 case 'number':
-    //                     return new NumberType(false, parent);
-    //                 case 'string':
-    //                     return new StringType(false, parent);
-    //                 case 'Error':
-    //                     return new ErrorType(false, parent);
-    //                 default:
-    //                     return new DeclaredType(type, false, parent, factory);
-    //             }
-    //     }
-    //     return new AnyType(false, parent);
-    // }
-
-    // static returnedFrom(signature: ts.Signature, optional: boolean, parent: Declaration, context: Context) {
-    //     return Type.create(context.checker.getReturnTypeOfSignature(signature), optional, parent, context);        
-    // }
-        
-    // static of(symbol: ts.Symbol, optional: boolean, parent: Declaration, context: Context): Type {
-    //     const type = context.checker.getTypeOfSymbolAtLocation(symbol, symbol.valueDeclaration!);
-    //     if(!type) {
-    //         log.warn(`Type information missing for ${ts.SyntaxKind[symbol.valueDeclaration!.kind]}, resorting to Any`, symbol.valueDeclaration!);
-    //         log.info(`Resolve this warning by adding a typescript type annotation or a @returns jsdoc tag`, symbol.valueDeclaration!)
-    //     } else try {
-    //         return Type.create(type, optional, parent, context);
-    //     } catch(error) {
-    //         if(typeof error !== 'string') throw error;
-    //         log.warn(`${error}, erasing to Any`, symbol.valueDeclaration);
-    //         log.info(`This type is not supported by crossrails`, symbol.valueDeclaration)
-    //     }
-    //     return new AnyType(false, parent);
-    // }
-
-    // protected static create(type: ts.Type, optional: boolean, parent: Declaration, context: Context): Type {
-    //     let flags = `Flags of type ${context.checker.typeToString(type)} are`
-    //     for(let i=1; i < (1<<30); i = i << 1) {
-    //         if(type.flags & i) flags = `${flags} ${ts.TypeFlags[i]}`
-    //     }
-    //     console.log(flags);
-    //     switch(type.flags) {
-    //         case ts.TypeFlags.Void:
-    //             return new VoidType(parent);
-    //         case ts.TypeFlags.Any:
-    //             return new AnyType(optional, parent);
-    //         case ts.TypeFlags.Boolean:
-    //             return new BooleanType(optional, parent);
-    //         case ts.TypeFlags.Number:
-    //             return new NumberType(optional, parent);
-    //         case ts.TypeFlags.String:
-    //             return new StringType(optional, parent);
-    //         case ts.TypeFlags.Narrowable:
-    //             return new FunctionType(context.checker.getSignaturesOfType(type, ts.SignatureKind.Call)[0], optional, parent, context);
-    //         case ts.TypeFlags.Reference:
-    //             return Type.fromReference(type as ts.TypeReference, optional, parent, context);
-    //         case ts.TypeFlags.Union:
-    //             return Type.fromUnion(type as ts.UnionType, parent, context);
-    //         default:
-    //             throw `Unsupported type ${ts.TypeFlags[type.flags]}`;                
-    //     }
-    // }
-    
-    // static fromReference(reference: ts.TypeReference, optional: boolean, parent: Declaration, context: Context) {
-    //     switch(reference.symbol!.name) {
-    //         case 'Object':
-    //             return new AnyType(optional, parent);
-    //         case 'Date':
-    //             return new DateType(optional, parent);
-    //         case 'Error':
-    //             return new ErrorType(optional, parent);
-    //         case 'Array':
-    //         case 'ReadonlyArray':
-    //             return new ArrayType(reference.typeArguments, optional, parent, factory);
-    //         default:
-    //             return new DeclaredType(reference, optional, parent, factory);
-    //     }
-    // }
-        
-    // static fromUnion(union: ts.UnionType, parent: Declaration, context: Context) {
-    //     if(union.types.length == 2) {
-    //         if(union.types[0].flags == ts.TypeFlags.Null || union.types[0].flags ==  ts.TypeFlags.Undefined) {
-    //             return Type.create(union.types[1], true, parent, context);
-    //         } else if(union.types[1].flags == ts.TypeFlags.Null || union.types[1].flags == ts.TypeFlags.Undefined) {
-    //             return Type.create(union.types[0], true, parent, context);                        
-    //         }
-    //     }
-    //     throw `Unsupported type union, only unions between null or undefined and a single type supported`
-    // }  
 }  
 
 export class FunctionType extends Type {
@@ -324,15 +231,6 @@ export class FunctionType extends Type {
     constructor(flags: Flags, signature: FunctionSignature) {
         super(flags);
         this.signature = adoptSignature(signature, this);
-
-// =======
-//     constructor(signature: ts.Signature, optional: boolean, parent: Declaration, context: Context) {
-//         super(optional, parent);
-//         // context.queue(() => {
-//         //     //todo support @callback tags
-//         //     this._signature = new FunctionSignature(signature, new Comment(signature.getDocumentationComment()), parent, context);
-//         // });
-// >>>>>>> Stashed changes
     }  
 }       
 
@@ -342,14 +240,6 @@ export abstract class GenericType extends Type {
     
     constructor(flags: Flags, typeArguments: ReadonlyArray<Type>) {
         super(flags);
-// =======
-//     constructor(typeArgs: ts.Type[] | undefined, optional: boolean, parent: Declaration, context: Context) {
-//         super(optional, parent);
-//         let typeArguments: Type[] = [];
-//         if(typeArgs) for (let typeArg of typeArgs) {
-//             typeArguments.push(Type.create(typeArg, false, parent, context))
-//         }
-// >>>>>>> Stashed changes
         this.typeArguments = adopt(typeArguments, this);      
     }  
 }
@@ -357,44 +247,18 @@ export abstract class GenericType extends Type {
 export class DeclaredType extends GenericType {
     readonly name: string
 
-    constructor(flags: Flags, typeArguments: ReadonlyArray<Type>, name: string) {
+    constructor(name: string, flags: Flags, typeArguments: ReadonlyArray<Type>) {
         super(flags, typeArguments);
         this.name = name;
-// =======
-//     private _declaration?: TypeDeclaration
-//     readonly name: string|undefined
-
-//     constructor(type: ts.TypeReference | Comment.Tag.Type, optional: boolean, parent: Declaration, context: Context) {
-//         if(DeclaredType.isTypeReference(type)) {
-//             super(type.typeArguments, optional, parent, context);
-//             this.name = context.checker.typeToString(type);
-//         } else {
-//             super([], optional, parent, context);
-//             this.name = type.name;
-//         }    
-//         context.queue(() => {
-//             // this._declaration = context.typeDeclarations.get(this.name);
-//             // if(!this._declaration) {
-//             //     let msg = `Cannot find type ${this.name.elements.join('.')}`;
-//             //     if(DeclaredType.isTypeReferenceNode(type)) {
-//             //         log.error(msg, type);
-//             //     } else {
-//             //         log.error(msg, type.node, type.lineNumber);
-//             //     }
-//             //     log.info(`Resolve this error by adding the source for ${this.name.elements.join('.')} to the input file otherwise output will not compile standalone`)
-//             // }
-//         })
-//     }     
-
-//     private static isTypeReference(type: ts.TypeReference|Comment.Tag.Type): type is ts.TypeReference {
-//         return (type as ts.TypeReference).flags !== undefined;
-// >>>>>>> Stashed changes
     }
 
     get isAbstract(): boolean {
         return (this.flags & Flags.Abstract) != 0;
     }
 
+    get isThrown(): boolean {
+        return (this.flags & Flags.Thrown) != 0;
+    }
 }
 
 export class VoidType extends Type {

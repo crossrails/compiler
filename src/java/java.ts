@@ -30,9 +30,10 @@ declare module "../ast" {
 decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootOutDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
     let outDir = path.join(rootOutDir, options.basePackage.replace('.', path.sep));
     let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
-    let globals = this.declarations.filter(d => !(d instanceof NamespaceDeclaration || d instanceof TypeDeclaration));
+    const declarations = [...this.allDeclarations()].filter(d => d.parent instanceof SourceFile);
+    let globals = declarations.filter(d => !(d instanceof NamespaceDeclaration || d instanceof TypeDeclaration));
     let writtenModuleFile = false;  
-    for(let declaration of this.declarations.filter(d => d instanceof TypeDeclaration || d instanceof NamespaceDeclaration) as Array<TypeDeclaration|NamespaceDeclaration>) {               
+    for(let declaration of declarations.filter(d => d instanceof TypeDeclaration || d instanceof NamespaceDeclaration) as Array<TypeDeclaration|NamespaceDeclaration>) {               
         let filename = path.join(outDir, path.relative(this.sourceRoot, declaration.sourceFile.path.dir), `${declaration.declarationName()}.java`);
         let file: SourceFile = Object.create(SourceFile.prototype, {
             name: { value: declaration.name },
@@ -70,15 +71,20 @@ decorate(ClassDeclaration, ({prototype}) => prototype.declarationName = function
     return this.isThrown && this.name.endsWith('Error') ? `${this.name.slice(0, -5)}Exception` : this.name;
 })
 
+decorate(DeclaredType, ({prototype}) => prototype.typeName = function (this: DeclaredType): string {
+    return this.isThrown && this.name.endsWith('Error') ? `${this.name.slice(0, -5)}Exception` : this.name;
+})
+
+
 decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
     return this.declarations.reduce<Declaration[]>((members, member, memberIndex) => {
-        if(member instanceof FunctionDeclaration && !(member instanceof ConstructorDeclaration)) {
+        if(member instanceof FunctionDeclaration) {
             let parameters = member.signature.parameters;
             let startOfOptionals = parameters.reduceRight((start, p, i) => p.isOptional ? i : start, parameters.length);
             for(let index = startOfOptionals; index < parameters.length; index++) {
                 //skip adding overload if it already exists
                 if(([...members, ...this.declarations.slice(memberIndex)] as FunctionDeclaration[]).some(
-                    m => m.constructor.name === 'FunctionDeclaration' && m.name === member.name && m.signature.parameters.length==index && m.signature.parameters.every(
+                    m => m instanceof FunctionDeclaration && m.name === member.name && m.signature.parameters.length==index && m.signature.parameters.every(
                         (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
                     )
                 )) continue;

@@ -34,7 +34,7 @@ decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceF
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {
     return `${!this.isModuleFile ? '' : `
 extension JSProperty {
-    ${this.module.identifiers.map((d) => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
+    ${[...this.module.allDeclarations()].filter(d => d.parent && !(d instanceof ConstructorDeclaration)).map(d => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
 }`.substr(1)}`;
 })
 
