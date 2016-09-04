@@ -30,8 +30,15 @@ public class TableLine {
                     this.option = line.substring(0, index + 1);
                     String second = line.substring(index + 1, line.length());
                     this.description = second;
-                    //    System.out.println("Options: "+this.option);
-                } else if (ch == '[') {
+//                        System.out.println("Options: "+this.option);
+//                    System.out.println("Description?: "+this.description);
+
+                    if (line.contains("[")) {
+                        ch = '[';
+                        index = line.indexOf('[')-1;
+                    }
+                }
+                if (ch == '[') {
                     String first = line.substring(0, index + 1);
                     this.description = first.replaceAll(this.option, "");
                     //System.out.println("Description?: "+this.description);
@@ -51,12 +58,19 @@ public class TableLine {
 //                        System.out.println("Type?: "+this.type);
                         String secondBracket = second.substring(bracketIndex + 2, second.length());
                         secondBracket = secondBracket.replaceAll("\\[","").replaceAll("]","");
+                        secondBracket = secondBracket.replaceAll("default: ", "");
                         this.defaultType = secondBracket;
 //                        System.out.println("Default?: "+this.defaultType);
                         index += 2;
                     } else {
                         second = second.replaceAll("\\[","").replaceAll("]","");
-                        this.type = second;
+//                        System.out.println("Type?: "+this.type);
+                        if (this.type == null) {
+                            this.type = second;
+                        } else {
+                            this.description = this.description.replaceAll(" \\["+this.type+"\\] ", "");
+                            this.defaultType = second.replaceAll("default: ","").replaceAll(" ","");
+                        }
 //                        System.out.println("Type?: "+this.type);
                     }
                 }

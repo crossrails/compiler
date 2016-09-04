@@ -101,9 +101,9 @@ public class App {
                             }*/
                             String description = tableLine.description;
                             if (tableLine.defaultType != null) {
-                                description = description+" defaults to ["+tableLine.defaultType+"]";
+                                description = description+", defaults to "+tableLine.defaultType+"";
                             }
-                            line = "| "+tableLine.option+" | "+tableLine.type+" | "+description+" |";
+                            line = "| `"+tableLine.option+"` | `"+tableLine.type+"` | "+description+" |";
                             table.add(tableLine);
                         } else if (line.contains("options:")) {
                             line = "\n### " + line + App.createTableHeader();
@@ -146,6 +146,7 @@ public class App {
 
     static String removeExecutionJunk(String output) {
         output = output.replace("|Usage: ../src/main [file.js] [options]|\n","");
+        output = output.replace("|Usage: ../src/main [file.js|package.json|bower.json] [options]|\n","");
         output = output.replace("||\n","");
         return output;
     }
