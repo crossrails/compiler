@@ -76,23 +76,24 @@ decorate(DeclaredType, ({prototype}) => prototype.typeName = function (this: Dec
 })
 
 
-decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
+decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration): ReadonlyArray<Declaration> {
     return this.declarations.reduce<Declaration[]>((members, member, memberIndex) => {
         if(member instanceof FunctionDeclaration) {
             let parameters = member.signature.parameters;
             let startOfOptionals = parameters.reduceRight((start, p, i) => p.isOptional ? i : start, parameters.length);
             for(let index = startOfOptionals; index < parameters.length; index++) {
                 //skip adding overload if it already exists
-                if(([...members, ...this.declarations.slice(memberIndex)] as FunctionDeclaration[]).some(
-                    m => m instanceof FunctionDeclaration && m.name === member.name && m.signature.parameters.length==index && m.signature.parameters.every(
-                        (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
-                    )
+                if(([...members, ...this.declarations.slice(memberIndex + 1)]).some(
+                    (m: FunctionDeclaration) => (member instanceof ConstructorDeclaration ? m instanceof ConstructorDeclaration : (m instanceof FunctionDeclaration && m.name === member.name)) && 
+                        m.signature.parameters.length == index && m.signature.parameters.every(
+                            (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
+                        )
                 )) continue;
-                members.push(Object.create(FunctionDeclaration.prototype, {
-                    name: { value: member.name},
+                members.push(Object.create(Object.getPrototypeOf(member), {
+                    name: { value: member instanceof ConstructorDeclaration ? undefined : member.name},
+                    flags: { value: member.flags },
                     parent: { value: member.parent },
                     comment: { value: member.comment},
-                    flags: { value: member.flags },
                     typeParameters: { value: member.typeParameters },
                     signature: { value: Object.create(FunctionSignature.prototype, {
                         thrownTypes: { value: member.signature.thrownTypes},
