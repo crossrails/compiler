@@ -202,9 +202,9 @@ export class Module {
     *allDeclarations(): IterableIterator<Declaration> {
         function *traverse(child: Declaration & { declarations?: ReadonlyArray<Declaration>}): IterableIterator<Declaration> {
             yield child;
-            if(child.declarations) for(let declaration of child.declarations) yield *traverse(declaration);
+            if(child.declarations) for(const declaration of child.declarations) yield *traverse(declaration);
         }
-        for(let file of this.files) yield *traverse(file);
+        for(const file of this.files) yield *traverse(file);
     }
 }
 

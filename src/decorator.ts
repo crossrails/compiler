@@ -3,7 +3,7 @@ import * as assert from "assert"
 import {ParsedPath} from 'path';
 
 
-let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
+const decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
 
 export function decorate<T extends Function>(target: T, decorator: (type: T) => void) {
     let decoration = decorations.get(target.prototype);
@@ -13,7 +13,7 @@ export function decorate<T extends Function>(target: T, decorator: (type: T) => 
             proxy: { 
                 prototype: new Proxy(target.prototype, {
                     set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
-                        let existing = Reflect.getOwnPropertyDescriptor(prototype, property);    
+                        const existing = Reflect.getOwnPropertyDescriptor(prototype, property);    
                         decorations.get(prototype)!.changes.set(property, existing ? existing.value : undefined);
                         return Reflect.set(prototype, property, value, receiver);                    
                     }
@@ -26,7 +26,7 @@ export function decorate<T extends Function>(target: T, decorator: (type: T) => 
 }
 
 export function undecorate() {
-    for (let [prototype, decoration] of decorations) {
+    for (const [prototype, decoration] of decorations) {
         decoration.changes.forEach((value, property) => value ? Reflect.set(prototype, property, value) : Reflect.deleteProperty(prototype, property)); 
     }
     decorations.clear();    

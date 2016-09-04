@@ -8,7 +8,6 @@ export class Log {
     public level: Log.Level = Log.Level.WARNING
     
     public setLevel(level: string) {
-        let i = 0;
         for(let i = 0, l :string; l = Log.Level[i]; i++) {
             if(l == level.toUpperCase()) {
                 this.level = i;
@@ -51,7 +50,7 @@ export class Log {
     }
 
     public logDiagnostics(diagnostics: ts.Diagnostic[]) {
-        for(let diagnostic of diagnostics) {
+        for(const diagnostic of diagnostics) {
             const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
             const node = diagnostic.file ? {pos: diagnostic.start, getSourceFile: () => diagnostic.file} : undefined; 
             switch(diagnostic.category) {
@@ -71,9 +70,9 @@ export class Log {
     public log(level: Log.Level, message: any, node?: ts.Node, line: number = 0) {
         if(level >= this.level) {
             if(node) {
-                let file = node.getSourceFile();
-                let path = Path.relative('.', file.fileName);
-                let pos = file.getLineAndCharacterOfPosition(node.pos);
+                const file = node.getSourceFile();
+                const path = Path.relative('.', file.fileName);
+                const pos = file.getLineAndCharacterOfPosition(node.pos);
                 message = `${path}(${pos.line+line+1},${pos.character+1}): ${message}`;
             }
             message = `${Log.Level[level]}: ${message}`;
@@ -104,4 +103,4 @@ export namespace Log {
     }
 }
 
-export let log = new Log();
+export const log = new Log();

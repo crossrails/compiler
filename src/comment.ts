@@ -14,12 +14,12 @@ export class Comment {
     readonly description: string = '';
 
     constructor(node: ts.Node) {
-        let text = node.getFullText();
-        let comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
+        const text = node.getFullText();
+        const comment = (ts.getLeadingCommentRanges(text, 0) || []).pop();
         if(comment) {
-            let parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
+            const parsed = doctrine.parse(text.substring(comment.pos, comment.end), {unwrap : true, lineNumbers: true});
             this.description = parsed.description;
-            for(let tag of parsed.tags) {
+            for(const tag of parsed.tags) {
                 tag['node'] = node;
                 if(tag.type) {
                     tag.type['node'] = node;
@@ -30,7 +30,7 @@ export class Comment {
     }
 
     isTagged(title: string, value?: string): boolean {
-        let tags = this.tags.get(title);
+        const tags = this.tags.get(title);
         return tags != undefined && (!value || tags.some(tag => tag[title] == value));
     }
 

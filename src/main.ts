@@ -12,10 +12,10 @@ import yargs = require('yargs');
 
 function main(...args: string[]): number {
 
-    let options = yargs
+    const options = yargs
         .usage('Usage: $0 [file.js|package.json|bower.json] [options]')
         .check((argv: yargs.Argv, aliases: { [key: string]: string[] }) => {
-            let filename = argv._[0] && path.basename(argv._[0]);
+            const filename = argv._[0] && path.basename(argv._[0]);
             return !filename || filename.endsWith('.js') || filename == 'package.json' || filename == 'bower.json' ? true : 'File argument must be a javascript source file (.js) or package manifest file (bower.json|package.json)';
         })
         .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
@@ -114,7 +114,7 @@ function main(...args: string[]): number {
     
     log.setLevel(options.logLevel);
 
-    let compiler = new Compiler(options, [
+    const compiler = new Compiler(options, [
         [`swift`,   [`javascriptcore`]], 
         ['java',    [`nashorn`, 'j2v8']],
         [`c#`,      [`chakracore`]], 
@@ -133,8 +133,8 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        let sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
-        let program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: options.charset, skipDefaultLibCheck: true});
+        const sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
+        const program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: options.charset, skipDefaultLibCheck: true});
         log.logDiagnostics(ts.getPreEmitDiagnostics(program));
         const parser = new Parser(program, options.implicitExport);
         // console.log(JSON.stringify(module, (key, value) => {
@@ -150,9 +150,9 @@ function main(...args: string[]): number {
 
 function mapSources(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, charset: string) : {sourceRoot: string, sources: string[]} {
     if(sourceMapFile || !declarationFile) try {                
-        let sourceMap = sourceMapFile || `${src}.map`;
+        const sourceMap = sourceMapFile || `${src}.map`;
         log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
-        let map = JSON.parse(readFileSync(sourceMap, charset));
+        const map = JSON.parse(readFileSync(sourceMap, charset));
         map.sourceRoot = path.join(path.dirname(src), map.sourceRoot); 
         log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
         return map;
@@ -163,7 +163,7 @@ function mapSources(src: string, sourceMapFile: string|undefined, declarationFil
         log.info(`No sourcemap found`);
     }
     try {
-        let file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
+        const file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
         log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
         accessSync(file, R_OK);
         log.debug(`Declaration file (.d.ts) found`);
@@ -180,7 +180,7 @@ function mapSources(src: string, sourceMapFile: string|undefined, declarationFil
 function readPackageFile(filename: string, options: {typings?: string, charset: string}): string|undefined {
     try {
         log.debug(`Attempting to open package manifest file at ${path.relative('.', filename)}`);
-        let json = JSON.parse(readFileSync(filename, options.charset));
+        const json = JSON.parse(readFileSync(filename, options.charset));
         if(json.typings) {
             options.typings = path.join(path.dirname(filename), json.typings); 
         }
@@ -197,7 +197,7 @@ function readPackageFile(filename: string, options: {typings?: string, charset: 
 export = main;
 
 if(require.main === module) {
-    let [,, ...args] = process.argv;
+    const [,, ...args] = process.argv;
     process.exit(main(...args));
 } else {
     yargs.exitProcess(false);
