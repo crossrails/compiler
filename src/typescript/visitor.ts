@@ -12,6 +12,7 @@ export interface NodeVisitor<T> {
     visitNamespace?(node: ts.ModuleDeclaration): T | Symbol
     visitConstructor?(node: ts.ConstructorDeclaration): T | Symbol
     visitVariable?(node: VariableDeclaration): T | Symbol
+    visitVariableStatement?(node: ts.VariableStatement): T | Symbol
     visitFunction?(node: FunctionDeclaration): T | Symbol
     visitParameter?(node: ts.ParameterDeclaration): T | Symbol
     visitIdentifier?(node: ts.Identifier): T | Symbol
@@ -46,7 +47,8 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
             return visit(visitor.visitSourceFile, node as ts.SourceFile, node => visitChildren(node.statements)) || [];
 
         case ts.SyntaxKind.VariableStatement:
-            return visitChildren((node as ts.VariableStatement).declarationList.declarations) || [];
+            return visit(visitor.visitVariableStatement, node as ts.VariableStatement, node => 
+                visitChildren(node.declarationList.declarations)) || [];
 
         case ts.SyntaxKind.VariableDeclaration:
         case ts.SyntaxKind.PropertyDeclaration:

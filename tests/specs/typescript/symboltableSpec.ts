@@ -33,6 +33,113 @@ describe("SymbolTable", () => {
         log.resetCounters();
     });
 
+    it("does not export global non exported declarations when implicitExport is false", function(this: This) {
+        const [[variable], program] = mockVariables(`let declaration`);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        expect(symbols.isExported(variable)).toBe(false);
+    });
+
+    it("exports global non exported declarations when implicitExport is true", function(this: This) {
+        const [[variable], program] = mockVariables(`let declaration`);
+        const symbols = new SymbolTable(program, true);
+        expect(log.errorCount).toBe(0);
+        expect(symbols.isExported(variable)).toBe(true);
+    });
+
+    it("exports global declarations with export keyword even when implicitExport is false", function(this: This) {
+        const [[variable], program] = mockVariables(`export let declaration`);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        expect(symbols.isExported(variable)).toBe(true);
+    });
+
+    it("exports global declarations with export jsdoc tag even when implicitExport is false", function(this: This) {
+        const [[variable], program] = mockVariables(`/** @export */ let declaration`);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        expect(symbols.isExported(variable)).toBe(true);
+    });
+
+    it("does not export non exported declarations inside a namespace even when implicitExport is true", function(this: This) {
+        const program = mockProgram([['src.ts', `
+            namespace Foo {
+                var bar;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, true);
+        expect(log.errorCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
+        expect(symbols.isExported(foo)).toBe(true);
+        let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
+        expect(symbols.isExported(bar)).toBe(false);
+    });
+
+    it("exports declarations with export keyword inside a namespace", function(this: This) {
+        const program = mockProgram([['src.ts', `
+            export namespace Foo {
+                export var bar;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
+        expect(symbols.isExported(foo)).toBe(true);
+        let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
+        expect(symbols.isExported(bar)).toBe(true);
+    });
+
+    it("does not export declarations with export keyword inside an unexported namespace", function(this: This) {
+        const program = mockProgram([['src.ts', `
+            namespace Foo {
+                export var bar;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
+        expect(symbols.isExported(foo)).toBe(false);
+        let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
+        expect(symbols.isExported(bar)).toBe(false);
+    });
+
+    it("exports declarations without private keyword inside a class", function(this: This) {
+        const program = mockProgram([['src.ts', `
+            export class Foo {
+                bar;
+                protected protectedBar;
+                private privateBar;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
+        expect(symbols.isExported(foo)).toBe(true);
+        let bar = foo.members[0] as ts.PropertyDeclaration;
+        expect(symbols.getName(bar)).toBe('bar');
+        expect(symbols.isExported(bar)).toBe(true);
+        let protectedBar = foo.members[1] as ts.PropertyDeclaration;
+        expect(symbols.getName(protectedBar)).toBe('protectedBar');
+        expect(symbols.isExported(protectedBar)).toBe(true);
+        let privateBar = foo.members[2] as ts.PropertyDeclaration;
+        expect(symbols.getName(privateBar)).toBe('privateBar');
+        expect(symbols.isExported(privateBar)).toBe(false);
+    });
+
+    it("does not export declarations inside an unexported class", function(this: This) {
+        const program = mockProgram([['src.ts', `
+            class Foo {
+                bar;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
+        expect(symbols.isExported(foo)).toBe(false);
+        let bar = foo.members[0] as ts.PropertyDeclaration;
+        expect(symbols.isExported(bar)).toBe(false);
+    });
+
     it("erases to any on typescript intersection types", function(this: This) {
         const [[variable], program] = mockVariables(`let s: string & number`);
         let symbols = new SymbolTable(program, true);

@@ -8,7 +8,7 @@ import {SymbolTable} from './symboltable'
 import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisit} from "./visitor"
 
 function getFlags(node: ts.Node): ast.Flags {
-    const comment = new Comment(node);
+    const comment = Comment.fromNode(node);
     const isAbstract = (node.flags & ts.NodeFlags.Abstract) || comment.isTagged('abstract') || comment.isTagged('virtual') || [...ancestry(node)].some(n => n.kind == ts.SyntaxKind.InterfaceDeclaration); 
     const isProtected = (node.flags & ts.NodeFlags.Protected) || comment.isTagged('protected') || comment.isTagged('access', 'protected');
     const isStatic = (node.flags & ts.NodeFlags.Static) || comment.isTagged('static') || [...ancestry(node)].every(n => n.kind != ts.SyntaxKind.InterfaceDeclaration && n.kind != ts.SyntaxKind.ClassDeclaration);

@@ -53,7 +53,7 @@ export class SymbolTable implements NodeVisitor<void> {
             return new ast.ParameterDeclaration(parameter.name, declaration.questionToken ? ast.Flags.Optional : ast.Flags.None, type);
         });
         const returnType = this.createType(node, signature.getReturnType(), signature.declaration.type, ast.Flags.None, (flags) => new ast.VoidType(flags));
-        const thrownTypes = new Comment(node).tagsNamed('throws').map(tag => tag.type ? this.createReferenceType(node, tag.type.name!) : new ast.AnyType());
+        const thrownTypes = Comment.fromNode(node).tagsNamed('throws').map(tag => tag.type ? this.createReferenceType(node, tag.type.name!) : new ast.AnyType());
         return new ast.FunctionSignature(parameters, returnType, thrownTypes);        
     }
 
@@ -144,23 +144,47 @@ export class SymbolTable implements NodeVisitor<void> {
 
     visitSourceFile(node: ts.SourceFile) {
         this.exports.set(node, [node]);
+        // console.log(JSON.stringify(ts.createSourceFile(node.fileName, node.getFullText(), ts.ScriptTarget.ES6, false), (key, value) => { 
+        //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value; 
+        // }, 4)); 
     }
 
-    visitFunction(node: FunctionDeclaration) {
-        const comment = new Comment(node);
+    visitFunction(node: FunctionDeclaration): void | Symbol {
+        const result = this.visitOtherNode(node);
+        if(result) return result;
+        const comment = Comment.fromNode(node);
         comment.tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
     }
 
-    visitConstructor(node: ts.ConstructorDeclaration) {
+    visitConstructor(node: ts.ConstructorDeclaration): void | Symbol {
+        const result = this.visitOtherNode(node);
+        if(result) return result;
         this.exports.set(node, [node]);        
+    }
+
+    visitVariable(node: VariableDeclaration): void | Symbol {
+        if(node.kind != ts.SyntaxKind.VariableDeclaration) return this.visitOtherNode(node);        
+    }
+
+    visitOtherNode(node: ts.Node): void | Symbol {
+        switch(node.parent!.kind) {
+            case ts.SyntaxKind.SourceFile:
+                if(this.implicitExport || Comment.fromNode(node).isTagged('export')) return;
+                //fallthrough
+            case ts.SyntaxKind.ModuleBlock:
+                if(node.flags & ts.NodeFlags.Export) return;
+                break;
+            default:
+                if(node.flags & ts.NodeFlags.Private) break;
+                const comment = Comment.fromNode(node);
+                if(comment.isTagged('private') || comment.isTagged('access', 'private')) break;
+                return;
+        }
+        return BreakVisit;
     }
 
     visitIdentifier(node: ts.Identifier): void | Symbol {
         const symbol = this.checker.getSymbolAtLocation(node);
-        const comment = new Comment(node.parent!);
-        const isExported = this.implicitExport || symbol.flags ^ ts.SymbolFlags.Export || comment.isTagged('export');
-        const isPrivate = node.parent!.flags & ts.NodeFlags.Private || comment.isTagged('private') || comment.isTagged('access', 'private');
-        if(!isExported || isPrivate) return BreakVisit;
         const symbolName = this.checker.getFullyQualifiedName(symbol);
         if(this.symbols.has(symbolName)) return BreakVisit;        
         this.symbols.add(symbolName);
@@ -169,7 +193,7 @@ export class SymbolTable implements NodeVisitor<void> {
         this.exports.set(declaration, symbol.getDeclarations());
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
-        if(type.flags ^ ts.TypeFlags.Reference) return;
+        if((type.flags & ts.TypeFlags.Reference) == 0) return;
         const target = (type as ts.TypeReference).target;
         const typeName = this.checker.getFullyQualifiedName(target.getSymbol());
         if(this.symbols.has(typeName)) return; 
