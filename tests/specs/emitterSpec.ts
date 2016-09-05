@@ -17,67 +17,67 @@ describe("Emitter", () => {
     
     it("errors when no output languages specified", function(this: This) {
         let emitter = new Emitter({} as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBeGreaterThan(0);
-        expect(emitMethodOnTheEmitter).not.toHaveBeenCalled();
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBeGreaterThan(0);
+        expect(emitEngineMethodOnTheEmitter).not.toHaveBeenCalled();
     });
         
     it("defaults to first engine if none specified in options", function(this: This) {
         let options = {emit: true, 'language': {}};
         let emitter = new Emitter(options as any, [['language', ['engine1', 'engine2']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine1', '.', jasmine.anything());
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledTimes(1);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine1', '.', jasmine.anything());
     });
     
     it("emits to only to the engine specified in the options", function(this: This) {
         let options = {emit: true, 'language': {'engine2': {}}};
         let emitter = new Emitter(options as any, [['language', ['engine1', 'engine2']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledTimes(1);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine2', '.', jasmine.anything());
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledTimes(1);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine2', '.', jasmine.anything());
     });    
     
     it("passes emitter level options to the emitter", function(this: This) {
         let options = {emit: true, 'language': {}, 'complierOption': true};
         let emitter = new Emitter(options as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine', '.', jasmine.objectContaining({'complierOption': true}));
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine', '.', jasmine.objectContaining({'complierOption': true}));
     }); 
     
     it("passes language level options to the emitter", function(this: This) {
         let options = {emit: true, 'language': {'languageOption': true}};
         let emitter = new Emitter(options as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine', '.', jasmine.objectContaining({'languageOption': true}));
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine', '.', jasmine.objectContaining({'languageOption': true}));
     });
          
     it("passes engine level options to the emitter", function(this: This) {
         let options = {emit: true, 'language': {'engine': {'engineOption': true}}};
         let emitter = new Emitter(options as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine', '.', jasmine.objectContaining({'engineOption': true}));
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine', '.', jasmine.objectContaining({'engineOption': true}));
     });
         
     it("overwrites emitter level options with language level options", function(this: This) {
         let options = {emit: true, 'language': {'option': true}, 'option': false};
         let emitter = new Emitter(options as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine', '.', jasmine.objectContaining({'option': true}));
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine', '.', jasmine.objectContaining({'option': true}));
     });   
     
     it("overwrites language level options with engine level options", function(this: This) {
         let options = {emit: true, 'language': {'engine': {'option': true}, 'option': false}, 'option': false};
         let emitter = new Emitter(options as any, [['language', ['engine']]]);
-        let emitMethodOnTheEmitter = spyOn(emitter, 'emit');
-        expect(emitter.emit({} as Module)).toBe(0);
-        expect(emitMethodOnTheEmitter).toHaveBeenCalledWith({} as Module, 'language', 'engine', '.', jasmine.objectContaining({'option': true}));
+        let emitEngineMethodOnTheEmitter = spyOn(emitter, 'emitEngine');
+        expect(emitter.emit('main.js', {} as Module)).toBe(0);
+        expect(emitEngineMethodOnTheEmitter).toHaveBeenCalledWith(jasmine.anything(), 'language', 'engine', '.', jasmine.objectContaining({'option': true}));
     });   
 
     it("emits when emit is true", function(this: This) {
@@ -88,7 +88,7 @@ describe("Emitter", () => {
         let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
-        expect(emitter.emit({emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
+        expect(emitter.emit('main.js', {emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
         expect(emitWrapperMethodOnTheModule).toHaveBeenCalled()
         expect(mkdirp.sync).toHaveBeenCalled()
         expect(fs.writeFileSync).toHaveBeenCalled()
@@ -102,7 +102,7 @@ describe("Emitter", () => {
         let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
-        expect(emitter.emit({emit: emitMethodsOnTheModule, emitWrapper: emitMethodsOnTheModule} as any)).toBe(0);
+        expect(emitter.emit('main.js', {emit: emitMethodsOnTheModule, emitWrapper: emitMethodsOnTheModule} as any)).toBe(0);
         expect(mkdirp.sync).not.toHaveBeenCalled();
         expect(fs.writeFileSync).not.toHaveBeenCalled();
     });
@@ -113,7 +113,7 @@ describe("Emitter", () => {
             writeFile('name', 'content');
         })
         spyOn(fs, 'writeFileSync');
-        expect(emitter.emit({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(emitter.emit('main.js', {emit: emitMethodOnTheModule} as any)).toBe(0);
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
     });
 
@@ -123,7 +123,7 @@ describe("Emitter", () => {
         let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(fs, 'writeFileSync');
         spyOn(fs, 'readFileSync');
-        expect(emitter.emit({src: {dir:".", base:"src.js"}, emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
+        expect(emitter.emit('src.js', {emit: emitMethodOnTheModule, emitWrapper: emitWrapperMethodOnTheModule} as any)).toBe(0);
         expect(emitMethodOnTheModule).toHaveBeenCalledWith(`emit/path`, jasmine.anything(), jasmine.anything());
         expect(emitWrapperMethodOnTheModule).toHaveBeenCalledWith(`wrapper/path`, jasmine.anything(), jasmine.anything());
         expect(fs.readFileSync).toHaveBeenCalledWith('src.js', 'utf8');
@@ -137,7 +137,7 @@ describe("Emitter", () => {
         })
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
-        expect(emitter.emit({emit: emitMethodOnTheModule} as any)).toBe(0);
+        expect(emitter.emit('main.js', {emit: emitMethodOnTheModule} as any)).toBe(0);
         expect(mkdirp.sync).toHaveBeenCalledWith('path/to')
     });
 });

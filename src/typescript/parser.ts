@@ -39,11 +39,16 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
         return false;
     }
 
-    visitSourceFile(node: ts.SourceFile): ast.Declaration {
+    visitSourceFile(node: ts.SourceFile): ast.Declaration | Symbol {
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => { 
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value; 
         // }, 4)); 
-        return new ast.SourceFile(node.fileName, visitNode(node, this, false));
+        const declarations = visitNode(node, this, false);
+        if(declarations.length) {
+            log.info(`No exported declarations found in ${path.relative('.', node.fileName)}`);            
+            return BreakVisit;            
+        }
+        return new ast.SourceFile(node.fileName, declarations);
     }
 
     visitNamespace(node: ts.ModuleDeclaration): ast.Declaration {

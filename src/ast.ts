@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as assert from 'assert';
-import {log, Log} from "./log";
 
 function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
@@ -54,13 +53,6 @@ export abstract class Declaration {
     }
 }
 
-function adoptSignature(child: FunctionSignature, parent: Declaration|Type): FunctionSignature {
-    adopt(child.parameters, parent);
-    adopt(child.returnType, parent);
-    adopt(child.thrownTypes, parent);
-    return child;
-}
-
 export class FunctionSignature {
     readonly parameters: ReadonlyArray<ParameterDeclaration>
     readonly returnType: Type;
@@ -79,8 +71,11 @@ export class FunctionDeclaration extends Declaration {
 
     constructor(name: string | undefined, flags: Flags, signature: FunctionSignature, typeParameters: ReadonlyArray<Type>) {
         super(name, flags);
-        this.signature = adoptSignature(signature, this);
+        this.signature = signature;
         this.typeParameters = adopt(typeParameters, this);
+        adopt(signature.parameters, this);
+        adopt(signature.returnType, this);
+        adopt(signature.thrownTypes, this);
     }
 }
 
@@ -193,10 +188,6 @@ export class Module {
     constructor(sourceRoot: string, files: ReadonlyArray<SourceFile>) {
         this.sourceRoot = sourceRoot;
         this.files = adopt(files, this, 'module');
-        if(files.length == 0) {
-            log.warn(`Nothing to output as no exported declarations found in the source files`);                
-            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
-        }
     }   
 
     *allDeclarations(): IterableIterator<Declaration> {
@@ -230,7 +221,10 @@ export class FunctionType extends Type {
     
     constructor(flags: Flags, signature: FunctionSignature) {
         super(flags);
-        this.signature = adoptSignature(signature, this);
+        this.signature = signature;
+        adopt(signature.parameters, this);
+        adopt(signature.returnType, this);
+        adopt(signature.thrownTypes, this);
     }  
 }       
 

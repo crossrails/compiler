@@ -142,9 +142,13 @@ function main(...args: string[]): number {
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
-        // if(log.errorCount === 0) {       
-            emitter.emit(filename, parser.parse()); 
-        // }       
+        const module = parser.parse();
+        if(module.files.length) {
+            emitter.emit(filename, module); 
+        } else if(log.errorCount == 0) {
+            log.warn(`Nothing to output as no exported declarations found in the source files`);                
+            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
+        }
     }
     
     return log.errorCount;

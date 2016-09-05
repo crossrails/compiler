@@ -4,6 +4,6 @@ node_modules/**
 typings/**
 src/**/*.js
 src/**/*.js.map
-tests/js/**/*.js
-tests/js/**/*.js.map
+tests/specs/**/*.js
+tests/specs/**/*.js.map
 tests/java/build/

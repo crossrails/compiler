@@ -38,8 +38,8 @@ export class SymbolTable implements NodeVisitor<void> {
         return node.name ? this.checker.symbolToString(this.checker.getSymbolAtLocation(node.name)) : '';
     }
 
-    getType(node: ts.Declaration & {type?: ts.TypeNode}, defaultType?: ((flags: ast.Flags) => ast.Type)): ast.Type {
-        return this.createType(node, this.checker.getTypeAtLocation(node), node.type, ast.Flags.None, defaultType);
+    getType<T extends ast.Type>(node: ts.Declaration & {type?: ts.TypeNode}, defaultType?: ((flags: ast.Flags) => ast.Type)): T {
+        return this.createType(node, this.checker.getTypeAtLocation(node), node.type, ast.Flags.None, defaultType) as T;
     }
 
     getSignature(node: ts.SignatureDeclaration): ast.FunctionSignature {
@@ -90,7 +90,7 @@ export class SymbolTable implements NodeVisitor<void> {
                 log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
                 return new ast.AnyType();
         }
-        log.warn(`Type information missing for ${ts.SyntaxKind[node.kind]} ${this.checker.symbolToString(this.checker.getSymbolAtLocation(node.name!))}, resorting to Any`, node);  
+        log.warn(`Type information missing for ${ts.SyntaxKind[node.kind]} ${this.checker.symbolToString(this.checker.getSymbolAtLocation(node.name!))}, resorting to ${defaultType(flags).constructor.name.replace('Type', '')}`, node);  
         log.info(`Resolve this warning by adding a typescript type annotation or a jsdoc type tag`);
         return defaultType(flags);
     }

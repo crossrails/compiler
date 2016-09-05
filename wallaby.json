@@ -5,10 +5,10 @@
       "src/**/*.swift",
       "src/**/*.java",
       "tests/input/*",
-      "tests/js/mock*"
+      "tests/specs/**/mock*"
   ],
   "tests": [
-      "tests/js/**/*Spec.ts"
+      "tests/specs/**/*Spec.ts"
   ],
   "env" : {
       "type": "node",

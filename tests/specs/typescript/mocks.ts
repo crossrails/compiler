@@ -3,10 +3,9 @@ import * as rewire from 'rewire';
 import * as ts from "typescript";
 import * as assert from 'assert';
 import {readFileSync} from 'fs';
-import {SourceFile, Context} from "../../src/ast"
-import {log, Log} from "../../src/log"
+import {log, Log} from "../../../src/log"
 
-export function mockProgram(files: [string, string][]) {
+export function mockProgram(files: [string, string][]): ts.Program {
     const map = new Map(files);
     const services = ts.createLanguageService({
         getScriptFileNames: () => Array.from(map.keys()),
@@ -20,10 +19,7 @@ export function mockProgram(files: [string, string][]) {
     return services.getProgram();
 }
 
-export function mockSourceFile(implicitExport: boolean, source: string): SourceFile {
+export function mockVariables(source: string): [ts.VariableDeclaration[], ts.Program] {
     const program = mockProgram([['source.ts', source]]);
-    let context = new Context(program);
-    const file = new SourceFile(program.getSourceFile('source.ts'), implicitExport, {} as any, context);
-    context.finalize();
-    return file;
+    return [(program.getSourceFiles().filter(f => !f.hasNoDefaultLib)[0].statements[0] as ts.VariableStatement).declarationList.declarations, program];
 }
