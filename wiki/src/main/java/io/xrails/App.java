@@ -52,53 +52,6 @@ public class App {
                     } else {
                         if (line.startsWith("  -")) {
                             TableLine tableLine = new TableLine(line);
-
-                            /*line = "|" + line + " |";
-
-                            boolean keepChecking = true;
-                            int index = line.indexOf("  ");
-                            while (keepChecking) {
-                                index = line.indexOf("  ", index + 1);
-                                if (index == -1) {
-                                    keepChecking = false;
-                                } else {
-                                    char ch = line.charAt(index + 2);
-
-                                    if (Character.isLetter(ch)) {
-                                        String first = line.substring(0, index + 1);
-                                        String second = line.substring(index + 1, line.length());
-                                        line = first + " | " + second;
-                                        line = line.replaceAll("\\[default\\]", "");
-                                        index += 3;
-
-                                        //System.out.print("\ncharacter is letter "+line);
-
-                                    } else if (ch == '[') {
-                                        //check to see if we have more than 2 brackets.
-                                        String first = line.substring(0, index + 1);
-                                        String second = line.substring(index + 1, line.length());
-
-                                        Pattern p = Pattern.compile("\\]");
-                                        Matcher m = p.matcher(second);
-                                        int count = 0;
-                                        while (m.find()) {
-                                            count += 1;
-                                        }
-
-                                        if (count > 1) {
-                                            int bracketIndex = second.indexOf("]");
-                                            String firstBracket = second.substring(0, bracketIndex + 1);
-                                            String secondBracket = second.substring(bracketIndex + 1, second.length());
-                                            second = firstBracket + " |" + secondBracket;
-                                            index += 2;
-                                        }
-
-                                        second = App.formatProperties(second);
-                                        line = first + " | " + second;
-                                        index += 3;
-                                    }
-                                }
-                            }*/
                             String description = tableLine.description;
                             if (tableLine.defaultType != null) {
                                 description = description+", defaults to "+tableLine.defaultType+"";

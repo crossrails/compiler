@@ -7,3 +7,5 @@ src/**/*.js.map
 tests/specs/**/*.js
 tests/specs/**/*.js.map
 tests/java/build/
+wiki/target/*
+wiki/compiler.wiki/*

@@ -150,4 +150,12 @@ public class Wiki {
         return line;
     }
 
+    public class Line {
+        public String option;
+        public String description;
+        public String type;
+        public String defaultType;
+    }
+
 }
+
