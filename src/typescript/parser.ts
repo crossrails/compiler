@@ -5,7 +5,7 @@ import {readFileSync} from 'fs';
 import {log} from "../log"
 import {Comment} from "../comment"
 import {SymbolTable} from './symboltable'
-import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
 
 function getFlags(node: ts.Node): ast.Flags {
     const comment = Comment.fromNode(node);
@@ -71,7 +71,7 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
         return new ast.ConstructorDeclaration(getFlags(node), this.symbols.getSignature(node), typeParameters);
     }
 
-    visitFunction(node: FunctionDeclaration): ast.Declaration {
+    visitFunction(node: ts.SignatureDeclaration): ast.Declaration {
         const typeParameters = node.typeParameters ? node.typeParameters.map(t => this.symbols.getType(t)) : []; 
         return new ast.FunctionDeclaration((node.name as ts.Identifier).text, getFlags(node), this.symbols.getSignature(node), typeParameters);
     }

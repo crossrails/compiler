@@ -3,16 +3,15 @@ import * as ts from "typescript";
 import * as ast from "../ast"
 import {log} from "../log"
 import {Comment} from "../comment"
-import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
 
 export class SymbolTable implements NodeVisitor<void> {
 
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
-    private readonly symbols = new Set<string>();
+    private readonly symbols = new Set<ts.Symbol>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
-    private readonly thrown = new Set<string>();
-    private readonly knownTypes = new Set<string>();
+    private readonly thrown = new Set<ts.Symbol>();
 
     constructor(program: ts.Program, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
@@ -31,7 +30,7 @@ export class SymbolTable implements NodeVisitor<void> {
 
     isThrown(node: ts.ClassDeclaration): boolean {
         const symbol = this.checker.getSymbolAtLocation(node.name!);
-        return this.thrown.has(this.checker.getFullyQualifiedName(symbol));        
+        return this.thrown.has(this.checker.getSymbolAtLocation(node.name!));        
     }
 
     getName(node: ts.Node & { name?: ts.DeclarationName}) {
@@ -46,18 +45,38 @@ export class SymbolTable implements NodeVisitor<void> {
         return this.createSignature(node, this.checker.getSignatureFromDeclaration(node as ts.SignatureDeclaration));
     }
 
-    private createSignature(node: ts.Declaration & {type?: ts.TypeNode}, signature: ts.Signature) {
+    private getMainDeclaration(symbol: ts.Symbol) {
+        return symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main);
+    }
+
+    private exportIfNecessary(symbol: ts.Symbol) {
+        if(this.exports.has(this.getMainDeclaration(symbol))) return; 
+        symbol.getDeclarations().forEach((node: ts.Node) => {
+            [...ancestry(node)].forEach(n => n.flags |= ts.NodeFlags.Export);
+            visitNode(node.getSourceFile(), this, true);
+        });
+    }
+
+    private getThrownSymbols(node: ts.SignatureDeclaration, tags: ReadonlyArray<Comment.Tag> = Comment.fromNode(node).tagsNamed('throws')): ReadonlyArray<ts.Symbol> {
+        const names = new Set(tags.filter(tag => tag.type && tag.type.name).map(tag => tag.type.name!));
+        if(names.size == 0) return [];
+        let symbols = this.checker.getSymbolsInScope(node, ts.SymbolFlags.Type);
+        return symbols.filter(s => names.has(this.checker.symbolToString(s, node, ts.SymbolFlags.Type)));
+    }
+
+    private createSignature(node: ts.SignatureDeclaration, signature: ts.Signature) {
         const parameters = signature.parameters.map(parameter => {
             const declaration = parameter.valueDeclaration as ts.ParameterDeclaration;
             const type = this.createType(node, this.checker.getTypeOfSymbolAtLocation(parameter, declaration), declaration.type)
             return new ast.ParameterDeclaration(parameter.name, declaration.questionToken ? ast.Flags.Optional : ast.Flags.None, type);
         });
         const returnType = this.createType(node, signature.getReturnType(), signature.declaration.type, ast.Flags.None, (flags) => new ast.VoidType(flags));
-        const thrownTypes = Comment.fromNode(node).tagsNamed('throws').map(tag => tag.type ? this.createReferenceType(node, tag.type.name!) : new ast.AnyType());
-        return new ast.FunctionSignature(parameters, returnType, thrownTypes);        
+        const throwsTags = Comment.fromNode(node).tagsNamed('throws');
+        const thrownTypes = this.getThrownSymbols(node, throwsTags).map(symbol => this.createReferenceType(node, symbol));
+        return new ast.FunctionSignature(parameters, returnType, thrownTypes.length == throwsTags.length ? thrownTypes : [...thrownTypes, new ast.AnyType()]);        
     }
 
-    private createType(node: ts.Declaration & {type?: ts.TypeNode}, type: ts.Type, typeNode: ts.TypeNode | undefined, flags: ast.Flags = ast.Flags.None, defaultType: (flags: ast.Flags) => ast.Type = (flags) => new ast.AnyType(flags)): ast.Type {
+    private createType(node: ts.Declaration, type: ts.Type, typeNode: ts.TypeNode | undefined, flags: ast.Flags = ast.Flags.None, defaultType: (flags: ast.Flags) => ast.Type = (flags) => new ast.AnyType(flags)): ast.Type {
         const mask = function* () { for(let i=1; i < (1<<30); i = i << 1) if(type.flags & i) yield i; }
         switch(type.flags) {
             case ts.TypeFlags.Never:
@@ -71,7 +90,7 @@ export class SymbolTable implements NodeVisitor<void> {
             case ts.TypeFlags.String:
                 return new ast.StringType(flags);
             case ts.TypeFlags.Anonymous:
-                return new ast.FunctionType(flags, this.createSignature(node, type.getCallSignatures()[0]));
+                return new ast.FunctionType(flags, this.createSignature(node as ts.SignatureDeclaration, type.getCallSignatures()[0]));
             case ts.TypeFlags.Any:
                 return new ast.AnyType(typeNode && typeNode.kind == ts.SyntaxKind.UnionType ? ast.Flags.Optional : ast.Flags.None);
             case ts.TypeFlags.Interface:
@@ -79,7 +98,8 @@ export class SymbolTable implements NodeVisitor<void> {
                 //fallthrough
             case ts.TypeFlags.Reference:
             case ts.TypeFlags.Class | ts.TypeFlags.Reference:
-                return this.createReferenceType(node, this.checker.getFullyQualifiedName(type.getSymbol()), flags, (type as ts.TypeReference).typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
+                const reference = type as ts.TypeReference;
+                return this.createReferenceType(node, reference/*.target*/.getSymbol(), flags, reference.typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
             case ts.TypeFlags.Union: 
                 const nonNullableType = this.checker.getNonNullableType(type);
                 if(nonNullableType != type) { 
@@ -95,8 +115,8 @@ export class SymbolTable implements NodeVisitor<void> {
         return defaultType(flags);
     }
 
-    private createReferenceType(node: ts.Declaration & {type?: ts.TypeNode}, name: string, flags: ast.Flags = ast.Flags.None, typeArguments: ts.Type[] = [], typeArgumentNodes: ts.TypeNode[] = []) {
-        switch(name) {
+    private createReferenceType(node: ts.Declaration, symbol: ts.Symbol, flags: ast.Flags = ast.Flags.None, typeArguments: ts.Type[] = [], typeArgumentNodes: ts.TypeNode[] = []) {
+        switch(this.checker.getFullyQualifiedName(symbol)) {
             case 'boolean':
                 return new ast.BooleanType(flags);
             case 'number':
@@ -113,11 +133,12 @@ export class SymbolTable implements NodeVisitor<void> {
             case 'ReadonlyArray':
                 return new ast.ArrayType(flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
             default:
-                if(!this.knownTypes.has(name)) {
+                const name = this.checker.symbolToString(symbol);
+                if(!this.symbols.has(symbol)) {
                     log.warn(`Could not find type ${name}`, node); 
                     log.info(`Resolve this error by adding the source for ${name} to the input file otherwise output will not compile standalone`) 
                 }
-                if(this.thrown.has(name)) flags |= ast.Flags.Thrown;
+                if(this.thrown.has(symbol)) flags |= ast.Flags.Thrown;
                 return new ast.DeclaredType(name, flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
         }
     }
@@ -144,10 +165,12 @@ export class SymbolTable implements NodeVisitor<void> {
         // }, 4)); 
     }
 
-        const comment = Comment.fromNode(node);
-        comment.tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
-    visitFunction(node: FunctionDeclaration): void {
+    visitFunction(node: ts.SignatureDeclaration): void {
         this.visitOtherNode(node);
+        this.getThrownSymbols(node).forEach(symbol => {
+            this.exportIfNecessary(symbol);
+            this.thrown.add(symbol)
+        });
     }
 
     visitConstructor(node: ts.ConstructorDeclaration): void {
@@ -176,27 +199,13 @@ export class SymbolTable implements NodeVisitor<void> {
 
     visitIdentifier(node: ts.Identifier): void {
         const symbol = this.checker.getSymbolAtLocation(node);
-        const symbolName = this.checker.getFullyQualifiedName(symbol);
-        if(this.symbols.has(symbolName)) throw BreakVisitException;        
-        this.symbols.add(symbolName);
-        switch(node.parent!.kind) {
-            case ts.SyntaxKind.ClassDeclaration:
-            case ts.SyntaxKind.InterfaceDeclaration: 
-            case ts.SyntaxKind.EnumDeclaration:
-                this.knownTypes.add(symbolName);
-        }
-        const declaration = symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main); 
-        this.exports.set(declaration, symbol.getDeclarations());
+        if(this.symbols.has(symbol)) throw BreakVisitException;        
+        this.symbols.add(symbol);
+        this.exports.set(this.getMainDeclaration(symbol), symbol.getDeclarations());
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
         if((type.flags & ts.TypeFlags.Reference) == 0) return;
         const target = (type as ts.TypeReference).target;
-        const typeName = this.checker.getFullyQualifiedName(target.getSymbol());
-        if(this.symbols.has(typeName)) return; 
-        target.getSymbol().getDeclarations().forEach((child: ts.Node | undefined) => {
-            [...ancestry(node)].forEach(n =>  n.flags |= ts.NodeFlags.Export);
-            visitNode(node.getSourceFile(), this, true);
-        });
     }
 }
 

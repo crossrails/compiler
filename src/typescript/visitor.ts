@@ -2,7 +2,6 @@ import * as ts from "typescript";
 import {log} from "../log"
 
 export type VariableDeclaration = ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature;
-export type FunctionDeclaration = ts.FunctionDeclaration | ts.MethodDeclaration | ts.MethodSignature;
 
 export interface NodeVisitor<T> {
     shouldVisitNode?(node: ts.Node): boolean
@@ -13,7 +12,7 @@ export interface NodeVisitor<T> {
     visitConstructor?(node: ts.ConstructorDeclaration): T
     visitVariable?(node: VariableDeclaration): T
     visitVariableStatement?(node: ts.VariableStatement): T
-    visitFunction?(node: FunctionDeclaration): T
+    visitFunction?(node: ts.SignatureDeclaration): T
     visitParameter?(node: ts.ParameterDeclaration): T
     visitIdentifier?(node: ts.Identifier): T
     visitOtherNode?(node: ts.Node): T
@@ -65,7 +64,7 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
         case ts.SyntaxKind.FunctionDeclaration:
         case ts.SyntaxKind.MethodDeclaration:
         case ts.SyntaxKind.MethodSignature: 
-            return visit(visitor.visitFunction, node as FunctionDeclaration, node =>
+            return visit(visitor.visitFunction, node as ts.SignatureDeclaration, node =>
                 visitChildren(node.parameters) || (node.name && visitChild(node.name))) || [];
 
         case ts.SyntaxKind.Constructor: 

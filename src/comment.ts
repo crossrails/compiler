@@ -1,7 +1,7 @@
 import * as ts from "typescript";
 import * as doctrine from 'doctrine';
 
-namespace Comment {
+export namespace Comment {
     export type Tag = doctrine.Tag & {node: ts.Node, type: Tag.Type}
     export namespace Tag {
         export type Type = doctrine.Type & {node: ts.Node}
