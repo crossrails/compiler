@@ -54,7 +54,7 @@ decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: a
     return `}    
 
 public func ==(lhs: ${this.declarationName()}, rhs: ${this.declarationName()}) -> Bool { 
-    return lhs as AnyObject == rhs as AnyObject`;
+    return lhs as AnyObject === rhs as AnyObject`;
 })
 
 decorate(NamespaceDeclaration, ({prototype}) => prototype.keyword = function (this: NamespaceDeclaration): string {
