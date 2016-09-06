@@ -47,7 +47,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, o
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
-    return ` : Equatable${this.isThrown ? ', ErrorProtocol' : ''}`;
+    return `: Equatable${this.isThrown ? ', ErrorProtocol' : ''}`;
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ast.ClassDeclaration): string {
@@ -66,7 +66,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
 })
 
 decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (this: ast.InterfaceDeclaration): string {
-    return " : class";
+    return ": class";
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
@@ -130,5 +130,5 @@ decorate(ArrayType, ({prototype}) => prototype.typeName = function(this: ast.Arr
 })
 
 decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: ast.FunctionType): string {
-    return `(${this.signature.parameters.map(p => `${p.declarationName()} :${p.type.emit()}`).join(', ')}) -> ${this.signature.returnType.emit()}`; 
+    return `(${this.signature.parameters.map(p => `${p.declarationName()}: ${p.type.emit()}`).join(', ')}) -> ${this.signature.returnType.emit()}`; 
 })

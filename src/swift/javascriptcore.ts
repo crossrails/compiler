@@ -11,15 +11,15 @@ import {
 declare module "../ast" {
     interface Declaration {
         accessor(): string
-        argumentName(): string;
+        argumentName(): string
         thisName(): string
     }    
     
     interface Type {
-        toNativeValue(accessor: string, indent?: string): string;
-        genericToNativeValue(optional?: boolean): string;
-        fromNativeValue(argumentName: string): string;
-        genericFromNativeValue(optional?: boolean): string;
+        toNativeValue(accessor: string, indent?: string): string
+        genericToNativeValue(optional?: boolean): string
+        fromNativeValue(argumentName: string): string
+        genericFromNativeValue(optional?: boolean): string
     }
 }
 
@@ -28,7 +28,7 @@ decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module
 })
 
 decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceFile): string {
-    return `import Foundation\n${!this.isModuleFile  ? '' : `\nvar this :JSInstance = try! JSContext().eval(${this.module.resourcePath})\n`}`;
+    return `import Foundation\n${!this.isModuleFile  ? '' : `\nvar this: JSInstance = try! JSContext().eval(${this.module.resourcePath})\n`}`;
 })
 
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {
@@ -113,14 +113,14 @@ ${indent}}`
 
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration): string {
     return `
-    private static var this :JSClass { 
+    private static var this: JSClass { 
         get { return ${this.module.name}.this["${this.name}"] } 
     } 
      
-    private let this :JSInstance
-    private var proxy :JSInstance!
+    private let this: JSInstance
+    private var proxy: JSInstance!
     
-    init(_ instance :JSInstance) { 
+    init(_ instance: JSInstance) { 
         this = instance 
         proxy = instance 
         this.bind(self)
@@ -150,11 +150,11 @@ ${this.declarations.reduce((out, m) =>
     }
 }
 
-class JS_${this.declarationName()} : ${this.declarationName()} {
+class JS_${this.declarationName()}: ${this.declarationName()} {
     
-    private let this :JSInstance
+    private let this: JSInstance
     
-    init(_ instance :JSInstance) {
+    init(_ instance: JSInstance) {
         this = instance
         this.bind(self)
     }
@@ -186,7 +186,7 @@ decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type, a
 })
 
 decorate(FunctionType, ({prototype}) => prototype.toNativeValue = function(this: FunctionType, accessor: string = this.declaration.accessor(), indent?: string) {
-    return `let function :JSFunction = ${accessor}
+    return `let function: JSFunction = ${accessor}
 ${indent}    return { () in return ${this.signature.returnType.emit()}(try! function.call(${this.declaration.thisName()})) }`;    
 })
 
