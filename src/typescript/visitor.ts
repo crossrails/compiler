@@ -6,20 +6,21 @@ export type FunctionDeclaration = ts.FunctionDeclaration | ts.MethodDeclaration 
 
 export interface NodeVisitor<T> {
     shouldVisitNode?(node: ts.Node): boolean
-    visitSourceFile?(node: ts.SourceFile): T | Symbol
-    visitClass?(node: ts.ClassDeclaration): T | Symbol
-    visitInterface?(node: ts.InterfaceDeclaration): T | Symbol
-    visitNamespace?(node: ts.ModuleDeclaration): T | Symbol
-    visitConstructor?(node: ts.ConstructorDeclaration): T | Symbol
-    visitVariable?(node: VariableDeclaration): T | Symbol
-    visitVariableStatement?(node: ts.VariableStatement): T | Symbol
-    visitFunction?(node: FunctionDeclaration): T | Symbol
-    visitParameter?(node: ts.ParameterDeclaration): T | Symbol
-    visitIdentifier?(node: ts.Identifier): T | Symbol
-    visitOtherNode?(node: ts.Node): T | Symbol
+    visitSourceFile?(node: ts.SourceFile): T
+    visitClass?(node: ts.ClassDeclaration): T
+    visitInterface?(node: ts.InterfaceDeclaration): T
+    visitNamespace?(node: ts.ModuleDeclaration): T
+    visitConstructor?(node: ts.ConstructorDeclaration): T
+    visitVariable?(node: VariableDeclaration): T
+    visitVariableStatement?(node: ts.VariableStatement): T
+    visitFunction?(node: FunctionDeclaration): T
+    visitParameter?(node: ts.ParameterDeclaration): T
+    visitIdentifier?(node: ts.Identifier): T
+    visitOtherNode?(node: ts.Node): T
 }
 
-export const BreakVisit = Symbol();
+export const BreakVisitException = Symbol();
+export const ContinueVisitException = Symbol();
 
 export function* ancestry(node: ts.Node) {
     while(node = node.parent!) yield node;
@@ -33,9 +34,15 @@ export function visitNode<T>(node: ts.Node, visitor: NodeVisitor<T>, visitRootNo
     const visit = <N extends ts.Node>(visitMethod: ((node: N) => T | Symbol) | undefined, node: N, visitChildren: (node: N) => ReadonlyArray<T> | undefined = (node) => []) => {
         if(!visitRootNode) return visitChildren(node);
         if(visitMethod && visitor.shouldVisitNode && !visitor.shouldVisitNode.call(thisArg, node)) return [];
-        if(!visitMethod) visitMethod = visitor.visitOtherNode; 
-        const result = visitMethod ? visitMethod.call(thisArg, node) : false;
-        return result ? (result === BreakVisit ? [] : [result]) : visitChildren(node);
+        if(!visitMethod) visitMethod = visitor.visitOtherNode;
+        try { 
+            const result = visitMethod ? visitMethod.call(thisArg, node) : false;
+            return result ? [result] : visitChildren(node);
+        } catch(error) { 
+            if(error === BreakVisitException) return []; 
+            if(error === ContinueVisitException) return visitChildren(node); 
+            throw error; 
+        }         
     }
     const visitChild = (node: ts.Node) => visitNode(node, visitor, true, thisArg);
     const visitChildren = (nodes: ReadonlyArray<ts.Node>) => {

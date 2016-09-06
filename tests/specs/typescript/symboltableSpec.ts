@@ -8,60 +8,40 @@ import {mockVariables, mockProgram} from "./mocks"
 
 describe("SymbolTable", () => {
     
-    interface This {
-        // ast: typeof AST & rewire.Rewire;
-        // anyTypeConstructor: jasmine.Spy;            
-        // stringTypeConstructor: jasmine.Spy;            
-        // booleanTypeConstructor: jasmine.Spy;            
-        // numberTypeConstructor: jasmine.Spy;            
-        // errorTypeConstructor: jasmine.Spy;            
-    }
-    
-    beforeEach(function(this: This) {
-        // this.ast = rewire<typeof AST>('../../../src/ast');
-        // this.anyTypeConstructor = jasmine.createSpy('AnyType');
-        // this.ast.__set__('AnyType', this.anyTypeConstructor);
-        // this.stringTypeConstructor = jasmine.createSpy('StringType');
-        // this.ast.__set__('StringType', this.stringTypeConstructor);
-        // this.booleanTypeConstructor = jasmine.createSpy('BooleanType');
-        // this.ast.__set__('BooleanType', this.booleanTypeConstructor);
-        // this.numberTypeConstructor = jasmine.createSpy('NumberType');
-        // this.ast.__set__('NumberType', this.numberTypeConstructor);
-        // this.errorTypeConstructor = jasmine.createSpy('ErrorType');
-        // this.ast.__set__('ErrorType', this.errorTypeConstructor);
+    beforeEach(function() {
         log.level = Log.Level.DEBUG;
         log.resetCounters();
     });
 
-    it("does not export global non exported declarations when implicitExport is false", function(this: This) {
+    it("does not export global non exported declarations when implicitExport is false", function() {
         const [[variable], program] = mockVariables(`let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(false);
     });
 
-    it("exports global non exported declarations when implicitExport is true", function(this: This) {
+    it("exports global non exported declarations when implicitExport is true", function() {
         const [[variable], program] = mockVariables(`let declaration`);
         const symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
-    it("exports global declarations with export keyword even when implicitExport is false", function(this: This) {
+    it("exports global declarations with export keyword even when implicitExport is false", function() {
         const [[variable], program] = mockVariables(`export let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
-    it("exports global declarations with export jsdoc tag even when implicitExport is false", function(this: This) {
+    it("exports global declarations with export jsdoc tag even when implicitExport is false", function() {
         const [[variable], program] = mockVariables(`/** @export */ let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
-    it("does not export non exported declarations inside a namespace even when implicitExport is true", function(this: This) {
+    it("does not export non exported declarations inside a namespace even when implicitExport is true", function() {
         const program = mockProgram([['src.ts', `
             namespace Foo {
                 var bar;
@@ -75,7 +55,7 @@ describe("SymbolTable", () => {
         expect(symbols.isExported(bar)).toBe(false);
     });
 
-    it("exports declarations with export keyword inside a namespace", function(this: This) {
+    it("exports declarations with export keyword inside a namespace", function() {
         const program = mockProgram([['src.ts', `
             export namespace Foo {
                 export var bar;
@@ -89,7 +69,7 @@ describe("SymbolTable", () => {
         expect(symbols.isExported(bar)).toBe(true);
     });
 
-    it("does not export declarations with export keyword inside an unexported namespace", function(this: This) {
+    it("does not export declarations with export keyword inside an unexported namespace", function() {
         const program = mockProgram([['src.ts', `
             namespace Foo {
                 export var bar;
@@ -103,30 +83,7 @@ describe("SymbolTable", () => {
         expect(symbols.isExported(bar)).toBe(false);
     });
 
-    it("exports declarations without private keyword inside a class", function(this: This) {
-        const program = mockProgram([['src.ts', `
-            export class Foo {
-                bar;
-                protected protectedBar;
-                private privateBar;
-            }
-        `]]);
-        const symbols = new SymbolTable(program, false);
-        expect(log.errorCount).toBe(0);
-        let foo = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
-        expect(symbols.isExported(foo)).toBe(true);
-        let bar = foo.members[0] as ts.PropertyDeclaration;
-        expect(symbols.getName(bar)).toBe('bar');
-        expect(symbols.isExported(bar)).toBe(true);
-        let protectedBar = foo.members[1] as ts.PropertyDeclaration;
-        expect(symbols.getName(protectedBar)).toBe('protectedBar');
-        expect(symbols.isExported(protectedBar)).toBe(true);
-        let privateBar = foo.members[2] as ts.PropertyDeclaration;
-        expect(symbols.getName(privateBar)).toBe('privateBar');
-        expect(symbols.isExported(privateBar)).toBe(false);
-    });
-
-    it("does not export declarations inside an unexported class", function(this: This) {
+    it("does not export declarations inside an unexported class", function() {
         const program = mockProgram([['src.ts', `
             class Foo {
                 bar;
@@ -140,7 +97,78 @@ describe("SymbolTable", () => {
         expect(symbols.isExported(bar)).toBe(false);
     });
 
-    it("erases to any on typescript intersection types", function(this: This) {
+    it("not does not export private member declarations", function() {
+        const program = mockProgram([['src.ts', `
+            export class MyClass {
+                publicVar;
+                protected protectedVar;
+                private privateKeywordUsed;
+                /**
+                 * @private
+                 */            
+                privateTagUsed;
+                /**
+                 * @access private
+                 */            
+                accessTagUsed;
+            }
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        let myClass = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
+        expect(symbols.isExported(myClass)).toBe(true);
+        let publicVar = myClass.members[0] as ts.PropertyDeclaration;
+        expect(symbols.getName(publicVar)).toBe('publicVar');
+        expect(symbols.isExported(publicVar)).toBe(true);
+        let protectedVar = myClass.members[1] as ts.PropertyDeclaration;
+        expect(symbols.getName(protectedVar)).toBe('protectedVar');
+        expect(symbols.isExported(protectedVar)).toBe(true);
+        let privateKeywordUsed = myClass.members[2] as ts.PropertyDeclaration;
+        expect(symbols.getName(privateKeywordUsed)).toBe('privateKeywordUsed');
+        expect(symbols.isExported(privateKeywordUsed)).toBe(false);
+        let privateTagUsed = myClass.members[3] as ts.PropertyDeclaration;
+        expect(symbols.getName(privateTagUsed)).toBe('privateTagUsed');
+        expect(symbols.isExported(privateTagUsed)).toBe(false);
+        let accessTagUsed = myClass.members[4] as ts.PropertyDeclaration;
+        expect(symbols.getName(accessTagUsed)).toBe('accessTagUsed');
+        expect(symbols.isExported(accessTagUsed)).toBe(false);
+    });
+
+    it("correctly parses throw tags from the jsdoc comment ", function() {
+        const program = mockProgram([['src.ts', `
+            export class BigError {}
+            export class SmallError {}
+            /**
+             * @throws
+             */            
+            export function justThrows() {}
+            /**
+             * @throws {Error}
+             */            
+            export function throwsError() {}
+            /**
+             * @throws {BigError}
+             * @throws {SmallError}
+             */            
+            export function throwsSeveral() {}
+        `]]);
+        const symbols = new SymbolTable(program, false);
+        expect(log.errorCount).toBe(0);
+        expect(symbols.isThrown(program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration)).toBe(true);
+        expect(symbols.isThrown(program.getSourceFile('src.ts').statements[1] as ts.ClassDeclaration)).toBe(true);
+        const justThrows = symbols.getSignature(program.getSourceFile('src.ts').statements[2] as ts.FunctionDeclaration);
+        expect(justThrows.thrownTypes.length).toBe(1);
+        expect(justThrows.thrownTypes[0].constructor.name).toBe('AnyType');
+        let throwsError = symbols.getSignature(program.getSourceFile('src.ts').statements[3] as ts.FunctionDeclaration);
+        expect(throwsError.thrownTypes.length).toBe(1);
+        expect(throwsError.thrownTypes[0].constructor.name).toBe('ErrorType');
+        let throwsSeveral = symbols.getSignature(program.getSourceFile('src.ts').statements[4] as ts.FunctionDeclaration);
+        expect(throwsSeveral.thrownTypes.length).toBe(2);
+        expect(throwsSeveral.thrownTypes[0].constructor.name).toBe('DeclaredType');
+        expect(throwsSeveral.thrownTypes[1].constructor.name).toBe('DeclaredType');
+    });
+    
+    it("erases to any on typescript intersection types", function() {
         const [[variable], program] = mockVariables(`let s: string & number`);
         let symbols = new SymbolTable(program, true);
         let type = symbols.getType(variable, (flags) => fail('Called default type') as any);
@@ -148,7 +176,7 @@ describe("SymbolTable", () => {
         expect(type.constructor.name).toBe('AnyType');
     });  
     
-    it("erases to any on unsupported typescript union types", function(this: This) {
+    it("erases to any on unsupported typescript union types", function() {
         const [[variable], program] = mockVariables(`let s: string | number`);
         let symbols = new SymbolTable(program, true);
         let type = symbols.getType(variable, (flags) => fail('Called default type') as any);
@@ -156,7 +184,7 @@ describe("SymbolTable", () => {
         expect(type.constructor.name).toBe('AnyType');
     });
 
-    it("correctly identifies typescript optional types", function(this: This) {
+    it("correctly identifies typescript optional types", function() {
         const [[a, b, c, d], program] = mockVariables(`
             let a: any | null, 
                 b: null | any, 
@@ -179,7 +207,7 @@ describe("SymbolTable", () => {
         expect(dType.flags).toBe(AST.Flags.Optional);
     });
     
-    it("correctly identifies typescript function types", function(this: This) {
+    it("correctly identifies typescript function types", function() {
         let [[run, supplier, consumer], program] = mockVariables(`
             let run: () => void,
                 supplier: () => ReturnValue,
@@ -206,7 +234,7 @@ describe("SymbolTable", () => {
         expect((consumerType.signature.parameters[0].type as AST.DeclaredType).name).toBe('Arg');
     });
     
-    it("correctly identifies typescript array types", function(this: This) {
+    it("correctly identifies typescript array types", function() {
         let [[numbers, strings, booleans], program] = mockVariables(`
             let numbers: number[],
                 strings: Array<string>,
@@ -219,7 +247,7 @@ describe("SymbolTable", () => {
         expect(symbols.getType(booleans, (flags) => fail('Called default type') as any).constructor.name).toBe('ArrayType');
     });    
     
-    it("correctly identifies typescript basic types", function(this: This) {
+    it("correctly identifies typescript basic types", function() {
         const [[s, b, n, a, e, o, d], program] = mockVariables(`
             let s: string,
                 b: boolean,
@@ -254,7 +282,7 @@ describe("SymbolTable", () => {
         expect(symbols.getType(d, (flags) => fail('Called default type') as any).constructor.name).toBe('DateType');
     });
 
-    it("correctly identifies typescript declared types", function(this: This) {
+    it("correctly identifies typescript declared types", function() {
         let [[c], program] = mockVariables(`
             let c: Custom;
             interface Custom {}
@@ -266,7 +294,7 @@ describe("SymbolTable", () => {
         expect(type.name).toBe('Custom');
     });
 
-    it("errors when an typescript undeclared type is referenced", function(this: This) {
+    it("errors when an typescript undeclared type is referenced", function() {
         let [[c], program] = mockVariables(`
             let c: Custom;
         `);

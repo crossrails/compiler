@@ -5,7 +5,7 @@ import {readFileSync} from 'fs';
 import {log} from "../log"
 import {Comment} from "../comment"
 import {SymbolTable} from './symboltable'
-import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisit} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
 
 function getFlags(node: ts.Node): ast.Flags {
     const comment = Comment.fromNode(node);
@@ -39,14 +39,14 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
         return false;
     }
 
-    visitSourceFile(node: ts.SourceFile): ast.Declaration | Symbol {
+    visitSourceFile(node: ts.SourceFile): ast.Declaration {
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, readFileSync(node.fileName).toString(), ts.ScriptTarget.ES6, false), (key, value) => { 
         //     return value ? Object.assign(value, { kind: ts.SyntaxKind[value.kind], flags: ts.NodeFlags[value.flags] }) : value; 
         // }, 4)); 
         const declarations = visitNode(node, this, false);
-        if(declarations.length) {
+        if(declarations.length == 0) {
             log.info(`No exported declarations found in ${path.relative('.', node.fileName)}`);            
-            return BreakVisit;            
+            throw BreakVisitException;            
         }
         return new ast.SourceFile(node.fileName, declarations);
     }
@@ -81,10 +81,11 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
         return new ast.VariableDeclaration((node.name as ts.Identifier).text, flags, this.symbols.getType(node));
     }
 
-    visitOtherNode(node: ts.Node): ast.Declaration | Symbol {
+    visitOtherNode(node: ts.Node): ast.Declaration {
+        if(node.kind == ts.SyntaxKind.VariableStatement) throw ContinueVisitException;
         log.warn(`Skipping ${ts.SyntaxKind[node.kind]} ${this.symbols.getName(node)}`, node); 
         log.info(`This syntax element is not currently supported by crossrails`);
-        return BreakVisit;
+        throw BreakVisitException;
     }
 }
 

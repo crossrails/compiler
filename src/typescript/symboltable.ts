@@ -3,7 +3,7 @@ import * as ts from "typescript";
 import * as ast from "../ast"
 import {log} from "../log"
 import {Comment} from "../comment"
-import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisit} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, FunctionDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
 
 export class SymbolTable implements NodeVisitor<void> {
 
@@ -137,11 +137,6 @@ export class SymbolTable implements NodeVisitor<void> {
         });        
     }
 
-    private isMainDeclaration(node: ts.Node): boolean {
-        let declarations = this.declarationsFor(node as ts.Declaration);
-        return node === declarations.reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main);
-    }
-
     visitSourceFile(node: ts.SourceFile) {
         this.exports.set(node, [node]);
         // console.log(JSON.stringify(ts.createSourceFile(node.fileName, node.getFullText(), ts.ScriptTarget.ES6, false), (key, value) => { 
@@ -149,46 +144,47 @@ export class SymbolTable implements NodeVisitor<void> {
         // }, 4)); 
     }
 
-    visitFunction(node: FunctionDeclaration): void | Symbol {
-        const result = this.visitOtherNode(node);
-        if(result) return result;
         const comment = Comment.fromNode(node);
         comment.tagsNamed('throws').filter(tag => tag.type).forEach(tag => this.thrown.add(tag.type.name!));
+    visitFunction(node: FunctionDeclaration): void {
+        this.visitOtherNode(node);
     }
 
-    visitConstructor(node: ts.ConstructorDeclaration): void | Symbol {
-        const result = this.visitOtherNode(node);
-        if(result) return result;
+    visitConstructor(node: ts.ConstructorDeclaration): void {
+        this.visitOtherNode(node);
         this.exports.set(node, [node]);        
     }
 
-    visitVariable(node: VariableDeclaration): void | Symbol {
-        if(node.kind != ts.SyntaxKind.VariableDeclaration) return this.visitOtherNode(node);        
+    visitVariable(node: VariableDeclaration): void {
+        if(node.kind != ts.SyntaxKind.VariableDeclaration) this.visitOtherNode(node);        
     }
 
-    visitOtherNode(node: ts.Node): void | Symbol {
+    visitOtherNode(node: ts.Node): void {
         switch(node.parent!.kind) {
             case ts.SyntaxKind.SourceFile:
-                if(this.implicitExport || Comment.fromNode(node).isTagged('export')) return;
+                if(this.implicitExport || Comment.fromNode(node).isTagged('export')) break;
                 //fallthrough
             case ts.SyntaxKind.ModuleBlock:
-                if(node.flags & ts.NodeFlags.Export) return;
-                break;
+                if(node.flags & ts.NodeFlags.Export) break;
+                throw BreakVisitException;
             default:
-                if(node.flags & ts.NodeFlags.Private) break;
+                if(node.flags & ts.NodeFlags.Private) throw BreakVisitException;
                 const comment = Comment.fromNode(node);
-                if(comment.isTagged('private') || comment.isTagged('access', 'private')) break;
-                return;
+                if(comment.isTagged('private') || comment.isTagged('access', 'private')) throw BreakVisitException;
         }
-        return BreakVisit;
     }
 
-    visitIdentifier(node: ts.Identifier): void | Symbol {
+    visitIdentifier(node: ts.Identifier): void {
         const symbol = this.checker.getSymbolAtLocation(node);
         const symbolName = this.checker.getFullyQualifiedName(symbol);
-        if(this.symbols.has(symbolName)) return BreakVisit;        
+        if(this.symbols.has(symbolName)) throw BreakVisitException;        
         this.symbols.add(symbolName);
-        if(symbol.flags & ts.SymbolFlags.Type) this.knownTypes.add(symbolName);
+        switch(node.parent!.kind) {
+            case ts.SyntaxKind.ClassDeclaration:
+            case ts.SyntaxKind.InterfaceDeclaration: 
+            case ts.SyntaxKind.EnumDeclaration:
+                this.knownTypes.add(symbolName);
+        }
         const declaration = symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main); 
         this.exports.set(declaration, symbol.getDeclarations());
         //if type reference ensure type is exported
