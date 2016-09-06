@@ -97,6 +97,31 @@ describe("SymbolTable", () => {
         expect(symbols.isExported(bar)).toBe(false);
     });
 
+    // it("exports non exported types when referenced in an exported declaration", function() {
+    //     const program = mockProgram([['src.ts', `
+    //         class UnexportedType {}
+    //         export var declaration: UnexportedType;
+    //     `]]);
+    //     const symbols = new SymbolTable(program, false);
+    //     expect(log.errorCount).toBe(0);
+    //     const unexportedType = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
+    //     expect(unexportedType.name!.text).toBe('UnexportedType');
+    //     expect(symbols.isExported(unexportedType)).toBe(true);
+    // });
+
+    // it("exports non exported types when referenced in a throws jsdoc tag on an exported declaration", function() {
+    //     const program = mockProgram([['src.ts', `
+    //         class UnexportedType {}
+    //         /** @throws {UnexportedType} */
+    //         export function throwUnexportedType(): void {}
+    //     `]]);
+    //     const symbols = new SymbolTable(program, false);
+    //     expect(log.errorCount).toBe(0);
+    //     const unexportedType = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
+    //     expect(unexportedType.name!.text).toBe('UnexportedType');
+    //     expect(symbols.isExported(unexportedType)).toBe(true);
+    // });
+
     it("not does not export private member declarations", function() {
         const program = mockProgram([['src.ts', `
             export class MyClass {
