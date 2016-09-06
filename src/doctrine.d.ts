@@ -17,9 +17,9 @@ declare module "doctrine" {
 
     export interface Tag {
         title: string
-        description: string|null
-        type: Type|null  
-        name: string|null
+        description?: string
+        type?: Type  
+        name?: string
         [key: string]: any
         lineNumber?: number
     }

@@ -35,6 +35,20 @@ public class SimpleObject {
         prototype.setMember("methodToOverrideCalled", methodToOverrideCalled);
     }
     
+    public SimpleObject() {
+        prototype = (ScriptObjectMirror)classMirror.newObject(); 
+        mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
+            @Override 
+            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
+                builder.accept("numberSingleObjectArgMethod", args -> numberSingleObjectArgMethod((SimpleObject)args[0]));
+                builder.accept("callOverriddenMethod", args -> { callOverriddenMethod(); return null; });
+                builder.accept("methodToOverride", args -> { methodToOverride(); return null; });
+                builder.accept("upcastThisToObject", args -> upcastThisToObject()); 
+            } 
+        }; 
+        JS.heap.put(this, mirror); 
+    }
+
     public SimpleObject(Number v) {
         prototype = (ScriptObjectMirror)classMirror.newObject(v); 
         mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 

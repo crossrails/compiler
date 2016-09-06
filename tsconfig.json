@@ -6,7 +6,7 @@
     "noImplicitThis": true,
     "sourceMap": true,
     "strictNullChecks": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": false,
     "noImplicitReturns": true,
     "preserveConstEnums": true,
     "pretty": true

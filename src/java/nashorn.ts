@@ -4,15 +4,14 @@ import "./java"
 import {JavaOptions} from "./java"
 import {decorate} from '../decorator';
 
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
 
 declare module "../ast" {
     interface Declaration {
         accessor(): string
-    }    
-    interface MemberDeclaration {
         mirror(): string
     }
+
     interface Type {
         genericToNativeValue(optional?: boolean): string;
         toNativeValue(): string;
@@ -51,10 +50,10 @@ import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module
 decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("${this.module.src.base}");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");`.substr(1)
 }${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
-}${!this.declarations.some(m => !m.static) ? '' : `
+}${!this.declarations.some(m => !m.isStatic) ? '' : `
 ${indent}private final ScriptObjectMirror prototype;
 ${indent}private final JSObject mirror;
 
@@ -68,7 +67,7 @@ ${indent}}
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ClassDeclaration, indent?: string) {
-    return !this.declarations.some(m => !m.static) ? '' : `
+    return !this.declarations.some(m => !m.isStatic) ? '' : `
 ${indent}@Override
 ${indent}public String toString() {
 ${indent}    return mirror.toString();
@@ -85,8 +84,8 @@ ${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
 ${indent}}`;
 })
 
-decorate(MemberDeclaration, ({prototype}) => prototype.mirror = function (this: MemberDeclaration) {
-    return this.parent == this.sourceFile ? 'global' : this.static ? 'classMirror' : 'prototype';        
+decorate(Declaration, ({prototype}) => prototype.mirror = function (this: Declaration) {
+    return this.parent == this.sourceFile ? 'global' : this.isStatic ? 'classMirror' : 'prototype';        
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
@@ -94,7 +93,7 @@ decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (th
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.getter = function (this: VariableDeclaration, indent?: string) {
-    let returnValue = this.type.optional ? `Optional.ofNullable(${this.type.toNativeValue()})` : this.type.toNativeValue();
+    let returnValue = this.type.isOptional ? `Optional.ofNullable(${this.type.toNativeValue()})` : this.type.toNativeValue();
     return `{
 ${indent}    return ${returnValue};
 ${indent}}`;        
@@ -108,7 +107,7 @@ ${indent}}`;
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.fromNativeValue());
-    return this.static ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
+    return this.isStatic ? `${this.mirror()}.callMember(${[`"${this.declarationName()}"`, ...args].join(', ')})` : `((JSObject)prototype.getMember("${this.declarationName()}")).call(${[`mirror`, ...args].join(', ')})`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
@@ -143,7 +142,7 @@ ${indent}    prototype = (ScriptObjectMirror)classMirror.newObject(${this.signat
 ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
 ${indent}        @Override 
 ${indent}        void build(BiConsumer<String, Function<Object[], Object>> builder) { 
-${this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
+${this.parent.declarations.filter(m => !m.isStatic && m.constructor.name === 'FunctionDeclaration').map((m: FunctionDeclaration) => `
 ${indent}            builder.accept("${m.name}", args -> ${m.signature.returnType instanceof VoidType ? 
                      `{ ${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')}); return null; }` : 
                      `${m.declarationName()}(${m.signature.parameters.map((p, i) => `(${p.type.typeName()})args[${i}]`).join(', ')})`
@@ -155,49 +154,49 @@ ${indent}}`;
 })
 
 decorate(FunctionType, ({prototype}) => prototype.toNativeValue = function(this: FunctionType) {
-    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}.class)`;    
+    return `JS.wrap(${this.declaration.accessor()}, ${this.typeName()}.class)`;    
 })
 
 decorate(AnyType, ({prototype}) => prototype.toNativeValue = function(this: AnyType) {
-    return `JS.wrap(${this.parent.accessor()}, JS.Object::new)`;    
+    return `JS.wrap(${this.declaration.accessor()}, JS.Object::new)`;    
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType) {
-    return `JS.wrap(${this.parent.accessor()}, ${this.typeName()}${this.declaration instanceof InterfaceDeclaration ? '.class' : '::new'})`;    
+    return `JS.wrap(${this.declaration.accessor()}, ${this.typeName()}${this.isAbstract ? '.class' : '::new'})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: ArrayType) {
-    return `JS.wrap(${this.parent.accessor()}, ${this.typeArguments[0].genericToNativeValue()})`;    
+    return `JS.wrap(${this.declaration.accessor()}, ${this.typeArguments[0].genericToNativeValue()})`;    
 })
 
 decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type) {
-    return `(${this.typeName()})${this.parent.accessor()}`;    
+    return `(${this.typeName()})${this.declaration.accessor()}`;    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.isOptional) {
     return `o -> new JS.Array<>(o, ${this.typeArguments[0].genericToNativeValue()})`;    
 })
 
-decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.isOptional) {
     return `JS.Array::new`;    
 })
 
 decorate(Type, ({prototype}) => prototype.fromNativeValue = function(this: Type) {
-    return this.parent.declarationName();    
+    return this.declaration.declarationName();    
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType) {
-    return this.declaration instanceof InterfaceDeclaration ? this.parent.declarationName() : `JS.heap.get(${this.parent.declarationName()})`;    
+    return this.isAbstract ? this.declaration.declarationName() : `JS.heap.get(${this.declaration.declarationName()})`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: ArrayType) {
-    return `JS.heap.computeIfAbsent(${this.parent.declarationName()}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].genericFromNativeValue(this.optional)}))`;    
+    return `JS.heap.computeIfAbsent(${this.declaration.declarationName()}, o -> new JS.ArrayMirror<>(${this.typeArguments[0].genericFromNativeValue(this.isOptional)}))`;    
 })
 
-decorate(Type, ({prototype}) => prototype.genericFromNativeValue = function(this: Type, optional: boolean = this.optional) {
-    return this.parent.declarationName();    
+decorate(Type, ({prototype}) => prototype.genericFromNativeValue = function(this: Type, optional: boolean = this.isOptional) {
+    return this.declaration.declarationName();    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function(this: ArrayType, optional: boolean = this.optional) {
-    return `${this.parent.declarationName()}, JS.ArrayMirror::new`;    
+decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function(this: ArrayType, optional: boolean = this.isOptional) {
+    return `${this.declaration.declarationName()}, JS.ArrayMirror::new`;    
 })

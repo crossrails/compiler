@@ -4,7 +4,7 @@ import "./swift"
 import {SwiftOptions} from "./swift"
 import {decorate} from '../decorator';
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType
 } from "../ast"
 
 
@@ -34,7 +34,7 @@ decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceF
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {
     return `${!this.isModuleFile ? '' : `
 extension JSProperty {
-    ${this.module.identifiers.map((d) => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
+    ${[...this.module.allDeclarations()].filter(d => d.parent && !(d instanceof ConstructorDeclaration)).map(d => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
 }`.substr(1)}`;
 })
 
@@ -56,7 +56,7 @@ decorate(ParameterDeclaration, ({prototype}) => prototype.thisName = function (t
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (this: FunctionDeclaration): string {
     let args = this.signature.parameters.map(p => p.type.fromNativeValue());
-    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.static ? '(' : `.call(proxy${args.length ? `, args: ` : ''}`}${args.join(', ')})`;
+    return `try${this.signature.thrownTypes.length ? '' : '!'} this[.${this.declarationName()}]${this.isStatic ? '(' : `.call(proxy${args.length ? `, args: ` : ''}`}${args.join(', ')})`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
@@ -76,7 +76,7 @@ ${indent}}`
 })
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
-    let members = this.parent.declarations.filter(m => !m.static && m.constructor.name === 'FunctionDeclaration');
+    let members = this.parent.declarations.filter(m => !m.isStatic && m.constructor.name === 'FunctionDeclaration');
     return `{
 ${indent}    self.this = try! ${this.thisName()}.construct(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}) 
 ${indent}    self.proxy = ${members.length == 0 ? 'this' : `self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
@@ -96,17 +96,17 @@ decorate(VariableDeclaration, ({prototype}) => prototype.argumentName = function
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
-    return `${this.static ? 'this' : 'proxy'}[.${this.declarationName()}]`
+    return `${this.isStatic ? 'this' : 'proxy'}[.${this.declarationName()}]`
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.body = function (this: VariableDeclaration, indent?: string) { 
-    return this.constant ? `= ${this.type.toNativeValue()}` : 
+    return this.isConstant ? `= ${this.type.toNativeValue()}` : 
 `{
 ${indent}    get {
 ${indent}        ${this.type instanceof FunctionType ? '': 'return '}${this.type.toNativeValue(this.accessor(), `${indent}    `)}
 ${indent}    }
 ${indent}    set {
-${indent}        ${this.static ? 'this' : 'proxy'}[.${this.declarationName()}] = ${this.type.fromNativeValue()}
+${indent}        ${this.isStatic ? 'this' : 'proxy'}[.${this.declarationName()}] = ${this.type.fromNativeValue()}
 ${indent}    }
 ${indent}}`        
 })
@@ -169,70 +169,70 @@ ${this.declarations.reduce((out, m) => `${out}
 `, '')}`;
 })
 
-decorate(AnyType, ({prototype}) => prototype.toNativeValue = function(this: AnyType, accessor: string = this.parent.accessor()) {
-    return !this.optional ? `${accessor}.infer()` : `Any?(${accessor}, wrapped: { $0.infer() })`;    
+decorate(AnyType, ({prototype}) => prototype.toNativeValue = function(this: AnyType, accessor: string = this.declaration.accessor()) {
+    return !this.isOptional ? `${accessor}.infer()` : `Any?(${accessor}, wrapped: { $0.infer() })`;    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: ArrayType, accessor: string = this.parent.accessor()) {
-    return `${this.emit()}(${accessor}, ${this.optional ? `wrapped: ${this.genericToNativeValue(false)}` : `element: ${this.typeArguments[0].genericToNativeValue()}`})`
+decorate(ArrayType, ({prototype}) => prototype.toNativeValue = function(this: ArrayType, accessor: string = this.declaration.accessor()) {
+    return `${this.emit()}(${accessor}, ${this.isOptional ? `wrapped: ${this.genericToNativeValue(false)}` : `element: ${this.typeArguments[0].genericToNativeValue()}`})`
 })
 
-decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType, accessor: string = this.parent.accessor()): string {
-    return `${this.declaration instanceof InterfaceDeclaration ? 'JS_' : ''}${Type.prototype.toNativeValue.call(this, accessor)}`;    
+decorate(DeclaredType, ({prototype}) => prototype.toNativeValue = function(this: DeclaredType, accessor: string = this.declaration.accessor()): string {
+    return `${this.isAbstract ? 'JS_' : ''}${Type.prototype.toNativeValue.call(this, accessor)}`;    
 })
 
-decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type, accessor: string = this.parent.accessor()) {
-    return `${this.emit()}(${accessor}${this.optional ? `, wrapped: ${this.emit(false)}.init` : ''})`;
+decorate(Type, ({prototype}) => prototype.toNativeValue = function(this: Type, accessor: string = this.declaration.accessor()) {
+    return `${this.emit()}(${accessor}${this.isOptional ? `, wrapped: ${this.emit(false)}.init` : ''})`;
 })
 
-decorate(FunctionType, ({prototype}) => prototype.toNativeValue = function(this: FunctionType, accessor: string = this.parent.accessor(), indent?: string) {
+decorate(FunctionType, ({prototype}) => prototype.toNativeValue = function(this: FunctionType, accessor: string = this.declaration.accessor(), indent?: string) {
     return `let function :JSFunction = ${accessor}
-${indent}    return { () in return ${this.signature.returnType.emit()}(try! function.call(${this.parent.thisName()})) }`;    
+${indent}    return { () in return ${this.signature.returnType.emit()}(try! function.call(${this.declaration.thisName()})) }`;    
 })
 
-decorate(AnyType, ({prototype}) => prototype.genericToNativeValue = function(this: AnyType, optional: boolean = this.optional) {
+decorate(AnyType, ({prototype}) => prototype.genericToNativeValue = function(this: AnyType, optional: boolean = this.isOptional) {
     return !optional ? `JSValue.infer` : `{ Any?($0, wrapped: JSValue.infer) }`;    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.optional) {
+decorate(ArrayType, ({prototype}) => prototype.genericToNativeValue = function(this: ArrayType, optional: boolean = this.isOptional) {
     return `{ ${this.emit(optional)}($0, element: ${this.typeArguments[0].genericToNativeValue()}) }`;    
 })
 
-decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.optional) {
+decorate(Type, ({prototype}) => prototype.genericToNativeValue = function(this: Type, optional: boolean = this.isOptional) {
     return !optional ? `${this.emit(optional)}.init` : `{ ${this.emit(optional)}($0, wrapped: ${this.emit(false)}.init) }`;    
 })
 
-decorate(Type, ({prototype}) => prototype.fromNativeValue = function(this: Type, argumentName: string = this.parent.argumentName()) {
-    return `${this.parent.thisName()}.valueOf(${argumentName}${this.optional ? `, wrapped: ${this.genericFromNativeValue()})` : `)`}`;    
+decorate(Type, ({prototype}) => prototype.fromNativeValue = function(this: Type, argumentName: string = this.declaration.argumentName()) {
+    return `${this.declaration.thisName()}.valueOf(${argumentName}${this.isOptional ? `, wrapped: ${this.genericFromNativeValue()})` : `)`}`;    
 })
 
-decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType, argumentName: string = this.parent.argumentName()) {
-    return `${this.parent.thisName()}.valueOf(${argumentName}${this.optional ? `, wrapped: ${this.genericFromNativeValue()})` : `)`}`;    
+decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType, argumentName: string = this.declaration.argumentName()) {
+    return `${this.declaration.thisName()}.valueOf(${argumentName}${this.isOptional ? `, wrapped: ${this.genericFromNativeValue()})` : `)`}`;    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: ArrayType, argumentName: string = this.parent.argumentName()) {
-    return this.optional ? Type.prototype.fromNativeValue.call(this) : 
-        `${this.parent.thisName()}.valueOf(${argumentName}, element: ${this.typeArguments[0].genericFromNativeValue()})`;    
+decorate(ArrayType, ({prototype}) => prototype.fromNativeValue = function(this: ArrayType, argumentName: string = this.declaration.argumentName()) {
+    return this.isOptional ? Type.prototype.fromNativeValue.call(this) : 
+        `${this.declaration.thisName()}.valueOf(${argumentName}, element: ${this.typeArguments[0].genericFromNativeValue()})`;    
 })
 
-decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType, argumentName: string = this.parent.argumentName()) {
-    return this.optional || !(this.declaration instanceof InterfaceDeclaration) ? Type.prototype.fromNativeValue.call(this) : 
-        `${this.parent.thisName()}.valueOf(${argumentName}, with: ${argumentName}.eval)`;    
+decorate(DeclaredType, ({prototype}) => prototype.fromNativeValue = function(this: DeclaredType, argumentName: string = this.declaration.argumentName()) {
+    return this.isOptional || !this.isAbstract ? Type.prototype.fromNativeValue.call(this) : 
+        `${this.declaration.thisName()}.valueOf(${argumentName}, with: ${argumentName}.eval)`;    
 })
 
-decorate(FunctionType, ({prototype}) => prototype.fromNativeValue = function(this: FunctionType, argumentName: string = this.parent.argumentName()) {
-    return `JSObject(${this.parent.thisName()}.context, callback: { args in return ${this.parent.thisName()}.valueOf(${argumentName}()) })`;    
+decorate(FunctionType, ({prototype}) => prototype.fromNativeValue = function(this: FunctionType, argumentName: string = this.declaration.argumentName()) {
+    return `JSObject(${this.declaration.thisName()}.context, callback: { args in return ${this.declaration.thisName()}.valueOf(${argumentName}()) })`;    
 })
 
 decorate(Type, ({prototype}) => prototype.genericFromNativeValue = function(this: Type) {
-    return `${this.parent.thisName()}.valueOf`;    
+    return `${this.declaration.thisName()}.valueOf`;    
 })
 
 decorate(ArrayType, ({prototype}) => prototype.genericFromNativeValue = function(this: ArrayType) {
-    return `{ ${this.parent.thisName()}.valueOf($0, element: ${this.typeArguments[0].genericFromNativeValue()}) }`;    
+    return `{ ${this.declaration.thisName()}.valueOf($0, element: ${this.typeArguments[0].genericFromNativeValue()}) }`;    
 })
 
 decorate(DeclaredType, ({prototype}) => prototype.genericFromNativeValue = function(this: DeclaredType) {
-    return !(this.declaration instanceof InterfaceDeclaration) ? Type.prototype.fromNativeValue.call(this) : 
-        `{ ${this.parent.thisName()}.valueOf($0, with: ${this.parent.argumentName()}.eval) }`;    
+    return !this.isAbstract ? Type.prototype.fromNativeValue.call(this) : 
+        `{ ${this.declaration.thisName()}.valueOf($0, with: ${this.declaration.argumentName()}.eval) }`;    
 })

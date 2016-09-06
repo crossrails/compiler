@@ -7,7 +7,7 @@ import {undecorate} from './decorator';
 
 var mkdirp = require('mkdirp');
 
-export interface CompilerOptions {
+export interface EmitterOptions {
    emit: boolean|string
    emitJS: boolean|string
    emitWrapper: boolean|string
@@ -15,17 +15,19 @@ export interface CompilerOptions {
     [option: string]: any
 }
 
-export class Compiler {
+export class Emitter {
     
     private readonly languages: Map<string, string[]>    
     
-    constructor(private readonly options: CompilerOptions, languages: [string, string[]][]) {
+    constructor(private readonly options: EmitterOptions, languages: [string, string[]][]) {
         this.languages = new Map(languages);
     }
     
-    compile(module: Module): number {
+    emit(sourceFile: string, module: Module): number {
         let emittedOutput = false;  
-        for(let [language, engines] of this.languages) {
+        module.sourcePath = path.parse(sourceFile); 
+        module.name = module.sourcePath.name;
+        for(const [language, engines] of this.languages) {
             emittedOutput = this.emitLanguage(module, language, engines) || emittedOutput;            
         }
         if(!emittedOutput) {
@@ -41,28 +43,28 @@ export class Compiler {
 
     private emitLanguage(module: Module, language: string, engines: string[]): boolean {
         if(this.options[language]) {
-            let options = Object.assign({}, this.options, this.options[language]);
-            let outDir = typeof options.emit === 'boolean' ? '.' : options.emit;
+            const options = Object.assign({}, this.options, this.options[language]);
+            const outDir = typeof options.emit === 'boolean' ? '.' : options.emit;
             let emittedOutput = false;  
-            for(let engine of engines) {
+            for(const engine of engines) {
                 if(options[engine]) {
-                    this.emit(module, language, engine, outDir, Object.assign({}, options, options[engine]));
+                    this.emitEngine(module, language, engine, outDir, Object.assign({}, options, options[engine]));
                     emittedOutput = true;
                 }
             }
             if(!emittedOutput) {
-                this.emit(module, language, engines[0], outDir, options);
+                this.emitEngine(module, language, engines[0], outDir, options);
             }
             return true;
         }
         return false;
     }
     
-    private emit(module: Module, language: string, engine: string, outDir: string, options: CompilerOptions) {
-        let engineOptions = Object.assign({}, options, options[engine])
+    private emitEngine(module: Module, language: string, engine: string, outDir: string, options: EmitterOptions) {
+        const engineOptions = Object.assign({}, options, options[engine])
         log.info(`Emitting ${language} source for ${engine} engine to ${path.relative('.', outDir)}`);
         require(path.join(__dirname, language, engine));
-        let writeFile = (filename: string, data: string) => {
+        const writeFile = (filename: string, data: string) => {
             if(!engineOptions.emit) {
                 log.info(`Skipping emit of file ${path.relative('.', filename)}`);
             } else {
@@ -76,8 +78,8 @@ export class Compiler {
             module.emitWrapper(typeof options.emitWrapper === 'boolean' ? outDir : options.emitWrapper, engineOptions, writeFile);
         }                
         if(options.emitJS) {
-            let src = path.join(typeof options.emitJS === 'boolean' ? outDir : options.emitJS, module.src.base);
-            let dest = path.join(module.src.dir, module.src.base);
+            const src = path.join(typeof options.emitJS === 'boolean' ? outDir : options.emitJS, module.sourcePath.base);
+            const dest = path.join(module.sourcePath.dir, module.sourcePath.base);
             if(src != dest) {
                 writeFile(src, readFileSync(dest, 'utf8'));
             }

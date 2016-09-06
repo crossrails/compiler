@@ -3,17 +3,22 @@
 import * as path from 'path';
 import {log} from "./log"
 import {Module} from "./ast"
-import {readFileSync} from 'fs';
-import {Compiler, CompilerOptions} from "./compiler"
+import {TypeScriptParser} from "./typescript/parser"
+import {readFileSync, accessSync, R_OK} from 'fs';
+import {Emitter, EmitterOptions} from "./emitter"
 
 import yargs = require('yargs');
 
+interface ParserFactory {
+    new(sourceMap: {sourceRoot: string, sources: string[]}, implicitExport: boolean, charset: string): {parse(): Module};
+}
+
 function main(...args: string[]): number {
 
-    let options = yargs
+    const options = yargs
         .usage('Usage: $0 [file.js|package.json|bower.json] [options]')
         .check((argv: yargs.Argv, aliases: { [key: string]: string[] }) => {
-            let filename = argv._[0] && path.basename(argv._[0]);
+            const filename = argv._[0] && path.basename(argv._[0]);
             return !filename || filename.endsWith('.js') || filename == 'package.json' || filename == 'bower.json' ? true : 'File argument must be a javascript source file (.js) or package manifest file (bower.json|package.json)';
         })
         .example('$0 src.min.js --swift', 'Compile to swift, outputting beside original source files')
@@ -58,7 +63,7 @@ function main(...args: string[]): number {
             },
             'swift.javascriptcore': { 
                 group: 'Swift options:',
-                desc: 'Compile source to use the JavaScriptCore engine under the hood [default]',
+                desc: 'Compile source to use the JavaScriptCore engine under the hood [default engine]',
             },
             'swift.bundleId': { 
                 group: 'Swift options:',
@@ -104,7 +109,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
-        .parse<CompilerOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
+        .parse<EmitterOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
 
     ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
         options[o] = options[o] == 'true' ? true : options[o] == 'false' ? false : options[o]
@@ -112,10 +117,10 @@ function main(...args: string[]): number {
     
     log.setLevel(options.logLevel);
 
-    let compiler = new Compiler(options, [
+    const emitter = new Emitter(options, [
         [`swift`,   [`javascriptcore`]], 
         ['java',    [`nashorn`, 'j2v8']],
-        [`cs`,      [`chakracore`]], 
+        [`c#`,      [`chakracore`]], 
         [`php`,     [`v8`]], 
     ]);
 
@@ -131,22 +136,57 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        let module = new Module(filename, options.sourceMap, options.declarationFile, options.typings, options.implicitExport, options.charset);
+        const sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
+        const factory: ParserFactory = TypeScriptParser;
+        const parser = new factory(sourceMap, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
-        // if(log.errorCount === 0) {       
-            compiler.compile(module); 
-        // }       
+        const module = parser.parse();
+        if(module.files.length) {
+            emitter.emit(filename, module); 
+        } else if(log.errorCount == 0) {
+            log.warn(`Nothing to output as no exported declarations found in the source files`);                
+            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
+        }
     }
     
     return log.errorCount;
 }
 
+function mapSources(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, charset: string) : {sourceRoot: string, sources: string[]} {
+    if(sourceMapFile || !declarationFile) try {                
+        const sourceMap = sourceMapFile || `${src}.map`;
+        log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
+        const map = JSON.parse(readFileSync(sourceMap, charset));
+        map.sourceRoot = path.join(path.dirname(src), map.sourceRoot); 
+        log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
+        return map;
+    } catch(error) {
+        if(sourceMapFile || error.code != 'ENOENT') {
+            throw error;
+        }
+        log.info(`No sourcemap found`);
+    }
+    try {
+        const file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
+        log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
+        accessSync(file, R_OK);
+        log.debug(`Declaration file (.d.ts) found`);
+        return  {sourceRoot: path.dirname(file), sources: [path.basename(file)] }; 
+    } catch(error) {
+        if(declarationFile || error.code != 'ENOENT') {
+            throw error;
+        }
+        log.info(`No declaration file (.d.ts) file found`);
+    }
+    return { sourceRoot: path.dirname(src), sources: [path.basename(src)] }; 
+} 
+    
 function readPackageFile(filename: string, options: {typings?: string, charset: string}): string|undefined {
     try {
         log.debug(`Attempting to open package manifest file at ${path.relative('.', filename)}`);
-        let json = JSON.parse(readFileSync(filename, options.charset));
+        const json = JSON.parse(readFileSync(filename, options.charset));
         if(json.typings) {
             options.typings = path.join(path.dirname(filename), json.typings); 
         }
@@ -163,7 +203,7 @@ function readPackageFile(filename: string, options: {typings?: string, charset: 
 export = main;
 
 if(require.main === module) {
-    let [,, ...args] = process.argv;
+    const [,, ...args] = process.argv;
     process.exit(main(...args));
 } else {
     yargs.exitProcess(false);

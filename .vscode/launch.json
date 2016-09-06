@@ -31,7 +31,7 @@
 			"env": {
 				"NODE_ENV": "development"
 			},
-			"externalConsole": false,
+			"console": "internalConsole",
 			"outDir": "${workspaceRoot}/src",
 			"sourceMaps": true
 		}

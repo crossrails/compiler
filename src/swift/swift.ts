@@ -2,13 +2,13 @@ import * as path from 'path';
 import * as ast from "../ast"
 import {log} from "../log"
 import {decorate} from '../decorator';
-import {CompilerOptions} from "../compiler" 
+import {EmitterOptions} from "../emitter" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, MemberDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
 } from "../ast"
 
-export interface SwiftOptions extends CompilerOptions {
-    javascriptcore?: CompilerOptions 
+export interface SwiftOptions extends EmitterOptions {
+    javascriptcore?: EmitterOptions 
     bundleId: string|undefined
     omitArgumentLabels: boolean|undefined   
 }
@@ -25,11 +25,11 @@ declare module "../ast" {
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, outDir: string, options: SwiftOptions, writeFile: (filename: string, data: string) => void): void {
-    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.path(forResource: "${this.src.name}", ofType: "${this.src.ext.substr(1)}")!`);
+    Reflect.set(this, 'resourcePath', `Bundle${options.bundleId ? `(identifier: "${options.bundleId}")!` : `.mainBundle()`}.path(forResource: "${this.sourcePath.name}", ofType: "${this.sourcePath.ext.substr(1)}")!`);
     Reflect.set(this, 'parameterPrefix', options.omitArgumentLabels ? '_ ' : '');
     let moduleFilename = path.join(outDir, `${this.name}.swift`);
     let writtenModuleFile = false;  
-    for(let file of this.files as Array<ast.SourceFile>) {
+    for(let file of this.files) {
         let filename = `${path.join(outDir, path.relative(this.sourceRoot, file.path.dir), file.path.base.substr(0, file.path.base.indexOf('.')))}.swift`;
         Object.defineProperty(file, 'isModuleFile', { writable: false, value: filename == moduleFilename});
         writeFile(filename, file.emit());                
@@ -70,15 +70,15 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.suffix = function (thi
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: ast.VariableDeclaration, indent?: string): string {
-    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}${this.constant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
+    return `${indent}${this.parent instanceof ast.InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}${this.isConstant ? 'let' : 'var'} ${this.name} :${this.type.emit()} ${this.body(indent)}\n`;
 })
 
 decorate(ParameterDeclaration, ({prototype}) => prototype.emit = function (this: ast.ParameterDeclaration): string {
-    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.optional ? '? = nil' : ''}`;
+    return `${this.module.parameterPrefix}${this.declarationName()}: ${this.type.emit()}${this.isOptional ? `${this.type.isOptional ? '' : '?'} = nil` : ''}`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.prefix = function (this: ast.FunctionDeclaration): string {
-    return `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.static && this.parent != this.sourceFile ? 'static ' : ''}func`;
+    return `${this.parent instanceof InterfaceDeclaration ? '' : 'public '}${this.isStatic && this.parent != this.sourceFile ? 'static ' : ''}func`;
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.suffix = function (this: ast.FunctionDeclaration): string {
@@ -97,7 +97,7 @@ decorate(ConstructorDeclaration, ({prototype}) => prototype.suffix = function (t
     return this.signature.thrownTypes.length ? ' throws' : '';
 })
 
-decorate(Type, ({prototype}) => prototype.emit = function(this: ast.Type, optional: boolean = this.optional): string {
+decorate(Type, ({prototype}) => prototype.emit = function(this: ast.Type, optional: boolean = this.isOptional): string {
     return `${this.typeName()}${optional ? '?' : ''}`;    
 })
 

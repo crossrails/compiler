@@ -1,7 +1,9 @@
-import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, MemberDeclaration, NamespaceDeclaration} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration} from "./ast"
 import * as assert from "assert"
+import {ParsedPath} from 'path';
 
-let decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
+
+const decorations : Map<Function, { proxy: { prototype: any }, changes: Map<PropertyKey, Function|undefined>}> = new Map();
 
 export function decorate<T extends Function>(target: T, decorator: (type: T) => void) {
     let decoration = decorations.get(target.prototype);
@@ -11,7 +13,7 @@ export function decorate<T extends Function>(target: T, decorator: (type: T) => 
             proxy: { 
                 prototype: new Proxy(target.prototype, {
                     set(prototype: T, property: PropertyKey, value: any, receiver: any): boolean {
-                        let existing = Reflect.getOwnPropertyDescriptor(prototype, property);    
+                        const existing = Reflect.getOwnPropertyDescriptor(prototype, property);    
                         decorations.get(prototype)!.changes.set(property, existing ? existing.value : undefined);
                         return Reflect.set(prototype, property, value, receiver);                    
                     }
@@ -24,7 +26,7 @@ export function decorate<T extends Function>(target: T, decorator: (type: T) => 
 }
 
 export function undecorate() {
-    for (let [prototype, decoration] of decorations) {
+    for (const [prototype, decoration] of decorations) {
         decoration.changes.forEach((value, property) => value ? Reflect.set(prototype, property, value) : Reflect.deleteProperty(prototype, property)); 
     }
     decorations.clear();    
@@ -33,6 +35,8 @@ export function undecorate() {
 declare module "./ast" {
 
     interface Module {
+        name: string
+        sourcePath: ParsedPath
         emit<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
         emitWrapper<Options>(outDir: string, options: Options, writeFile: (filename: string, data: string) => void): void
     }
@@ -56,7 +60,7 @@ declare module "./ast" {
     }
 
     interface TypeDeclaration {
-        typeMembers(): ReadonlyArray<MemberDeclaration>
+        typeMembers(): ReadonlyArray<Declaration>
         keyword(): string
         typeName(): string
         suffix(): string
@@ -90,14 +94,14 @@ Declaration.prototype.declarationName = function(this: Declaration): string {
 }
 
 DeclaredType.prototype.typeName = function(this: DeclaredType): string {
-    return this.declaration ? this.declaration.declarationName() : this.name!;
+    return this.name!;
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
-    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.abstract ? '\n' : ` ${this.body(indent)}\n`}`;
+    return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.isAbstract ? '\n' : ` ${this.body(indent)}\n`}`;
 }
 
-TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<MemberDeclaration> {
+TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
     return this.declarations;
 }
 
