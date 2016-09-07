@@ -17,6 +17,7 @@ describe("SymbolTable", () => {
         const [[variable], program] = mockVariables(`let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(false);
     });
 
@@ -24,6 +25,7 @@ describe("SymbolTable", () => {
         const [[variable], program] = mockVariables(`let declaration`);
         const symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
@@ -31,6 +33,7 @@ describe("SymbolTable", () => {
         const [[variable], program] = mockVariables(`export let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
@@ -38,6 +41,7 @@ describe("SymbolTable", () => {
         const [[variable], program] = mockVariables(`/** @export */ let declaration`);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.isExported(variable)).toBe(true);
     });
 
@@ -49,6 +53,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
         expect(symbols.isExported(foo)).toBe(true);
         let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
@@ -63,6 +68,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
         expect(symbols.isExported(foo)).toBe(true);
         let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
@@ -77,6 +83,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let foo = program.getSourceFile('src.ts').statements[0] as ts.ModuleDeclaration;
         expect(symbols.isExported(foo)).toBe(false);
         let bar = ((foo.body as ts.ModuleBlock).statements[0] as ts.VariableStatement).declarationList.declarations[0];
@@ -91,6 +98,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let foo = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
         expect(symbols.isExported(foo)).toBe(false);
         let bar = foo.members[0] as ts.PropertyDeclaration;
@@ -117,6 +125,7 @@ describe("SymbolTable", () => {
     //     `]]);
     //     const symbols = new SymbolTable(program, false);
     //     expect(log.errorCount).toBe(0);
+    //     expect(log.warningCount).toBe(0);
     //     const unexportedType = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
     //     expect(unexportedType.name!.text).toBe('UnexportedType');
     //     expect(symbols.isExported(unexportedType)).toBe(true);
@@ -140,6 +149,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let myClass = program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration;
         expect(symbols.isExported(myClass)).toBe(true);
         let publicVar = myClass.members[0] as ts.PropertyDeclaration;
@@ -179,6 +189,7 @@ describe("SymbolTable", () => {
         `]]);
         const symbols = new SymbolTable(program, false);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.isThrown(program.getSourceFile('src.ts').statements[0] as ts.ClassDeclaration)).toBe(true);
         expect(symbols.isThrown(program.getSourceFile('src.ts').statements[1] as ts.ClassDeclaration)).toBe(true);
         const justThrows = symbols.getSignature(program.getSourceFile('src.ts').statements[2] as ts.FunctionDeclaration);
@@ -198,6 +209,7 @@ describe("SymbolTable", () => {
         let symbols = new SymbolTable(program, true);
         let type = symbols.getType(variable, (flags) => fail('Called default type') as any);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(1);
         expect(type.constructor.name).toBe('AnyType');
     });  
     
@@ -206,6 +218,7 @@ describe("SymbolTable", () => {
         let symbols = new SymbolTable(program, true);
         let type = symbols.getType(variable, (flags) => fail('Called default type') as any);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(1);
         expect(type.constructor.name).toBe('AnyType');
     });
 
@@ -218,6 +231,7 @@ describe("SymbolTable", () => {
         `);
         let symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let aType = symbols.getType(a, (flags) => fail('Called default type') as any);
         expect(aType.constructor.name).toBe('AnyType');
         expect(aType.flags).toBe(AST.Flags.Optional);
@@ -242,6 +256,7 @@ describe("SymbolTable", () => {
         `);
         let symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         let runType = symbols.getType<AST.FunctionType>(run, (flags) => fail('Called default type') as any);
         expect(runType.constructor.name).toBe('FunctionType');
         expect(runType.signature.returnType.constructor.name).toBe('VoidType');
@@ -267,6 +282,7 @@ describe("SymbolTable", () => {
         `);
         let symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(symbols.getType(numbers, (flags) => fail('Called default type') as any).constructor.name).toBe('ArrayType');
         expect(symbols.getType(strings, (flags) => fail('Called default type') as any).constructor.name).toBe('ArrayType');
         expect(symbols.getType(booleans, (flags) => fail('Called default type') as any).constructor.name).toBe('ArrayType');
@@ -284,6 +300,7 @@ describe("SymbolTable", () => {
         `);
         let symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         //s: string
         expect(s.name.getText()).toBe('s');
         expect(symbols.getType(s, (flags) => fail('Called default type') as any).constructor.name).toBe('StringType');
@@ -314,6 +331,7 @@ describe("SymbolTable", () => {
         `);
         let symbols = new SymbolTable(program, true);
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         const type = symbols.getType<AST.DeclaredType>(c, (flags) => fail('Called default type') as any);
         expect(type.constructor.name).toBe('DeclaredType');
         expect(type.name).toBe('Custom');

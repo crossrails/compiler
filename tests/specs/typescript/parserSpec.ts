@@ -42,6 +42,7 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, false, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files.length).toBe(1);
         expect(module.files[0].path.base).toBe("src.ts");
     });
@@ -52,6 +53,7 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, false, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files.length).toBe(0);
     });
 
@@ -61,6 +63,7 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, false, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files[0].declarations[0].isStatic).toBe(true);
     });
 
@@ -78,6 +81,8 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, true, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files[0].declarations.length).toBe(1);
         expect((module.files[0].declarations[0] as AST.InterfaceDeclaration).declarations.length).toBe(2);
     });
@@ -96,7 +101,9 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, true, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files[0].declarations.length).toBe(1);
+        expect((module.files[0].declarations[0].constructor.name)).toBe('ClassDeclaration');
         expect((module.files[0].declarations[0] as AST.ClassDeclaration).declarations.length).toBe(2);
         expect((module.files[0].declarations[0] as AST.ClassDeclaration).declarations[1].isAbstract).toBe(true);
     });
@@ -116,6 +123,7 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, true, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files[0].declarations.length).toBe(1);
         let members = (module.files[0].declarations[0] as AST.ClassDeclaration).declarations;
         expect(members.length).toBe(4);
@@ -133,7 +141,7 @@ describe("TypeScriptParser", () => {
         const program = mockProgram([['src.ts', `
             namespace Foo {
                 export var firstMember: any;
-                export function secondMember(): any {};
+                export function secondMember(): any {}
                 export var thirdMember: any;
             }
 
@@ -146,6 +154,7 @@ describe("TypeScriptParser", () => {
         const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, true, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(module.files[0].declarations.length).toBe(1);
         expect((module.files[0].declarations[0] as AST.NamespaceDeclaration).declarations.length).toBe(4);
     });
@@ -157,6 +166,7 @@ describe("TypeScriptParser", () => {
         const module = parser.parse();
         let myfunc = module.files[0].declarations[0] as AST.FunctionDeclaration;
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(myfunc.signature.returnType.constructor.name).toBe('VoidType');
         expect(myfunc.signature.parameters[0].type.constructor.name).toBe('AnyType');
     });
@@ -168,6 +178,7 @@ describe("TypeScriptParser", () => {
         const module = parser.parse();
         let declaration = module.files[0].declarations[0] as AST.VariableDeclaration;
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
         expect(declaration.type.constructor.name).toBe('AnyType');
     });
 
@@ -178,6 +189,7 @@ describe("TypeScriptParser", () => {
         const module = parser.parse();
         let declaration = module.files[0].declarations[0] as AST.VariableDeclaration;
         expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);    
         expect(declaration.type.constructor.name).toBe('StringType');
     });
 
