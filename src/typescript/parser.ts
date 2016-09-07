@@ -33,7 +33,7 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
     }
 
     shouldVisitNode(node: ts.Declaration): boolean {
-        if(this.symbols.isExported(node)) return true;
+        if(this.symbols.isExported(node)) return this.symbols.getExports(node).length > 0;
         const root = node.parent!.kind == ts.SyntaxKind.SourceFile || node.parent!.kind == ts.SyntaxKind.ModuleDeclaration;
         log.debug(`Skipping ${root ? 'unexported' : 'private'} ${ts.SyntaxKind[node.kind]} ${this.symbols.getName(node)}`, node);
         return false;
@@ -57,7 +57,7 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
     visitClass(node: ts.ClassDeclaration): ast.Declaration {
         const flags = getFlags(node) | (this.symbols.isThrown(node) ? ast.Flags.Thrown : ast.Flags.None);
-        const typeParameters = node.typeParameters ? node.typeParameters.map(t => this.symbols.getType(t)) : []; 
+        const typeParameters = node.typeParameters ? node.typeParameters.map(t => this.symbols.getType(t)) : [];
         return new ast.ClassDeclaration(node.name!.text, flags, visitNodes(this.symbols.getExports(node), this, false), typeParameters);           
     }
 

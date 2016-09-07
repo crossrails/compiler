@@ -9,7 +9,7 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
-    private readonly symbols = new Set<ts.Symbol>();
+    private readonly identifiers = new Set<ts.Identifier>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<ts.Symbol>();
 
@@ -45,15 +45,25 @@ export class SymbolTable implements NodeVisitor<void> {
         return this.createSignature(node, this.checker.getSignatureFromDeclaration(node as ts.SignatureDeclaration));
     }
 
-    private getMainDeclaration(symbol: ts.Symbol) {
-        return symbol.getDeclarations().reduce((main, d) => !main || (main.kind == ts.SyntaxKind.ModuleDeclaration && d.kind != ts.SyntaxKind.ModuleDeclaration) ? d : main);
+    private getDeclarations(symbol: ts.Symbol, declaration?: ts.Declaration): ReadonlyArray<ts.Declaration> {
+        return symbol.getDeclarations().filter( d => { 
+            if(declaration) switch(declaration.kind) {
+                case ts.SyntaxKind.FunctionDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration || ((d as ts.FunctionDeclaration).parameters.length == (declaration as ts.FunctionDeclaration).parameters.length &&
+                        (d as ts.FunctionDeclaration).parameters.reduce((typesMatch, p, i) => typesMatch && p.type == (declaration as ts.FunctionDeclaration).parameters[i].type, true));
+                case ts.SyntaxKind.ModuleDeclaration:
+                    return d.kind != ts.SyntaxKind.FunctionDeclaration;
+            }
+            return true;
+        }).sort((a, b) => a.kind - b.kind);        
     }
 
     private exportIfNecessary(symbol: ts.Symbol) {
-        if(this.exports.has(this.getMainDeclaration(symbol))) return; 
-        symbol.getDeclarations().forEach((node: ts.Node) => {
-            [...ancestry(node)].forEach(n => n.flags |= ts.NodeFlags.Export);
-            visitNode(node.getSourceFile(), this, true);
+        const declarations = this.getDeclarations(symbol);
+        if(declarations.some(d => d.getSourceFile().hasNoDefaultLib || this.exports.has(d))) return; 
+        declarations.forEach((d: ts.Declaration) => {
+            [...ancestry(d)].forEach(n => n.flags |= ts.NodeFlags.Export);
+            visitNode(d.getSourceFile(), this, true);
         });
     }
 
@@ -134,28 +144,13 @@ export class SymbolTable implements NodeVisitor<void> {
                 return new ast.ArrayType(flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
             default:
                 const name = this.checker.symbolToString(symbol);
-                if(!this.symbols.has(symbol)) {
+                if(!this.exports.has(this.getDeclarations(symbol)[0])) {
                     log.warn(`Could not find type ${name}`, node); 
                     log.info(`Resolve this error by adding the source for ${name} to the input file otherwise output will not compile standalone`) 
                 }
                 if(this.thrown.has(symbol)) flags |= ast.Flags.Thrown;
                 return new ast.DeclaredType(name, flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
         }
-    }
-
-    private declarationsFor(declaration: ts.Declaration): ts.Declaration[] {
-        if(declaration.name === undefined) return [declaration];
-        const symbol = this.checker.getSymbolAtLocation(declaration.name);
-        return symbol == undefined ?  [declaration] : symbol.declarations!.filter( d => { 
-            switch(declaration.kind) {
-                case ts.SyntaxKind.FunctionDeclaration:
-                    return d.kind != ts.SyntaxKind.FunctionDeclaration || ((d as ts.FunctionDeclaration).parameters.length == (declaration as ts.FunctionDeclaration).parameters.length &&
-                        (d as ts.FunctionDeclaration).parameters.reduce((typesMatch, p, i) => typesMatch && p.type == (declaration as ts.FunctionDeclaration).parameters[i].type, true));
-                case ts.SyntaxKind.ModuleDeclaration:
-                    return d.kind != ts.SyntaxKind.FunctionDeclaration;
-            }
-            return true;
-        });        
     }
 
     visitSourceFile(node: ts.SourceFile) {
@@ -198,14 +193,20 @@ export class SymbolTable implements NodeVisitor<void> {
     }
 
     visitIdentifier(node: ts.Identifier): void {
+        if(this.identifiers.has(node)) throw BreakVisitException;        
+        this.identifiers.add(node);
         const symbol = this.checker.getSymbolAtLocation(node);
-        if(this.symbols.has(symbol)) throw BreakVisitException;        
-        this.symbols.add(symbol);
-        this.exports.set(this.getMainDeclaration(symbol), symbol.getDeclarations());
+        //export
+        if(node.parent!.kind != ts.SyntaxKind.Parameter) {
+            const declarations = this.getDeclarations(symbol, node.parent! as ts.Declaration);
+            //log.debug(`Exporting symbol ${this.checker.getFullyQualifiedName(symbol)} as ${ts.SyntaxKind[declarations[0].kind]}`, node);
+            declarations.forEach((d, i) => this.exports.set(d, i ? [] : declarations));
+        }
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
-        if((type.flags & ts.TypeFlags.Reference) == 0) return;
-        const target = (type as ts.TypeReference).target;
+        if(!type.aliasSymbol) return;
+        log.debug(`Exporting if necessary ${this.checker.symbolToString(type.aliasSymbol)}`, node);
+        this.exportIfNecessary(type.aliasSymbol);
     }
 }
 
