@@ -32,10 +32,13 @@ decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceF
 })
 
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {
-    return `${!this.isModuleFile ? '' : `
+    if(!this.isModuleFile) return '';
+    const identifiers = new Map<string, Declaration>();
+    [...this.module.allDeclarations()].filter(d => d.parent && !(d instanceof ConstructorDeclaration)).forEach(d => identifiers.set(d.name, d)); 
+    return `
 extension JSProperty {
-    ${[...this.module.allDeclarations()].filter(d => d.parent && !(d instanceof ConstructorDeclaration)).map(d => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
-}`.substr(1)}`;
+    ${[...identifiers.values()].map(d => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
+}`.substr(1);
 })
 
 decorate(Declaration, ({prototype}) => prototype.argumentName = function (this: Declaration): string {
