@@ -82,7 +82,10 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
     }
 
     visitOtherNode(node: ts.Node): ast.Declaration {
-        if(node.kind == ts.SyntaxKind.VariableStatement) throw ContinueVisitException;
+        throw ContinueVisitException;
+    }
+
+    visitUnsupportedNode(node: ts.Node): ast.Declaration {
         log.warn(`Skipping ${ts.SyntaxKind[node.kind]} ${this.symbols.getName(node)}`, node); 
         log.info(`This syntax element is not currently supported by crossrails`);
         throw BreakVisitException;
