@@ -23,7 +23,7 @@ install:
   - "npm run codacy"
   - "npm install -g gulp"
   - "gulp run-java-tests"
-  - "gulp gen-markdown"
+#  - "gulp gen-markdown"
 language: objective-c
 osx_image: xcode8
 script:
