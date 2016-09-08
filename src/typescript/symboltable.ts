@@ -60,11 +60,17 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private exportIfNecessary(symbol: ts.Symbol) {
         const declarations = this.getDeclarations(symbol);
-        if(declarations.some(d => d.getSourceFile().hasNoDefaultLib || this.exports.has(d))) return; 
-        declarations.forEach((d: ts.Declaration) => {
+        if(declarations.some(d => d.getSourceFile().hasNoDefaultLib || this.exports.has(d))) return;
+        const exported = declarations.reduce((exported, d) => {
+            exported = (d.flags & ts.NodeFlags.Export) == 0;
+            d.flags |= ts.NodeFlags.Export;
             [...ancestry(d)].forEach(n => n.flags |= ts.NodeFlags.Export);
             visitNode(d.getSourceFile(), this, true);
-        });
+            return exported;
+        }, false);
+        if(exported) {
+            log.debug(`Exported referenced ${ts.SyntaxKind[declarations[0].kind]} ${this.getName(declarations[0])}`, declarations[0]);            
+        }
     }
 
     private getThrownSymbols(node: ts.SignatureDeclaration, tags: ReadonlyArray<Comment.Tag> = Comment.fromNode(node).tagsNamed('throws')): ReadonlyArray<ts.Symbol> {
@@ -204,9 +210,8 @@ export class SymbolTable implements NodeVisitor<void> {
         }
         //if type reference ensure type is exported
         const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
-        if(!type.aliasSymbol) return;
-        log.debug(`Exporting if necessary ${this.checker.symbolToString(type.aliasSymbol)}`, node);
-        this.exportIfNecessary(type.aliasSymbol);
+        if(!type.getSymbol()) return;
+        this.exportIfNecessary(type.getSymbol());
     }
 }
 
