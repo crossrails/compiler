@@ -1,4 +1,6 @@
-env: NODE_VERSION="6"
+env: 
+- NODE_VERSION="6"
+- GIT_SSH_KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDhM1GuGx1gDe/E81y02xeNUu7RqajkVy+mgrBywIPSzP54rOIw/MgLey+I5pJCZz5x28zEqyETZj036l+GNAtYVYqn5Jl/FHewwAu5xbGnZ44wDYycEbulDF+mUG+5yCP30wv9x4enmkM0uFBqg5HUG9v7KHa/gMyzPneqVX9lk84akThItb7XaR5HGUCrtPYrLb01lPURIWfGegsfPzdcvHZpnqjiyuH+UFS6vOq3wV5OhpwjiPyFiNhCqNMpL1Kih5K8R63QLhOpIqonbkStvi3XNF6ulcN9WRMw0FhyXplM5LT58TIe9w0uMwKp5/LrHYPwYMNfk/+8xsc3mffdchA9/QCpXsAK16enV9Qu09aSCRJPHYzotyHnufTl+UZf/y+GfzPSl5AlloHtCqy7D+n9X/74V6y0AdSc4TQmc+JO+aromoo9zjI3/7ztQWS8m52U8CC0JbDe2+5zqD+anbIFvt+XPNvoYgfWpmGewqOzZXSluLWyXHLo+OxCIIotFGFkjkfewgJvR2SGNW9+eAEK07uQxpYxFxO6He6WA7m75SKKiVsIfKHr2SLXB2TQ+6jcFpQ/OpAaNILZP1GltPgpmcsX+RsqqPn49QeC4qUE2D1pdI+5dX24RDa4r4Xv78beh4OBZfJ/4pGDB36fV9gYYLXrZxUvH+YWzEtJBw== travis@Traviss-Mac-528.local"
 addons:
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
@@ -22,6 +24,7 @@ install:
   - "npm run upload-code-coverage"
   - "npm run codacy"
   - "npm install -g gulp"
+  - "export GIT_SSH=`ssh -i ~/.ssh/gitkey_rsa '$GIT_SSH_KEY'`"
   - "cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m 'Updated compiler options' && git push "
 #  - "gulp run-java-tests"
 #  - "gulp gen-markdown"
