@@ -63,13 +63,13 @@ decorate(FunctionDeclaration, ({prototype}) => prototype.accessor = function (th
 })
 
 decorate(FunctionDeclaration, ({prototype}) => prototype.body = function (this: FunctionDeclaration, indent?: string): string {
-    let body = `${indent}    ${this.signature.returnType instanceof VoidType ? this.accessor() : `return ${this.signature.returnType.toNativeValue()}`}`;
+    let body = `${indent}    ${this.signature.returnType instanceof VoidType ? `_ = ${this.accessor()}` : `return ${this.signature.returnType.toNativeValue()}`}`;
     let thrownDeclaredTypes: DeclaredType[] = this.signature.thrownTypes.filter(t => t instanceof DeclaredType) as DeclaredType[];
     if(thrownDeclaredTypes.length) {
         body = `
 ${indent}    do {
     ${body}
-${indent}    } catch let error as Error {
+${indent}    } catch let error as JSError {
 ${indent}        throw ${thrownDeclaredTypes[0].typeName()}(error.exception)
 ${indent}    }`.substr(1); 
     }
@@ -82,7 +82,7 @@ decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (thi
     let members = this.parent.declarations.filter(m => !m.isStatic && m.constructor.name === 'FunctionDeclaration');
     return `{
 ${indent}    self.this = try! ${this.thisName()}.construct(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}) 
-${indent}    self.proxy = ${members.length == 0 ? 'this' : `self.dynamicType === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
+${indent}    self.proxy = ${members.length == 0 ? 'this' : `type(of: self) === ${this.parent.declarationName()}.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
 ${members.map((m: FunctionDeclaration) => `
 ${indent}        "${m.name}": { args in ${m.signature.returnType instanceof VoidType ? `
 ${indent}            self.${m.declarationName()}(${m.signature.parameters.map((p, i) => `${p.declarationName()}: ${p.type.toNativeValue(`args[${i}]`)}`).join(', ')}) 
@@ -167,7 +167,7 @@ class JS_${this.declarationName()}: ${this.declarationName()} {
     }
 ${this.declarations.reduce((out, m) => `${out}
     func ${m.declarationName()}() {
-        try! this[.${m.declarationName()}]()
+        _ = try! this[.${m.declarationName()}]()
     }
 `, '')}`;
 })

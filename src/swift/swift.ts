@@ -47,7 +47,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: ast.Module, o
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.suffix = function (this: ast.ClassDeclaration): string {
-    return `: Equatable${this.isThrown ? ', ErrorProtocol' : ''}`;
+    return `: Equatable${this.isThrown ? ', Error' : ''}`;
 })
 
 decorate(ClassDeclaration, ({prototype}) => prototype.footer = function (this: ast.ClassDeclaration): string {
