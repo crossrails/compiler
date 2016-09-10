@@ -9,7 +9,6 @@ before_install:
   - brew cask install java
   - brew install nvm
   - brew install gradle
-  - chmod +x wiki/deploy.sh
 install: 
   - "nvm install $NODE_VERSION"
   - "node --version"
@@ -24,7 +23,7 @@ install:
   - "npm run upload-code-coverage"
   - "npm run codacy"
   - "npm install -g gulp"
-  - "cd wiki && chmod 400 deploy.sh && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && ./deploy.sh "
+  - "cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && ./deploy.sh "
 #  - "gulp run-java-tests"
 #  - "gulp gen-markdown"
 language: objective-c
