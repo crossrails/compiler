@@ -17,7 +17,7 @@ class test: XCTestCase {
     }
     
     override func tearDown() {
-        try! this.context.eval(Bundle(identifier: "io.xrails.src")!.pathForResource("src", ofType: "js")!) as Void
+        try! this.context.eval(Bundle(identifier: "io.xrails.src")!.path(forResource: "src", ofType: "js")!) as Void
     }
     
     func testSimpleException() {
@@ -126,7 +126,7 @@ class test: XCTestCase {
         XCTAssert(numberConst.isNaN)
         XCTAssertEqual(stringConst, "stringConstLiteral")
         XCTAssertEqual(numberArrayConst, [1, 2, 3])
-        XCTAssertEqual(stringArrayArrayConst, [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]])
+        XCTAssertEqual(stringArrayArrayConst as NSArray, [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]])
         XCTAssertEqual(anyConst as? String, "anyConstLiteral")
     }
     
@@ -160,15 +160,15 @@ class test: XCTestCase {
         numberArrayVar = numberArrayConst
         XCTAssertEqual(numberArrayVar, numberArrayConst)
 
-        XCTAssertEqual(stringArrayArrayVar, [])
+        XCTAssertEqual(stringArrayArrayVar as NSArray, [])
         stringArrayArrayVar = stringArrayArrayConst
-        XCTAssertEqual(stringArrayArrayVar, stringArrayArrayConst)
+        XCTAssertEqual(stringArrayArrayVar as NSArray, stringArrayArrayConst as NSArray)
         
         numberArrayVar = [5]
         XCTAssertEqual(numberArrayVar, [5])
         
         stringArrayArrayVar = [["yo"]]
-        XCTAssertEqual(stringArrayArrayVar, [["yo"]])
+        XCTAssertEqual(stringArrayArrayVar as NSArray, [["yo"]])
     }
     
     
@@ -226,7 +226,7 @@ class test: XCTestCase {
     }
 
     func testUnknownJSSideObjectDeallocation() {
-        var o :AnyObject? = optionalAnyObjectInstance as? AnyObject
+        var o :AnyObject? = optionalAnyObjectInstance as AnyObject
         weak var ref = o!
         XCTAssertNotNil(ref)
         optionalAnyObjectInstance = nil
