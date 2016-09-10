@@ -24,8 +24,7 @@ install:
   - "npm run codacy"
   - "npm install -g gulp"
   - "export GIT_SSH=`ssh -i ~/.ssh/gitkey_rsa '$GIT_SSH_KEY'`"
-  - "git config user.email 'travis@Travis'"
-  - "cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m 'Updated compiler options' && git push "
+  - "git config user.email 'travis@Travis' && cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m 'Updated compiler options' && git push "
 #  - "gulp run-java-tests"
 #  - "gulp gen-markdown"
 language: objective-c
