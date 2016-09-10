@@ -9,6 +9,7 @@ before_install:
   - brew cask install java
   - brew install nvm
   - brew install gradle
+  - chmod +x wiki/deploy.sh
 install: 
   - "nvm install $NODE_VERSION"
   - "node --version"
