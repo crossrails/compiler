@@ -12,7 +12,7 @@
 		1DE3D3D11C66BA6F009671D8 /* src.h in Headers */ = {isa = PBXBuildFile; fileRef = 1DE3D3D01C66BA6F009671D8 /* src.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1DE3D3DD1C66BAA6009671D8 /* srcTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE3D3DC1C66BAA6009671D8 /* srcTest.swift */; };
 		1DE3D3DF1C66BAA6009671D8 /* src.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE3D3CD1C66BA6F009671D8 /* src.framework */; };
-		B62500321D1DBA3E00493DDD /* javascriptcore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62500311D1DBA3E00493DDD /* javascriptcore.swift */; };
+		1DE904E01D84C33C005F2C9F /* js.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D15F9291C92FA5800952FBE /* js.swift */; };
 		B63B760F1D1DAEB9004D66B8 /* src.js in Resources */ = {isa = PBXBuildFile; fileRef = B63B760E1D1DAEB9004D66B8 /* src.js */; };
 		B6D665EE1D1B0AF400AD848E /* functions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D665EC1D1B0AF400AD848E /* functions.swift */; };
 		B6D665EF1D1B0AF400AD848E /* objects.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6D665ED1D1B0AF400AD848E /* objects.swift */; };
@@ -31,21 +31,16 @@
 /* Begin PBXFileReference section */
 		00A968FB1CEBC846001C97AA /* types.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = types.swift; sourceTree = "<group>"; };
 		1D15F9291C92FA5800952FBE /* js.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = js.swift; sourceTree = "<group>"; };
-		1D4532131C99EE4A00098A44 /* specialException.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = specialException.swift; path = src/specialException.swift; sourceTree = "<group>"; };
 		1DB561241C680B59003442CF /* src.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = src.swift; sourceTree = "<group>"; };
-		1DD38DB01C93AAF5007AE8EA /* simpleObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = simpleObject.swift; path = src/simpleObject.swift; sourceTree = "<group>"; };
-		1DD38DB21C95CEB4007AE8EA /* simpleInterface.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = simpleInterface.swift; path = src/simpleInterface.swift; sourceTree = "<group>"; };
 		1DE3D3CD1C66BA6F009671D8 /* src.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = src.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DE3D3D01C66BA6F009671D8 /* src.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = src.h; sourceTree = "<group>"; };
 		1DE3D3D21C66BA6F009671D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1DE3D3DA1C66BAA6009671D8 /* test.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = test.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DE3D3DC1C66BAA6009671D8 /* srcTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = srcTest.swift; sourceTree = "<group>"; };
 		1DE3D3DE1C66BAA6009671D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		B62500311D1DBA3E00493DDD /* javascriptcore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = javascriptcore.swift; path = ../../src/swift/javascriptcore.swift; sourceTree = "<group>"; };
 		B63B760E1D1DAEB9004D66B8 /* src.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = src.js; path = ../input/src.js; sourceTree = "<group>"; };
 		B6D665EC1D1B0AF400AD848E /* functions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = functions.swift; sourceTree = "<group>"; };
 		B6D665ED1D1B0AF400AD848E /* objects.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = objects.swift; sourceTree = "<group>"; };
-		B6D665F01D1B0B2A00AD848E /* handwritten.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = handwritten.swift; path = src/handwritten.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,15 +65,10 @@
 		1DE3D3C11C66B9E8009671D8 = {
 			isa = PBXGroup;
 			children = (
-				B62500311D1DBA3E00493DDD /* javascriptcore.swift */,
 				B63B760E1D1DAEB9004D66B8 /* src.js */,
 				1DE3D3CF1C66BA6F009671D8 /* src */,
 				1DE3D3DB1C66BAA6009671D8 /* test */,
 				1DE3D3CE1C66BA6F009671D8 /* Products */,
-				1DD38DB01C93AAF5007AE8EA /* simpleObject.swift */,
-				1DD38DB21C95CEB4007AE8EA /* simpleInterface.swift */,
-				1D4532131C99EE4A00098A44 /* specialException.swift */,
-				B6D665F01D1B0B2A00AD848E /* handwritten.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -226,9 +216,9 @@
 			files = (
 				1DB561251C680B59003442CF /* src.swift in Sources */,
 				00A968FC1CEBC846001C97AA /* types.swift in Sources */,
+				1DE904E01D84C33C005F2C9F /* js.swift in Sources */,
 				B6D665EF1D1B0AF400AD848E /* objects.swift in Sources */,
 				B6D665EE1D1B0AF400AD848E /* functions.swift in Sources */,
-				B62500321D1DBA3E00493DDD /* javascriptcore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,7 +248,9 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -282,7 +274,9 @@
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -314,7 +308,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -374,7 +368,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;

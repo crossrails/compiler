@@ -1,6 +1,6 @@
 import Foundation
 
-var this :JSInstance = try! JSContext().eval(Bundle(identifier: "io.xrails.src")!.path(forResource: "src", ofType: "js")!)
+var this: JSInstance = try! JSContext().eval(Bundle(identifier: "io.xrails.src")!.path(forResource: "src", ofType: "js")!)
 
 
 extension JSProperty {

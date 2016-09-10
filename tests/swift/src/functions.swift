@@ -10,7 +10,7 @@ public var voidNoArgFunctionCalled :Bool {
 }
 
 public func voidNoArgFunction() {
-    try! this[.voidNoArgFunction]()
+    _ = try! this[.voidNoArgFunction]()
 }
 
 public func stringNoArgFunction() -> String {
@@ -23,7 +23,7 @@ public func numberMultipleArgFunction(a: Double, b: Double) -> Double {
 
 public var stringNoArgLambda :() -> String {
     get {
-        let function :JSFunction = this[.stringNoArgLambda]
+        let function: JSFunction = this[.stringNoArgLambda]
         return { () in return String(try! function.call(this)) }
     }
     set {
@@ -32,19 +32,19 @@ public var stringNoArgLambda :() -> String {
 }
 
 public func throwSimpleError() throws {
-    try this[.throwSimpleError]()
+    _ = try this[.throwSimpleError]()
 }
 
-public class SpecialError : Equatable, ErrorProtocol {
+public class SpecialError: Equatable, Error {
 
-    private static var this :JSClass { 
+    private static var this: JSClass { 
         get { return src.this["SpecialError"] } 
     } 
      
-    private let this :JSInstance
-    private var proxy :JSInstance!
+    private let this: JSInstance
+    private var proxy: JSInstance!
     
-    init(_ instance :JSInstance) { 
+    init(_ instance: JSInstance) { 
         this = instance 
         proxy = instance 
         this.bind(self)
@@ -71,13 +71,13 @@ public class SpecialError : Equatable, ErrorProtocol {
 }    
 
 public func ==(lhs: SpecialError, rhs: SpecialError) -> Bool { 
-    return lhs as AnyObject == rhs as AnyObject
+    return lhs as AnyObject === rhs as AnyObject
 }
     
 public func throwSpecialError() throws {
     do {
-        try this[.throwSpecialError]()
-    } catch let error as Error {
+        _ = try this[.throwSpecialError]()
+    } catch let error as JSError {
         throw SpecialError(error.exception)
     }
 }

@@ -1,15 +1,15 @@
 import Foundation
 
-public class SimpleObject : Equatable {
+public class SimpleObject: Equatable {
 
-    private static var this :JSClass { 
+    private static var this: JSClass { 
         get { return src.this["SimpleObject"] } 
     } 
      
-    private let this :JSInstance
-    private var proxy :JSInstance!
+    private let this: JSInstance
+    private var proxy: JSInstance!
     
-    init(_ instance :JSInstance) { 
+    init(_ instance: JSInstance) { 
         this = instance 
         proxy = instance 
         this.bind(self)
@@ -39,7 +39,7 @@ public class SimpleObject : Equatable {
 
     public init(v: Double? = nil) {
         self.this = try! SimpleObject.this.construct(SimpleObject.this.valueOf(v)) 
-        self.proxy = self.dynamicType === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
+        self.proxy = type(of: self) === SimpleObject.self ? this : JSObject(this.context, prototype: this, callbacks: [ 
             "numberSingleObjectArgMethod": { args in 
                 return self.this.valueOf(self.numberSingleObjectArgMethod(a: SimpleObject(args[0])))
             }, 
@@ -59,7 +59,7 @@ public class SimpleObject : Equatable {
     }
 
     public static func staticVoidNoArgMethod() {
-        try! this[.staticVoidNoArgMethod]()
+        _ = try! this[.staticVoidNoArgMethod]()
     }
 
     public func numberSingleObjectArgMethod(a: SimpleObject) -> Double {
@@ -67,11 +67,11 @@ public class SimpleObject : Equatable {
     }
 
     public func callOverriddenMethod() {
-        try! this[.callOverriddenMethod].call(proxy)
+        _ = try! this[.callOverriddenMethod].call(proxy)
     }
 
     public func methodToOverride() {
-        try! this[.methodToOverride].call(proxy)
+        _ = try! this[.methodToOverride].call(proxy)
     }
 
     public func upcastThisToObject() -> Any {
@@ -80,7 +80,7 @@ public class SimpleObject : Equatable {
 }    
 
 public func ==(lhs: SimpleObject, rhs: SimpleObject) -> Bool { 
-    return lhs as AnyObject == rhs as AnyObject
+    return lhs as AnyObject === rhs as AnyObject
 }
     
 public let simpleObjectInstance :SimpleObject = SimpleObject(this[.simpleObjectInstance])
@@ -105,7 +105,7 @@ public var simpleInterfaceInstanceCalled :Bool {
     }
 }
 
-public protocol SimpleInterface : class {
+public protocol SimpleInterface: class {
 
     func voidNoArgMethod()
 }
@@ -121,11 +121,11 @@ extension SimpleInterface {
     }
 }
 
-class JS_SimpleInterface : SimpleInterface {
+class JS_SimpleInterface: SimpleInterface {
     
-    private let this :JSInstance
+    private let this: JSInstance
     
-    init(_ instance :JSInstance) {
+    init(_ instance: JSInstance) {
         this = instance
         this.bind(self)
     }
@@ -135,7 +135,7 @@ class JS_SimpleInterface : SimpleInterface {
     }
 
     func voidNoArgMethod() {
-        try! this[.voidNoArgMethod]()
+        _ = try! this[.voidNoArgMethod]()
     }
 
 }
@@ -150,5 +150,5 @@ public var simpleInterfaceInstance :SimpleInterface {
 }
 
 public func acceptSimpleInterface(simpleInterface: SimpleInterface) {
-    try! this[.acceptSimpleInterface](this.valueOf(simpleInterface, with: simpleInterface.eval))
+    _ = try! this[.acceptSimpleInterface](this.valueOf(simpleInterface, with: simpleInterface.eval))
 }
