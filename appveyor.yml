@@ -17,11 +17,6 @@ test_script:
   - nyc npm test
   - npm run build-wrappers
   - npm run build-input-project
-  - npm install -g codecov
-  - npm install -g codeclimate-test-reporter
-  - npm run create-code-coverage
-  - npm run upload-code-coverage
-  - npm run codacy
   - npm install -g gulp
   - gulp run-java-tests
 # Don't actually build.
