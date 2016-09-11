@@ -22,7 +22,8 @@ declare module "../ast" {
 
 decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module, outDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
     outDir = path.join(outDir, options.basePackage.replace('.', path.sep));
-    writeFile(path.join(outDir, 'JS.java'), readFileSync(path.join(__dirname, 'nashorn.java'), 'utf8'));
+    const data = readFileSync(path.join(__dirname, 'nashorn.java'), 'utf8').replace('package io.xrails;', `package ${options.basePackage};`);
+    writeFile(path.join(outDir, 'JS.java'), data);
 })
 
 decorate(InterfaceDeclaration, ({prototype}) => prototype.imports = function (this: InterfaceDeclaration) {      

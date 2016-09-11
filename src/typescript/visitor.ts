@@ -16,7 +16,7 @@ export interface NodeVisitor<T> {
     visitParameter?(node: ts.ParameterDeclaration): T
     visitIdentifier?(node: ts.Identifier): T
     visitOtherNode?(node: ts.Node): T
-    visitUnsupportedNode?(node: ts.Node): T
+    visitUnsupportedNode?(node: ts.Node): void
 }
 
 export const BreakVisitException = Symbol();
@@ -89,7 +89,7 @@ export function visitNode<T>(node: ts.Node | undefined, visitor: NodeVisitor<T>,
             return [];
             
         default:
-            const result = visitor.visitUnsupportedNode && visitor.visitUnsupportedNode.call(thisArg, node);
-            return result ? [result] : [];
+            visitor.visitUnsupportedNode && visitor.visitUnsupportedNode.call(thisArg, node);
+            return [];
     }    
 } 
