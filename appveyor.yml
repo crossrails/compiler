@@ -18,6 +18,7 @@ test_script:
   - npm run build-wrappers
   - npm run build-input-project
   - npm install -g gulp
+  - gradlew.bat --version
   - gulp run-java-tests
 # Don't actually build.
 build: off
