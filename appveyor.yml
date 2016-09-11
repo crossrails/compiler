@@ -5,7 +5,7 @@ environment:
 install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
-  - ps: Install-Product Chocolatey
+  - ps: Install-PackageProvider Chocolatey
   # install modules
   - npm install
   - choco install gradle
