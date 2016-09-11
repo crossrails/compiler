@@ -10,6 +10,7 @@ install:
   - npm install
   - choco install gradle
   - choco install maven
+  - ps: refreshenv
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
