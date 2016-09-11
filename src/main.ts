@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as path from 'path';
-import {log} from "./log"
+import {log, Log} from "./log"
 import {Module} from "./ast"
 import {TypeScriptParser} from "./typescript/parser"
 import {readFileSync, accessSync, R_OK} from 'fs';
@@ -150,7 +150,10 @@ function main(...args: string[]): number {
             log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
         }
     }
-    
+    console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.warningCount == 1 ? '' : 's'}`)
+    if((log.level === Log.Level.ERROR || log.level === Log.Level.WARNING) && (log.errorCount || log.warningCount)) {
+        console.log(`Run with --logLevel=info to see more details`)            
+    }    
     return log.errorCount;
 }
 
