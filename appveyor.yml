@@ -27,6 +27,6 @@ test_script:
   - npm install -g gulp
   - gradle --version
   - gulp run-java-tests
-  - cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m "updated wiki" && git push 
+  #- cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m "updated wiki" && git push 
 # Don't actually build.
 build: off
