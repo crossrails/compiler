@@ -23,9 +23,7 @@ test_script:
   - npm run upload-code-coverage
   - npm run codacy
   - npm install -g gulp
-  # run tests
-  - npm test
-
+  - gulp run-java-tests
 # Don't actually build.
 build: off
 
