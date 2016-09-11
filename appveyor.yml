@@ -10,6 +10,7 @@ install:
   - npm install
   - choco install gradle
   - choco install maven
+  - cmd: SET PATH=C:\tools\apache-maven-3.3.9\bin;%PATH%
   - ps: refreshenv
 # Post-install test scripts.
 test_script:
