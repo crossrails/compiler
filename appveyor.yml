@@ -10,9 +10,6 @@ install:
   - npm install
   - choco install gradle
 
-build_script:
-  - gradlew.bat assemble --info --no-daemon
-
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
@@ -23,8 +20,7 @@ test_script:
   - npm run build-wrappers
   - npm run build-input-project
   - npm install -g gulp
-  - gradlew.bat test check gradleTest --info --no-daemon
-  - gradlew.bat --version
+  - gradle --version
   - gulp run-java-tests
 # Don't actually build.
 build: off
