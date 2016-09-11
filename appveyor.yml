@@ -13,6 +13,16 @@ test_script:
   # Output useful info for debugging.
   - node --version
   - npm --version
+  - npm install -g nyc
+  - nyc npm test
+  - npm run build-wrappers
+  - npm run build-input-project
+  - npm install -g codecov
+  - npm install -g codeclimate-test-reporter
+  - npm run create-code-coverage
+  - npm run upload-code-coverage
+  - npm run codacy
+  - npm install -g gulp
   # run tests
   - npm test
 
