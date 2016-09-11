@@ -22,4 +22,5 @@ test_script:
   - gulp run-java-tests
 # Don't actually build.
 build: off
-
+cache:
+  - C:\Users\appveyor\.gradle
