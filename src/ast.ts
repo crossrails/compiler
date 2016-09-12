@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as assert from 'assert';
 
-function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
+export function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
-        Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
+        Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, configurable: true, value: parent});
     return child;
 }
 

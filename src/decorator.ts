@@ -149,10 +149,6 @@ ${indent}}
     `.replace(/\n{3}/g, '\n').substr(1);
 }
 
-NamespaceDeclaration.prototype.declarationName = function (this: NamespaceDeclaration): string {
-    return `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}`;
-}
-
 NamespaceDeclaration.prototype.suffix = function (this: NamespaceDeclaration): string {
     return '';
 }

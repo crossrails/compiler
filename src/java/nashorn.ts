@@ -4,7 +4,7 @@ import "./java"
 import {JavaOptions} from "./java"
 import {decorate} from '../decorator';
 
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType} from "../ast"
+import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, NamespaceDeclaration} from "../ast"
 
 declare module "../ast" {
     interface Declaration {
@@ -83,6 +83,15 @@ ${indent}@Override
 ${indent}public boolean equals(Object obj) {
 ${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
 ${indent}}`;
+})
+
+decorate(NamespaceDeclaration, ({prototype}) => prototype.header = function (this: NamespaceDeclaration, indent?: string) {
+    return `
+${!this.sourceFile.isModuleFile ? '' : `
+${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");\n`.substr(1)
+}${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
+${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`}
+`.substr(1);    
 })
 
 decorate(Declaration, ({prototype}) => prototype.mirror = function (this: Declaration) {

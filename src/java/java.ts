@@ -3,7 +3,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {EmitterOptions} from "../emitter" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration
+    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration, adopt
 } from "../ast"
 
 export interface JavaOptions extends EmitterOptions {
@@ -38,10 +38,11 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
         let file: SourceFile = Object.create(SourceFile.prototype, {
             name: { value: declaration.name },
             module: { value: this },
-            isModuleFile: { value: filename == moduleFilename},
+            isModuleFile: { value: filename.toLowerCase() == moduleFilename.toLowerCase()},
             packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
-            declarations: { value: [ filename != moduleFilename ? declaration : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
+            declarations: { value: [ filename.toLowerCase() != moduleFilename.toLowerCase() ? declaration : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
         });
+        adopt(file.declarations, file);
         writeFile(filename, file.emit());
         writtenModuleFile = writtenModuleFile || file.isModuleFile;
     }        
@@ -54,7 +55,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             packageName: { value: options.basePackage },
             declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, module: { value: this }, declarations: { value: globals }}) ] }
         });
-        Reflect.set(file.declarations[0], 'parent', file);
+        adopt(file.declarations, file);
         writeFile(moduleFilename, file.emit());
     }
 }) 
@@ -122,9 +123,9 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration, indent?: string): string {
     return `
-${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}() ${this.getter(indent)}
+${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} ${this.type.emit()} get${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}()${this.isAbstract ? ';' : ` ${this.getter(indent)}`}
     ${this.isConstant ? '' : `
-${indent}${this.isProtected ? 'protected' : 'public'}${this.isStatic ?' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()}) ${this.setter(indent)}
+${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} void set${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}(${this.type.emit(false)} ${this.declarationName()})${this.isAbstract ? ';' : ` ${this.setter(indent)}`}
     `}`.substr(1);
 })
 
@@ -157,7 +158,7 @@ decorate(FunctionType, ({prototype}) => prototype.emit = function(this: Function
     if(!(this.signature.returnType instanceof VoidType)) {
         typeArguments = [this.signature.returnType, ...typeArguments];
     }
-    let typeSignature = `${this.typeName()}${typeArguments.length == 0 ? '' : `<${typeArguments.map(a => a.emit()).join(', ')}>`}`;
+    let typeSignature = `${this.typeName()}${typeArguments.length == 0 || this.signature.parameters.length > 2 ? '' : `<${typeArguments.map(a => a.emit()).join(', ')}>`}`;
     return optional ? `Optional<${typeSignature}>` : typeSignature;    
 })
 
@@ -204,6 +205,5 @@ decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: Func
             return isVoid ? `BiConsumer` : `BiFunction`;
         default:
             return 'Object';
-            //throw new Error('Currently unsupported function type');
     }  
 })
