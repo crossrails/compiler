@@ -95,6 +95,7 @@ export class ConstructorDeclaration extends FunctionDeclaration {
 
 export class VariableDeclaration extends Declaration {
     readonly type: Type;
+    readonly parent: SourceFile|NamespaceDeclaration|TypeDeclaration;
     
     constructor(name: string, flags: Flags, type: Type) {
         super(name, flags);
