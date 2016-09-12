@@ -34,7 +34,7 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
     shouldVisitNode(node: ts.Declaration): boolean {
         if(this.symbols.isExported(node)) return this.symbols.getExports(node).length > 0;
-        const root = node.parent!.kind == ts.SyntaxKind.SourceFile || node.parent!.kind == ts.SyntaxKind.ModuleDeclaration;
+        const root = node.parent!.kind == ts.SyntaxKind.SourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock;
         log.debug(`Skipping ${root ? 'unexported' : 'private'} ${ts.SyntaxKind[node.kind]} ${this.symbols.getName(node)}`, node);
         return false;
     }

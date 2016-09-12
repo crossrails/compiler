@@ -209,7 +209,10 @@ export class SymbolTable implements NodeVisitor<void> {
             declarations.forEach((d, i) => this.exports.set(d, i ? [] : declarations));
         }
         //if type reference ensure type is exported
-        const type = this.checker.getTypeOfSymbolAtLocation(symbol, node);
+        const type = this.checker.getNonNullableType(this.checker.getTypeOfSymbolAtLocation(symbol, node));
+        type.getCallSignatures().filter(s => s.getReturnType().getSymbol()).forEach(
+            s => this.exportIfNecessary(s.getReturnType().getSymbol()
+        ))
         if(!type.getSymbol()) return;
         this.exportIfNecessary(type.getSymbol());
     }
