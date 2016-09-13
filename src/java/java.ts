@@ -3,7 +3,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {EmitterOptions} from "../emitter" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, TypeDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, NamespaceDeclaration, adopt
+    Module, SourceFile, Type, GenericType, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, NamespaceDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, adopt
 } from "../ast"
 
 export interface JavaOptions extends EmitterOptions {
@@ -25,15 +25,20 @@ declare module "../ast" {
         getter(indent?: string): string
         setter(indent?: string): string
     }
+
+    interface Type {
+        emit(optional?: boolean): string;
+        erasure(): string;
+    } 
 }
  
 decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootOutDir: string, options: JavaOptions, writeFile: (filename: string, data: string) => void): void {
     let outDir = path.join(rootOutDir, options.basePackage.replace('.', path.sep));
     let moduleFilename = path.join(outDir, `${this.name.charAt(0).toUpperCase()}${this.name.slice(1)}.java`);
     const declarations = [...this.allDeclarations()].filter(d => d.parent instanceof SourceFile);
-    let globals = declarations.filter(d => !(d instanceof NamespaceDeclaration || d instanceof TypeDeclaration));
+    let globals = declarations.filter(d => !(d instanceof NamespaceDeclaration));
     let writtenModuleFile = false;  
-    for(let declaration of declarations.filter(d => d instanceof TypeDeclaration || d instanceof NamespaceDeclaration) as Array<TypeDeclaration|NamespaceDeclaration>) {               
+    for(let declaration of declarations.filter(d => d instanceof NamespaceDeclaration) as NamespaceDeclaration[]) {               
         let filename = path.join(outDir, path.relative(this.sourceRoot, declaration.sourceFile.path.dir), `${declaration.declarationName()}.java`);
         let file: SourceFile = Object.create(SourceFile.prototype, {
             name: { value: declaration.name },
@@ -155,6 +160,14 @@ decorate(Type, ({prototype}) => prototype.emit = function(this: Type, optional: 
     return optional ? `Optional<${this.typeName()}>` : this.typeName();    
 })
 
+decorate(Type, ({prototype}) => prototype.erasure = function(this: Type): string {
+    return this.typeName();    
+})
+
+decorate(GenericType, ({prototype}) => prototype.erasure = function(this: GenericType): string {
+    return this.genericTypeName();    
+})
+
 decorate(FunctionType, ({prototype}) => prototype.emit = function(this: FunctionType, optional: boolean = this.isOptional): string {
     let typeArguments = this.signature.parameters.map(p => p.type);
     if(!(this.signature.returnType instanceof VoidType)) {
@@ -184,8 +197,8 @@ decorate(NumberType, ({prototype}) => prototype.typeName = function(this: Number
     return 'Number'    
 })
 
-decorate(ArrayType, ({prototype}) => prototype.typeName = function(this: ArrayType): string {
-    return `List<${this.typeArguments[0].emit()}>`;    
+decorate(ArrayType, ({prototype}) => prototype.genericTypeName = function(this: ArrayType): string {
+    return `List`;    
 })
 
 decorate(ErrorType, ({prototype}) => prototype.typeName = function(this: ErrorType): string {

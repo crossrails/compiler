@@ -3,7 +3,7 @@ import * as assert from 'assert';
 
 export function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :
-        Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, configurable: true, value: parent});
+        Object.defineProperty(child, propertyKey, {enumerable: false, writable: false, value: parent});
     return child;
 }
 
@@ -41,7 +41,7 @@ export abstract class Declaration {
     }
 
     get isStatic(): boolean {
-        return this.parent == this.sourceFile || this.parent instanceof NamespaceDeclaration || (this.flags & Flags.Static) != 0;
+        return (this.flags & Flags.Static) != 0;
     }
 
     get isAbstract(): boolean {
@@ -77,6 +77,10 @@ export class FunctionDeclaration extends Declaration {
         adopt(signature.returnType, this);
         adopt(signature.thrownTypes, this);
     }
+
+    get parent(): NamespaceDeclaration {
+        return super.parent as NamespaceDeclaration;
+    }
 }
 
 export class ConstructorDeclaration extends FunctionDeclaration {
@@ -87,15 +91,10 @@ export class ConstructorDeclaration extends FunctionDeclaration {
     get name(): string {
         throw new Error('Accessing name of constructor')
     }
-
-    get parent(): TypeDeclaration {
-        return super.parent as TypeDeclaration;
-    }
 }
 
 export class VariableDeclaration extends Declaration {
     readonly type: Type;
-    readonly parent: SourceFile|NamespaceDeclaration|TypeDeclaration;
     
     constructor(name: string, flags: Flags, type: Type) {
         super(name, flags);
@@ -104,6 +103,10 @@ export class VariableDeclaration extends Declaration {
 
     get isConstant(): boolean {
         return (this.flags & Flags.Constant) != 0;
+    }
+
+    get parent(): NamespaceDeclaration {
+        return super.parent as NamespaceDeclaration;
     }
 }
 
@@ -119,30 +122,38 @@ export class ParameterDeclaration extends Declaration {
         return (this.flags & Flags.Optional) != 0;
     }
 
-    get parent(): Declaration {
-        return super.parent as Declaration;
+    get parent(): FunctionDeclaration {
+        return super.parent as FunctionDeclaration;
     }
 }
 
-export abstract class TypeDeclaration extends Declaration {
+export class NamespaceDeclaration extends Declaration {
     readonly declarations: ReadonlyArray<Declaration>
     
     constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>) {
         super(name, flags);
         this.declarations = adopt(declarations, this);
     }
+
+    get parent(): NamespaceDeclaration {
+        return super.parent as NamespaceDeclaration;
+    }
 }
 
-export class InterfaceDeclaration extends TypeDeclaration {
+export class InterfaceDeclaration extends NamespaceDeclaration {
     readonly typeParameters: ReadonlyArray<Type>
     
     constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>, typeParameters: ReadonlyArray<Type>) {
         super(name, flags, declarations);
         this.typeParameters = adopt(typeParameters, this);
     }
+
+    get parent(): NamespaceDeclaration {
+        return super.parent as NamespaceDeclaration;
+    }
 }
 
-export class ClassDeclaration extends TypeDeclaration {
+export class ClassDeclaration extends NamespaceDeclaration {
     readonly superClass: string|undefined;
     readonly typeParameters: ReadonlyArray<Type>
     
@@ -154,27 +165,19 @@ export class ClassDeclaration extends TypeDeclaration {
     get isThrown(): boolean {
         return (this.flags & Flags.Thrown) != 0;
     }
+
+    get parent(): NamespaceDeclaration {
+        return super.parent as NamespaceDeclaration;
+    }
 }
 
-export class NamespaceDeclaration extends Declaration { 
-    readonly declarations: ReadonlyArray<Declaration> 
-     
-    constructor(name: string, flags: Flags, declarations: ReadonlyArray<Declaration>) {
-        super(name, flags);
-        this.declarations = adopt(declarations, this);
-    }     
-} 
- 
-export class SourceFile extends Declaration {
+export class SourceFile extends NamespaceDeclaration {
     readonly path: path.ParsedPath;    
-    readonly comment: string;  
-    readonly declarations: ReadonlyArray<Declaration>
     readonly module: Module;
     
     constructor(name: string, declarations: ReadonlyArray<Declaration>) {
-        super(name, Flags.None);
+        super(name, Flags.None, declarations);
         this.path = path.parse(name);
-        this.declarations = adopt(declarations, this);
     }
         
     get sourceFile(): SourceFile {
@@ -232,7 +235,6 @@ export class FunctionType extends Type {
 export abstract class GenericType extends Type {
     readonly typeArguments: ReadonlyArray<Type>
 
-    
     constructor(flags: Flags, typeArguments: ReadonlyArray<Type>) {
         super(flags);
         this.typeArguments = adopt(typeArguments, this);      

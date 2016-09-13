@@ -1,4 +1,4 @@
-import {SourceFile, Declaration, FunctionDeclaration, TypeDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration, GenericType} from "./ast"
 import * as assert from "assert"
 import {ParsedPath} from 'path';
 
@@ -59,16 +59,8 @@ declare module "./ast" {
         body(indent?: string): string
     }
 
-    interface TypeDeclaration {
-        typeMembers(): ReadonlyArray<Declaration>
-        keyword(): string
-        typeName(): string
-        suffix(): string
-        header(indent?: string): string
-        footer(indent?: string): string
-    }
-
     interface NamespaceDeclaration {
+        memberDeclarations(): ReadonlyArray<Declaration>
         keyword(): string
         suffix(): string
         header(indent?: string): string
@@ -78,6 +70,10 @@ declare module "./ast" {
     interface Type {
         emit(optional?: boolean): string;
         typeName(): string;
+    } 
+
+    interface GenericType {
+        genericTypeName(): string;
     } 
 }
 
@@ -94,47 +90,19 @@ Declaration.prototype.declarationName = function(this: Declaration): string {
 }
 
 DeclaredType.prototype.typeName = function(this: DeclaredType): string {
-    return this.name!;
+    return this.name;
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
     return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.isAbstract ? '\n' : ` ${this.body(indent)}\n`}`;
 }
 
-TypeDeclaration.prototype.typeMembers = function (this: TypeDeclaration, indent?: string): ReadonlyArray<Declaration> {
+NamespaceDeclaration.prototype.memberDeclarations = function (this: NamespaceDeclaration, indent?: string): ReadonlyArray<Declaration> {
     return this.declarations;
 }
 
 ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
     return "class";
-}
-
-TypeDeclaration.prototype.emit = function (this: TypeDeclaration, indent?: string): string {
-    return `
-${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
-
-${this.header(`${indent}    `)}
-
-${this.typeMembers().reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
-${this.footer(`${indent}    `)}
-${indent}}
-    `.replace(/\n{3}/g, '\n').substr(1);
-}
-
-ClassDeclaration.prototype.keyword = function (this: ClassDeclaration): string {
-    return "class";
-}
-
-TypeDeclaration.prototype.suffix = function (this: TypeDeclaration): string {
-    return '';
-}
-
-TypeDeclaration.prototype.header = function (this: TypeDeclaration, indent?: string): string {
-    return "";
-}
-
-TypeDeclaration.prototype.footer = function (this: TypeDeclaration, indent?: string): string {
-    return "";
 }
 
 NamespaceDeclaration.prototype.emit = function (this: NamespaceDeclaration, indent?: string): string {
@@ -143,7 +111,7 @@ ${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
 
 ${this.header(`${indent}    `)}
 
-${this.declarations.reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
+${this.memberDeclarations().reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
 ${this.footer(`${indent}    `)}
 ${indent}}
     `.replace(/\n{3}/g, '\n').substr(1);
@@ -159,5 +127,13 @@ NamespaceDeclaration.prototype.header = function (this: NamespaceDeclaration, in
 
 NamespaceDeclaration.prototype.footer = function (this: NamespaceDeclaration, indent?: string): string {
     return "";
+}
+
+GenericType.prototype.typeName = function(this: GenericType): string {
+    return `${this.genericTypeName()}${this.typeArguments.length == 0 ? '' : `<${this.typeArguments[0].emit()}>`}`;    
+}
+
+DeclaredType.prototype.genericTypeName = function(this: DeclaredType): string {
+    return this.name;    
 }
 

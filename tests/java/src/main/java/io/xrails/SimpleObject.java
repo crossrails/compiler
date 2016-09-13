@@ -8,7 +8,7 @@ import static io.xrails.Src.global;
 
 public class SimpleObject {
 
-    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("SimpleObject");
+    private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SimpleObject");
 
     private final ScriptObjectMirror prototype;
     private final JSObject mirror;
@@ -20,11 +20,11 @@ public class SimpleObject {
     }
 
     public static Boolean getStaticVoidNoArgMethodCalled() {
-        return (Boolean)classMirror.get("staticVoidNoArgMethodCalled");
+        return (Boolean)staticMirror.get("staticVoidNoArgMethodCalled");
     }
     
     public static void setStaticVoidNoArgMethodCalled(Boolean staticVoidNoArgMethodCalled) {
-        classMirror.setMember("staticVoidNoArgMethodCalled", staticVoidNoArgMethodCalled);
+        staticMirror.setMember("staticVoidNoArgMethodCalled", staticVoidNoArgMethodCalled);
     }
     
     public Boolean getMethodToOverrideCalled() {
@@ -36,7 +36,7 @@ public class SimpleObject {
     }
     
     public SimpleObject() {
-        prototype = (ScriptObjectMirror)classMirror.newObject(); 
+        prototype = (ScriptObjectMirror)staticMirror.newObject(); 
         mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
             @Override 
             void build(BiConsumer<String, Function<Object[], Object>> builder) { 
@@ -50,7 +50,7 @@ public class SimpleObject {
     }
 
     public SimpleObject(Number v) {
-        prototype = (ScriptObjectMirror)classMirror.newObject(v); 
+        prototype = (ScriptObjectMirror)staticMirror.newObject(v); 
         mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
             @Override 
             void build(BiConsumer<String, Function<Object[], Object>> builder) { 
@@ -64,7 +64,7 @@ public class SimpleObject {
     }
 
     public static void staticVoidNoArgMethod() {
-        classMirror.callMember("staticVoidNoArgMethod");
+        staticMirror.callMember("staticVoidNoArgMethod");
     }
 
     public Number numberSingleObjectArgMethod(SimpleObject a) {

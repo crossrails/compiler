@@ -8,7 +8,7 @@ import static io.xrails.Src.global;
 
 public class SpecialException extends Exception {
 
-    private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("SpecialError");
+    private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SpecialError");
 
     private final ScriptObjectMirror prototype;
     private final JSObject mirror;
@@ -28,7 +28,7 @@ public class SpecialException extends Exception {
     }
     
     public SpecialException(String message) {
-        prototype = (ScriptObjectMirror)classMirror.newObject(message); 
+        prototype = (ScriptObjectMirror)staticMirror.newObject(message); 
         mirror = getClass() == SpecialException.class ? prototype : new JS.AbstractMirror(prototype) { 
             @Override 
             void build(BiConsumer<String, Function<Object[], Object>> builder) { 

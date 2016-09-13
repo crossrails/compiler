@@ -48,13 +48,13 @@ import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module
     }`.substr(1);
 })
 
-decorate(ClassDeclaration, ({prototype}) => prototype.header = function (this: ClassDeclaration, indent?: string) {
+decorate(NamespaceDeclaration, ({prototype}) => prototype.header = function (this: NamespaceDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
 ${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");`.substr(1)
 }${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
-${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
-}${!this.declarations.some(m => !m.isStatic) ? '' : `
+${indent}private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
+}${this instanceof InterfaceDeclaration || !this.declarations.some(m => !m.isStatic) ? '' : `
 ${indent}private final ScriptObjectMirror prototype;
 ${indent}private final JSObject mirror;
 
@@ -85,17 +85,8 @@ ${indent}    return mirror.equals(JS.heap.getOrDefault(obj, obj));
 ${indent}}`;
 })
 
-decorate(NamespaceDeclaration, ({prototype}) => prototype.header = function (this: NamespaceDeclaration, indent?: string) {
-    return `
-${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");\n`.substr(1)
-}${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
-${indent}private static final ScriptObjectMirror classMirror = (ScriptObjectMirror)global.get("${this.name}");\n`}
-`.substr(1);    
-})
-
 decorate(Declaration, ({prototype}) => prototype.mirror = function (this: Declaration) {
-    return this.parent == this.sourceFile ? 'global' : this.isStatic ? 'classMirror' : 'prototype';        
+    return this.parent == this.sourceFile ? 'global' : this.isStatic ? 'staticMirror' : 'prototype';        
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {
@@ -148,7 +139,7 @@ ${indent}}`
 
 decorate(ConstructorDeclaration, ({prototype}) => prototype.body = function (this: ConstructorDeclaration, indent?: string): string {
     return `{
-${indent}    prototype = (ScriptObjectMirror)classMirror.newObject(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}); 
+${indent}    prototype = (ScriptObjectMirror)staticMirror.newObject(${this.signature.parameters.map(p => p.type.fromNativeValue()).join(', ')}); 
 ${indent}    mirror = getClass() == ${this.parent.declarationName()}.class ? prototype : new JS.AbstractMirror(prototype) { 
 ${indent}        @Override 
 ${indent}        void build(BiConsumer<String, Function<Object[], Object>> builder) { 
