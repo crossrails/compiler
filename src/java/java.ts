@@ -81,37 +81,9 @@ decorate(DeclaredType, ({prototype}) => prototype.typeName = function (this: Dec
     return this.isThrown && this.name.endsWith('Error') ? `${this.name.slice(0, -5)}Exception` : this.name;
 })
 
-
-decorate(TypeDeclaration, ({prototype}) => prototype.typeMembers = function (this: TypeDeclaration): ReadonlyArray<Declaration> {
-    return this.declarations.reduce<Declaration[]>((members, member, memberIndex) => {
-        if(member instanceof FunctionDeclaration) {
-            let parameters = member.signature.parameters;
-            let startOfOptionals = parameters.reduceRight((start, p, i) => p.isOptional ? i : start, parameters.length);
-            for(let index = startOfOptionals; index < parameters.length; index++) {
-                //skip adding overload if it already exists
-                if(([...members, ...this.declarations.slice(memberIndex + 1)]).some(
-                    (m: FunctionDeclaration) => (member instanceof ConstructorDeclaration ? m instanceof ConstructorDeclaration : (m instanceof FunctionDeclaration && m.name === member.name)) && 
-                        m.signature.parameters.length == index && m.signature.parameters.every(
-                            (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
-                        )
-                )) continue;
-                members.push(Object.create(Object.getPrototypeOf(member), {
-                    name: { value: member instanceof ConstructorDeclaration ? undefined : member.name},
-                    flags: { value: member.flags },
-                    parent: { value: member.parent },
-                    comment: { value: member.comment},
-                    typeParameters: { value: member.typeParameters },
-                    signature: { value: Object.create(FunctionSignature.prototype, {
-                        thrownTypes: { value: member.signature.thrownTypes},
-                        returnType: { value: member.signature.returnType },
-                        parameters: { value: member.signature.parameters.slice(0, index) }
-                    })},
-                }));
-            }
-        }
-        members.push(member);
-        return members;
-    }, []);
+decorate(NamespaceDeclaration, ({prototype}) => prototype.transformedDeclarations = function (this: NamespaceDeclaration): ReadonlyArray<Declaration> {
+    logErrorsForFunctionsWithSameErasure(this.declarations);
+    return withOverloadsForFunctionsWithOptionalParameters(this.declarations);
 })
 
 decorate(NamespaceDeclaration, ({prototype}) => prototype.keyword = function (this: NamespaceDeclaration): string {
@@ -222,3 +194,55 @@ decorate(FunctionType, ({prototype}) => prototype.typeName = function(this: Func
             return 'Object';
     }  
 })
+
+function withOverloadsForFunctionsWithOptionalParameters(declarations: ReadonlyArray<Declaration>): ReadonlyArray<Declaration> {
+    return declarations.reduce((reduced: Declaration[], declaration: FunctionDeclaration, declarationIndex: number) => {
+        if(declaration instanceof FunctionDeclaration) {
+            let parameters = declaration.signature.parameters;
+            let startOfOptionals = parameters.reduceRight((start, p, i) => p.isOptional ? i : start, parameters.length);
+            for(let index = startOfOptionals; index < parameters.length; index++) {
+                //skip adding overload if it already exists
+                if(([...reduced, ...declarations.slice(declarationIndex + 1)]).some(
+                    (m: FunctionDeclaration) => (declaration instanceof ConstructorDeclaration ? m instanceof ConstructorDeclaration : (m instanceof FunctionDeclaration && m.name === declaration.name)) && 
+                        m.signature.parameters.length == index && m.signature.parameters.every(
+                            (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
+                        )
+                )) continue;
+                const overload = Object.create(declaration, {
+                    signature: { value: Object.create(declaration.signature, {
+                        parameters: { value: declaration.signature.parameters.slice(0, index).map(p => Object.create(p)) },
+                        thrownTypes: { value: declaration.signature.thrownTypes.map(t => Object.create(t)) },
+                        returnType: { value: Object.create(declaration.signature.returnType) }
+                    })}
+                });
+                adopt(overload.typeParameters, overload);
+                adopt(overload.signature.parameters, overload);
+                adopt(overload.signature.returnType, overload);
+                adopt(overload.signature.thrownTypes, overload);
+                reduced.push(overload);
+            }
+        }
+        reduced.push(declaration);
+        return reduced;
+    }, []);
+}
+
+function logErrorsForFunctionsWithSameErasure(declarations: ReadonlyArray<Declaration>) {
+    declarations.forEach((declaration: FunctionDeclaration) => {
+        if(declaration instanceof FunctionDeclaration) {
+            let parameters = declaration.signature.parameters;
+            const clashing = declarations.find((d: FunctionDeclaration) => {
+                const isOverload = d != declaration && (declaration instanceof ConstructorDeclaration ? d instanceof ConstructorDeclaration : (d instanceof FunctionDeclaration && d.name === declaration.name));
+                return isOverload && d.signature.parameters.length == parameters.length && d.signature.parameters.every((p, i) => 
+                    p.type.erasure() === parameters[i].type.erasure()
+                )
+            }) as FunctionDeclaration;
+            if(!clashing) return;
+            const declarationSignature = `${declaration.declarationName()}(${declaration.signature.parameters.map(p => p.type.typeName()).join(', ')})`;
+            const clashingSignature = `${clashing.declarationName()}(${clashing.signature.parameters.map(p => p.type.typeName()).join(', ')})`;
+            log.error(`${declarationSignature} clashes with ${clashingSignature}, both methods have same erasure in Java`); 
+            log.info(`Java Generics are implemented with Type Erasure and cannot support this overload, resolve this error by using different method names`);    
+        }
+    })    
+}
+

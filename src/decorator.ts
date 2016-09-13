@@ -60,7 +60,7 @@ declare module "./ast" {
     }
 
     interface NamespaceDeclaration {
-        memberDeclarations(): ReadonlyArray<Declaration>
+        transformedDeclarations(): ReadonlyArray<Declaration>
         keyword(): string
         suffix(): string
         header(indent?: string): string
@@ -97,7 +97,7 @@ FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent
     return `${indent}${this.prefix()} ${this.declarationName()}(${this.signature.parameters.map(p => p.emit()).join(', ')})${this.suffix()}${this.isAbstract ? '\n' : ` ${this.body(indent)}\n`}`;
 }
 
-NamespaceDeclaration.prototype.memberDeclarations = function (this: NamespaceDeclaration, indent?: string): ReadonlyArray<Declaration> {
+NamespaceDeclaration.prototype.transformedDeclarations = function (this: NamespaceDeclaration, indent?: string): ReadonlyArray<Declaration> {
     return this.declarations;
 }
 
@@ -111,7 +111,7 @@ ${indent}public ${this.keyword()} ${this.declarationName()}${this.suffix()} {
 
 ${this.header(`${indent}    `)}
 
-${this.memberDeclarations().reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
+${this.transformedDeclarations().reduce((out, member) => `${out}${member.emit(`${indent}    `)}\n`, '')}
 ${this.footer(`${indent}    `)}
 ${indent}}
     `.replace(/\n{3}/g, '\n').substr(1);
