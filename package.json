@@ -1,6 +1,6 @@
 {
   "name": "xrails",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Expose the public interface of your JavaScript or TypeScript library to native code",
   "keywords": [
     "crossrails",
