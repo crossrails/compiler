@@ -19,12 +19,12 @@ public class SpecialException extends Exception {
         JS.heap.put(this, mirror);
     }
 
-    public String getMessage() {
+    public String message() {
         return (String)prototype.get("message");
     }
     
-    public void setMessage(String message) {
-        prototype.setMember("message", message);
+    public void message(String newValue) {
+        prototype.setMember("message", newValue);
     }
     
     public SpecialException(String message) {

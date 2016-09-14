@@ -13,9 +13,6 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-/**
- * Created by nbransby on 05/03/2016.
- */
 class JS {
 
     private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine();

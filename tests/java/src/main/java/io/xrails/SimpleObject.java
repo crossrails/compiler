@@ -19,20 +19,20 @@ public class SimpleObject {
         JS.heap.put(this, mirror);
     }
 
-    public static Boolean getStaticVoidNoArgMethodCalled() {
+    public static Boolean staticVoidNoArgMethodCalled() {
         return (Boolean)staticMirror.get("staticVoidNoArgMethodCalled");
     }
     
-    public static void setStaticVoidNoArgMethodCalled(Boolean staticVoidNoArgMethodCalled) {
-        staticMirror.setMember("staticVoidNoArgMethodCalled", staticVoidNoArgMethodCalled);
+    public static void staticVoidNoArgMethodCalled(Boolean newValue) {
+        staticMirror.setMember("staticVoidNoArgMethodCalled", newValue);
     }
     
-    public Boolean getMethodToOverrideCalled() {
+    public Boolean methodToOverrideCalled() {
         return (Boolean)prototype.get("methodToOverrideCalled");
     }
     
-    public void setMethodToOverrideCalled(Boolean methodToOverrideCalled) {
-        prototype.setMember("methodToOverrideCalled", methodToOverrideCalled);
+    public void methodToOverrideCalled(Boolean newValue) {
+        prototype.setMember("methodToOverrideCalled", newValue);
     }
     
     public SimpleObject() {
