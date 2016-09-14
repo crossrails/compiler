@@ -126,7 +126,7 @@ function main(...args: string[]): number {
 
     let filename: string|undefined = options._[0];
 
-    if (filename[0] === '~') {
+    if (filename && filename[0] === '~') {
         filename = path.join(process.env.HOME, filename.slice(1));
     }
     if(!filename || filename.endsWith('package.json')) {
