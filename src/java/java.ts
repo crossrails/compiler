@@ -45,7 +45,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             module: { value: this },
             isModuleFile: { value: filename.toLowerCase() == moduleFilename.toLowerCase()},
             packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
-            declarations: { value: [ filename.toLowerCase() != moduleFilename.toLowerCase() ? declaration : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
+            declarations: { value: [ filename.toLowerCase() != moduleFilename.toLowerCase() ? Object.create(declaration) : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
         });
         adopt(file.declarations, file);
         writeFile(filename, file.emit());
@@ -230,7 +230,7 @@ function logErrorsForFunctionsWithSameErasure(declarations: ReadonlyArray<Declar
         if(declaration instanceof FunctionDeclaration) {
             let parameters = declaration.signature.parameters;
             const clashing = declarations.find((d: FunctionDeclaration) => {
-                const isOverload = d != declaration && (declaration instanceof ConstructorDeclaration ? d instanceof ConstructorDeclaration : (d instanceof FunctionDeclaration && d.name === declaration.name));
+                const isOverload = d != declaration && (declaration instanceof ConstructorDeclaration ? d instanceof ConstructorDeclaration : (d.constructor.name == 'FunctionDeclaration' && d.name === declaration.name));
                 return isOverload && d.signature.parameters.length == parameters.length && d.signature.parameters.every((p, i) => 
                     p.type.erasure() === parameters[i].type.erasure()
                 )
