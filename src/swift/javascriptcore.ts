@@ -11,7 +11,6 @@ import {
 declare module "../ast" {
     interface Declaration {
         accessor(): string
-        argumentName(): string
         thisName(): string
     }    
     
@@ -39,10 +38,6 @@ decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceF
 extension JSProperty {
     ${[...identifiers.values()].map(d => `static let ${d.declarationName()}: JSProperty = "${d.name}"`).join('\n    ')}
 }`.substr(1);
-})
-
-decorate(Declaration, ({prototype}) => prototype.argumentName = function (this: Declaration): string {
-    return this.declarationName();
 })
 
 decorate(Declaration, ({prototype}) => prototype.thisName = function (this: Declaration): string {
@@ -92,10 +87,6 @@ ${indent}        }`).join(', ').substr(1)}
 ${indent}    ])`} 
 ${indent}    this.bind(self) 
 ${indent}}`;        
-})
-
-decorate(VariableDeclaration, ({prototype}) => prototype.argumentName = function (this: VariableDeclaration) {
-    return `newValue`;
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.accessor = function (this: VariableDeclaration) {

@@ -99,12 +99,10 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.keyword = function (th
 })
 
 decorate(VariableDeclaration, ({prototype}) => prototype.emit = function (this: VariableDeclaration, indent?: string): string {
-    let name = `${this.declarationName().charAt(0).toUpperCase()}${this.declarationName().slice(1)}`;
-    if(this.parent.declarations.some(d => d !== this && d.name == name)) name = `_${this.declarationName()}`
     return `
-${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} ${this.type.emit()} get${name}()${this.isAbstract ? ';' : ` ${this.getter(indent)}`}
+${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} ${this.type.emit()} ${this.declarationName()}()${this.isAbstract ? ';' : ` ${this.getter(indent)}`}
     ${this.isConstant ? '' : `
-${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} void set${name}(${this.type.emit(false)} ${this.name})${this.isAbstract ? ';' : ` ${this.setter(indent)}`}
+${indent}${this.parent instanceof InterfaceDeclaration ? '' : this.isProtected ? 'protected' : 'public'}${this.isStatic ? ' static' : ''} void ${this.declarationName()}(${this.type.emit(false)} newValue)${this.isAbstract ? ';' : ` ${this.setter(indent)}`}
     `}`.substr(1);
 })
 

@@ -1,4 +1,4 @@
-import {SourceFile, Declaration, FunctionDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration, GenericType} from "./ast"
+import {SourceFile, Declaration, FunctionDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration, GenericType, VariableDeclaration} from "./ast"
 import * as assert from "assert"
 import {ParsedPath} from 'path';
 
@@ -43,6 +43,7 @@ declare module "./ast" {
 
     interface Declaration {
         emit(indent?: string): string
+        argumentName(): string
         declarationName(): string
     }
 
@@ -91,6 +92,14 @@ Declaration.prototype.declarationName = function(this: Declaration): string {
 
 DeclaredType.prototype.typeName = function(this: DeclaredType): string {
     return this.name;
+}
+
+Declaration.prototype.argumentName = function (this: Declaration): string {
+    return this.declarationName();
+}
+
+VariableDeclaration.prototype.argumentName = function (this: VariableDeclaration) {
+    return `newValue`;
 }
 
 FunctionDeclaration.prototype.emit = function (this: FunctionDeclaration, indent?: string): string {
