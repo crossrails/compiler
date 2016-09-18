@@ -32,8 +32,9 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
-  - mv wiki/wiki.md docs/compiler-options.md
-  - git add docs/compiler-options.md 
+  - git checkout gh-pages
+  - mv wiki/wiki.md compiler-options.md
+  - git add compiler-options.md 
   - git commit -m "updated wiki" 
   - git push origin gh-pages
 build: off
