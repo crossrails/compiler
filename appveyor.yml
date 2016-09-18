@@ -33,7 +33,7 @@ test_script:
 # Don't actually build.
 on_success:
   - git remote rm origin
-  - git remote add origin 'crossrailsReed@github.com:crossrailsReed/crossrails/compiler.git'
+  - git remote add origin https://github.com/crossrailsReed/crossrails/compiler.git
   - git config --global credential.helper store 
   - git config --global user.name "crossrailsReed" 
   - git config --global user.email crossrails@andrewreed.co.uk 
