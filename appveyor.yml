@@ -1,6 +1,8 @@
 version: 0.2.0.{build}
 environment:
   nodejs_version: "6"
+  access_token:
+    secure: a1ebf5bce7629668c0c3d7f4549c073253c8deb8
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
@@ -15,8 +17,6 @@ install:
 # Post-install test scripts.
 test_script:
   # Output useful info for debugging.
-  - git config --global user.name "crossrailsReed"
-  - git config --global user.email crossrails@andrewreed.co.uk
   - node --version
   - npm --version
   - mvn --version
@@ -27,6 +27,22 @@ test_script:
   - npm install -g gulp
   - gradle --version
   - gulp run-java-tests
-  #- cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m "updated wiki" && git push 
+  #- cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && cd compiler.wiki/ && git add compiler-options.md && git commit -m "updated wiki" && git push
+  - cd wiki 
+  - mvn clean package 
+  - java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App 
+  - cd ..
 # Don't actually build.
+on_success:
+  - rm -rf compiler.wiki/
+  - git config --global credential.helper store
+  - git config --global user.name "crossrailsReed"
+  - git config --global user.email crossrails@andrewreed.co.uk
+  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git clone https://github.com/crossrails/compiler.wiki.git compiler.wiki 
+  - mv wiki/wiki.md compiler.wiki/compiler-options.md
+  - cd compiler.wiki/ 
+  - git add compiler-options.md 
+  - git commit -m "updated wiki" 
+  - git push
 build: off
