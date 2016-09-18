@@ -2,7 +2,7 @@ version: 0.2.0.{build}
 environment:
   nodejs_version: "6"
   access_token:
-    secure: a1ebf5bce7629668c0c3d7f4549c073253c8deb8
+    secure: 031a590233304acf3f99db337dafb5c68ceb6bdc
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
