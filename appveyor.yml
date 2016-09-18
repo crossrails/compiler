@@ -32,6 +32,9 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
+  - git config --global credential.helper store 
+  - git config --global user.name "crossrailsReed" 
+  - git config --global user.email crossrails@andrewreed.co.uk 
   - git checkout gh-pages
   - mv wiki/wiki.md compiler-options.md
   - git add compiler-options.md 
