@@ -35,5 +35,5 @@ on_success:
   - mv wiki/wiki.md docs/compiler-options.md
   - git add docs/compiler-options.md 
   - git commit -m "updated wiki" 
-  - git push gh-pages
+  - git push origin gh-pages
 build: off
