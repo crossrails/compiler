@@ -1,8 +1,6 @@
 version: 0.2.0.{build}
 environment:
   nodejs_version: "6"
-  access_token:
-    secure: 031a590233304acf3f99db337dafb5c68ceb6bdc
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
@@ -34,15 +32,8 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
-  - rm -rf compiler.wiki/
-  - git config --global credential.helper store
-  - git config --global user.name "crossrailsReed"
-  - git config --global user.email crossrails@andrewreed.co.uk
-  - ps: Add-Content "$env:USERPROFILE\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-  - git clone https://github.com/crossrails/compiler.wiki.git compiler.wiki 
-  - mv wiki/wiki.md compiler.wiki/compiler-options.md
-  - cd compiler.wiki/ 
-  - git add compiler-options.md 
+  - mv wiki/wiki.md docs/compiler-options.md
+  - git add docs/compiler-options.md 
   - git commit -m "updated wiki" 
   - git push
 build: off
