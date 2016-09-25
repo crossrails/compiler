@@ -38,10 +38,10 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
-  - cmd: git clone https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git compiler.wiki
-  - cmd: cd compiler.wiki
-  - mv ../wiki/wiki.md docs/compiler-options.md
-  - git add docs/compiler-options.md 
+  - cmd: git clone -b gh-pages https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git pages
+  - cmd: cd pages
+  - mv ../wiki/wiki.md compiler-options.md
+  - git add compiler-options.md 
   - git commit -m "updated wiki" 
   - if ! git diff-index --quiet HEAD --; then git push origin gh-pages fi
 build: off
