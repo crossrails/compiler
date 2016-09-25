@@ -43,5 +43,5 @@ on_success:
   - mv ../wiki/wiki.md docs/compiler-options.md
   - git add docs/compiler-options.md 
   - git commit -m "updated wiki" 
-  - git push origin gh-pages
+  - if ! git diff-index --quiet HEAD --; then git push origin gh-pages fi
 build: off
