@@ -42,6 +42,6 @@ on_success:
   - cmd: cd pages
   - mv ../wiki/wiki.md compiler-options.md
   - git add compiler-options.md 
-  - git diff-index --quiet HEAD || git commit -m 'updated wiki'
+  - git diff-index --quiet HEAD || git commit -m "updated wiki"
   - git push origin gh-pages
 build: off
