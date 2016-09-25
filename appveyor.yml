@@ -41,7 +41,7 @@ on_success:
   - cmd: git clone https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git compiler.wiki
   - cmd: cd compiler.wiki
   - mv ../wiki/wiki.md docs/compiler-options.md
-  - git add compiler-options.md 
+  - git add docs/compiler-options.md 
   - git commit -m "updated wiki" 
   - git push
 build: off
