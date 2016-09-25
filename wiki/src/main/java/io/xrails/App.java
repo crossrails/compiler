@@ -41,29 +41,36 @@ public class App {
         String output = "";
         boolean skipLineFormatting = false;
         boolean finalLine = false;
+        boolean skipExamples = false;
         try {
             while ((line = input.readLine()) != null) {
                 //apply table formatting here.
-                if (!skipLineFormatting) {
+                if (line.startsWith("Usage:")) {
+                    line = "";
+                } else if (!skipLineFormatting) {
                     if (line.startsWith("Examples:")) {
-                        skipLineFormatting = true;
-                        line = "\n### " + line;
-                        line += App.createExampleTableHeader();
+                        line = "\n";
+                        skipExamples = true;
                     } else {
                         if (line.startsWith("  -")) {
-                            TableLine tableLine = new TableLine(line);
-                            String description = tableLine.description;
-                            if (tableLine.defaultType != null) {
-                                description = description+", defaults to "+tableLine.defaultType+"";
-                            }
-                            line = "| `"+tableLine.option+"` | `"+tableLine.type+"` | "+description+" |";
-                            table.add(tableLine);
+                                TableLine tableLine = new TableLine(line);
+                                String description = tableLine.description;
+                                if (tableLine.defaultType != null) {
+                                    description = description + ", defaults to " + tableLine.defaultType + "";
+                                }
+                                line = "| `" + tableLine.option + "` | `" + tableLine.type + "` | " + description + " |";
+                                table.add(tableLine);
                         } else if (line.contains("options:")) {
                             line = "\n### " + line + App.createTableHeader();
                         } else {
-                            line = "|" + line + "|";
+                            if (line.contains("src") && skipExamples) {
+                                line = "";
+                            } else {
+                                if(!skipExamples) {
+                                    line = "|" + line + "|";
+                                }
+                            }
                         }
-
                     }
                 } else {
                     if (!finalLine) {
@@ -75,26 +82,16 @@ public class App {
                         }
                     }
                 }
-                output += line + "\n";
+                if (skipExamples) {
+                    output += line;
+                } else {
+                    output += line + "\n";
+                }
             }
         } catch (Exception e) {
-            //System.out.println("Exception caught "+e);
         }
         output = App.removeExecutionJunk(output);
-
-        //System.out.print("Tableout: "+table);
-
         return output;
-    }
-
-    static String formatProperties(String second) {
-        if (second.contains("[")) {
-            second = second.replaceAll("\\[", "");
-            second = second.replaceAll("\\]", "");
-            second = second.replaceAll("default:", "");
-        }
-        second = second.replaceAll("choices:", "");
-        return second;
     }
 
     static String removeExecutionJunk(String output) {
@@ -105,15 +102,8 @@ public class App {
     }
 
     static String createTableHeader() {
-        //String header = "\n| Option | Description | Type | Default |\n" +
         String header = "\n| Option | Type | Description |\n" +
                 "| --- | --- | --- |";
-        return header;
-    }
-
-    static String createExampleTableHeader() {
-        String header = "\n| Option | Description |\n" +
-                "| --- | --- |";
         return header;
     }
 
