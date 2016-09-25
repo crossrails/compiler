@@ -1,6 +1,4 @@
-
-
-
+|Usage: ..\src\main [file.js|package.json|bower.json] [options]|
 
 ### Global options:
 | Option | Type | Description |
@@ -39,8 +37,8 @@
 ### Examples:
 | Option | Description |
 | --- | --- |
-|   ../src/main src.min.js --swift |       Compile to swift, outputting beside original source files |
-|   ../src/main src.js --java.emit java |  Compile to java, outputting to a java subdirectory |
+|   ..\src\main src.min.js --swift |       Compile to swift, outputting beside original source files |
+|   ..\src\main src.js --java.emit java |  Compile to java, outputting to a java subdirectory |
 
 General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit
 
