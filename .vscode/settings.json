@@ -13,6 +13,9 @@
         "tests/specs/**/*.js": { "when": "$(basename).ts" },
         "tests/specs/**/*.js.map": true
     },
-   "typescript.tsdk": "./node_modules/typescript/lib",
-   "files.autoSave": "onFocusChange"
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "files.autoSave": "onFocusChange",
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "Fira Code",
+    "editor.fontSize": 14
  }
