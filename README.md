@@ -1,4 +1,4 @@
-# Crossrails Compiler [![Gitter][gitter-image]][gitter-url] [![npm version][version-image]][package-url] [![Downloads][downloads-image]][package-url] [![Build status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url]
+# Crossrails Compiler [![Gitter][gitter-image]][gitter-url] [![npm version][version-image]][package-url] [![Downloads][downloads-image]][package-url] [![Build status][travis-image]][travis-url] [![Coverage Status][coverage-image]][coverage-url][![Build status](https://ci.appveyor.com/api/projects/status/0enfw6ngp6vsgqlt?svg=true)](https://ci.appveyor.com/project/Crossrails/compiler)
 
 The crossrails compiler is a command line tool which translates **JavaScript** or **TypeScript** libraries to other languages, namely **Swift** and **Java** with support for **C#** and **PHP** coming soon. 
 
