@@ -1,4 +1,3 @@
-something different
 |Usage: ..\src\main [file.js|package.json|bower.json] [options]|
 
 ### Global options:
