@@ -38,7 +38,6 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
-  - cmd: bundle install
   - cmd: git checkout gh-pages
   - mv wiki/wiki.md compiler-options.md
   - git add compiler-options.md 
