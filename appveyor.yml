@@ -1,6 +1,12 @@
 version: 0.2.0.{build}
+init:
+  - git config --global user.name "crossrailsReed" 
+  - git config --global user.email crossrails@andrewreed.co.uk 
 environment:
   nodejs_version: "6"
+  GithubUsername: crossrailsReed
+  GithubPassword:
+    secure: /iINJgMX9wdzkWxX0ARRYg==
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node.js or io.js
@@ -32,14 +38,10 @@ test_script:
   - cd ..
 # Don't actually build.
 on_success:
-  - git remote rm origin
-  - git remote add origin https://github.com/crossrailsReed/crossrails/compiler.git
-  - git config --global credential.helper store 
-  - git config --global user.name "crossrailsReed" 
-  - git config --global user.email crossrails@andrewreed.co.uk 
-  - git checkout gh-pages
+  - cmd: bundle install
+  - cmd: git checkout gh-pages
   - mv wiki/wiki.md compiler-options.md
   - git add compiler-options.md 
   - git commit -m "updated wiki" 
-  #- git push origin gh-pages
+  - git push origin gh-pages
 build: off
