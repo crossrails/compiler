@@ -1,9 +1,11 @@
+import * as path from 'path';
+import * as minimatch from 'minimatch';
 import * as assert from 'assert';
 import * as ts from "typescript";
 import * as ast from "../ast"
 import {log} from "../log"
 import {Comment} from "../comment"
-import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, BreakVisitException, ContinueVisitException} from "./visitor"
+import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, BreakVisitException} from "./visitor"
 
 export class SymbolTable implements NodeVisitor<void> {
 
@@ -12,11 +14,17 @@ export class SymbolTable implements NodeVisitor<void> {
     private readonly identifiers = new Set<ts.Identifier>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<ts.Symbol>();
+    private readonly shouldIncludeFile: (file: ts.SourceFile) => boolean; 
 
-    constructor(program: ts.Program, implicitExport: boolean) {
+    constructor(program: ts.Program, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
         this.implicitExport = implicitExport;
-        visitNodes(program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true);
+        this.shouldIncludeFile = (file: ts.SourceFile) => {
+            const relative = path.relative('.', file.path);
+            return (!includes || includes.some(pattern => minimatch(relative, pattern))) &&
+                (!excludes || excludes.every(pattern => !minimatch(relative, pattern))); 
+            };
+        visitNodes(program.getSourceFiles().filter(this.shouldIncludeFile), this, true);
     } 
 
     isExported(node: ts.Declaration): boolean {
@@ -29,7 +37,6 @@ export class SymbolTable implements NodeVisitor<void> {
     }
 
     isThrown(node: ts.ClassDeclaration): boolean {
-        const symbol = this.checker.getSymbolAtLocation(node.name!);
         return this.thrown.has(this.checker.getSymbolAtLocation(node.name!));        
     }
 
@@ -60,7 +67,7 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private exportIfNecessary(symbol: ts.Symbol) {
         const declarations = this.getDeclarations(symbol);
-        if(declarations.some(d => d.getSourceFile().hasNoDefaultLib || this.exports.has(d))) return;
+        if(declarations.some(d => this.shouldIncludeFile(d.getSourceFile()))) return;
         const exported = declarations.reduce((exported, d) => {
             exported = (d.flags & ts.NodeFlags.Export) == 0;
             d.flags |= ts.NodeFlags.Export;
@@ -80,10 +87,10 @@ export class SymbolTable implements NodeVisitor<void> {
         return symbols.filter(s => names.has(this.checker.symbolToString(s, node, ts.SymbolFlags.Type)));
     }
 
-    private createSignature(node: ts.SignatureDeclaration, signature: ts.Signature) {
+    private createSignature(node: ts.SignatureDeclaration, signature: ts.Signature): ast.FunctionSignature {
         const parameters = signature.parameters.map(parameter => {
             const declaration = parameter.valueDeclaration as ts.ParameterDeclaration;
-            const type = this.createType(node, this.checker.getTypeOfSymbolAtLocation(parameter, declaration), declaration.type)
+            const type = this.createType(declaration, this.checker.getTypeOfSymbolAtLocation(parameter, declaration), declaration.type)
             return new ast.ParameterDeclaration(parameter.name, declaration.questionToken ? ast.Flags.Optional : ast.Flags.None, type);
         });
         const returnType = this.createType(node, signature.getReturnType(), signature.declaration.type, ast.Flags.None, (flags) => new ast.VoidType(flags));
@@ -106,7 +113,12 @@ export class SymbolTable implements NodeVisitor<void> {
             case ts.TypeFlags.String:
                 return new ast.StringType(flags);
             case ts.TypeFlags.Anonymous:
-                return new ast.FunctionType(flags, this.createSignature(node as ts.SignatureDeclaration, type.getCallSignatures()[0]));
+                if(typeNode!.kind == ts.SyntaxKind.FunctionType) {
+                    const signature = this.createSignature(node as ts.SignatureDeclaration, type.getCallSignatures()[0]);
+                    return new ast.FunctionType(flags, signature);
+                }
+                log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
+                return new ast.AnyType();
             case ts.TypeFlags.Any:
                 return new ast.AnyType(typeNode && typeNode.kind == ts.SyntaxKind.UnionType ? ast.Flags.Optional : ast.Flags.None);
             case ts.TypeFlags.Interface:
@@ -114,8 +126,12 @@ export class SymbolTable implements NodeVisitor<void> {
                 //fallthrough
             case ts.TypeFlags.Reference:
             case ts.TypeFlags.Class | ts.TypeFlags.Reference:
-                const reference = type as ts.TypeReference;
-                return this.createReferenceType(node, reference/*.target*/.getSymbol(), flags, reference.typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
+                if(typeNode && (typeNode.kind == ts.SyntaxKind.TypeReference || typeNode.kind == ts.SyntaxKind.ArrayType)) {
+                    const reference = type as ts.TypeReference;
+                    return this.createReferenceType(node, reference.getSymbol(), flags, reference.typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
+                }
+                log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
+                return new ast.AnyType();
             case ts.TypeFlags.Union: 
                 const nonNullableType = this.checker.getNonNullableType(type);
                 if(nonNullableType != type) { 

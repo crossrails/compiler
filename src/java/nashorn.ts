@@ -4,7 +4,7 @@ import "./java"
 import {JavaOptions} from "./java"
 import {decorate} from '../decorator';
 
-import {Module, SourceFile, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, NamespaceDeclaration} from "../ast"
+import {Module, Type, VoidType, AnyType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ConstructorDeclaration, FunctionType, NamespaceDeclaration} from "../ast"
 
 declare module "../ast" {
     interface Declaration {

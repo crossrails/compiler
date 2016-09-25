@@ -1,5 +1,4 @@
 import {SourceFile, Declaration, FunctionDeclaration, ClassDeclaration, DeclaredType, NamespaceDeclaration, GenericType, VariableDeclaration} from "./ast"
-import * as assert from "assert"
 import {ParsedPath} from 'path';
 
 

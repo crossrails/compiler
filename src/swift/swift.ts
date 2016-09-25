@@ -1,10 +1,9 @@
 import * as path from 'path';
 import * as ast from "../ast"
-import {log} from "../log"
 import {decorate} from '../decorator';
 import {EmitterOptions} from "../emitter" 
 import {
-    Module, SourceFile, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
+    Module, Type, VoidType, AnyType, BooleanType, StringType, NumberType, ArrayType, VariableDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, NamespaceDeclaration
 } from "../ast"
 
 export interface SwiftOptions extends EmitterOptions {

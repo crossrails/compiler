@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import {sep} from 'path';
 import {Module} from "../../src/ast"
-import {Emitter, EmitterOptions} from "../../src/emitter"
+import {Emitter} from "../../src/emitter"
 import {log} from "../../src/log"
 
 var mkdirp = require('mkdirp');
@@ -99,7 +99,6 @@ describe("Emitter", () => {
         let emitMethodsOnTheModule = jasmine.createSpy('emit').and.callFake((outDir: string, options: any, writeFile: (filename: string, data: string) => void) => {
             writeFile('name', 'content');
         })
-        let emitWrapperMethodOnTheModule = jasmine.createSpy('emitWrapper')
         spyOn(mkdirp, 'sync');
         spyOn(fs, 'writeFileSync');
         expect(emitter.emit('main.js', {emit: emitMethodsOnTheModule, emitWrapper: emitMethodsOnTheModule} as any)).toBe(0);

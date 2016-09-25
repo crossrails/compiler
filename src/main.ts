@@ -10,7 +10,18 @@ import {Emitter, EmitterOptions} from "./emitter"
 import yargs = require('yargs');
 
 interface ParserFactory {
-    new(sourceMap: {sourceRoot: string, sources: string[]}, implicitExport: boolean, charset: string): {parse(): Module};
+    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean, charset: string): {parse(): Module};
+}
+
+interface CompilerOptions extends EmitterOptions {
+    sourceMap?: string 
+    declarationFile?: string 
+    typings?: string 
+    include?: string[]
+    exclude?: string[]
+    implicitExport: boolean
+    logLevel: string
+    charset: string
 }
 
 function main(...args: string[]): number {
@@ -40,10 +51,14 @@ function main(...args: string[]): number {
             describe: 'Path to a typescript declaration file (.d.ts), defaults to [file.js].d.ts',
             type: 'string'
         })
-        .option('charset', {
-            default: 'utf8',
-            describe: 'The character set of the input files',
-            type: 'string'
+        .option('include', {
+            describe: 'A list of glob-like file patterns, restricts the output to the declarations found in matching source files',
+            type: 'array'
+        })
+        .option('exclude', {
+            describe: 'A list of glob-like file patterns, exlcudes the declarations found in matching source files from the output',
+            type: 'array',
+            default: ['node_modules/**', 'bower_components/**', 'jspm_package/**']
         })
         .option('implicitExport', {
             default: false,
@@ -55,6 +70,11 @@ function main(...args: string[]): number {
             default: 'warning',
             describe: 'Set the complier log level',
             choices: ['debug', 'info', 'warning', 'error']
+        })
+        .option('charset', {
+            default: 'utf8',
+            describe: 'The character set of the input files',
+            type: 'string'
         })
         .options({
             'swift': { 
@@ -109,7 +129,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
-        .parse<EmitterOptions & {sourceMap?: string, declarationFile?: string, typings?: string, logLevel: string, charset: string, implicitExport: boolean}>(args);
+        .parse<CompilerOptions>(args);
 
     ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
         options[o] = options[o] == 'true' ? true : options[o] == 'false' ? false : options[o]
@@ -118,10 +138,10 @@ function main(...args: string[]): number {
     log.setLevel(options.logLevel);
 
     const emitter = new Emitter(options, [
-        [`swift`,   [`javascriptcore`]], 
-        ['java',    [`nashorn`, 'j2v8']],
-        [`c#`,      [`chakracore`]], 
-        [`php`,     [`v8`]], 
+        ['swift',   ['javascriptcore']], 
+        ['java',    ['nashorn', 'j2v8']],
+        ['c#',      ['chakracore']], 
+        ['php',     ['v8']], 
     ]);
 
     let filename: string|undefined = options._[0];
@@ -139,9 +159,9 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        const sourceMap = mapSources(filename, options.sourceMap, options.declarationFile, options.typings, options.charset);
+        const sourceMap = mapSources(filename, options);
         const factory: ParserFactory = TypeScriptParser;
-        const parser = new factory(sourceMap, options.implicitExport, options.charset);
+        const parser = new factory(sourceMap, options.include, options.exclude, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
@@ -150,38 +170,41 @@ function main(...args: string[]): number {
             emitter.emit(filename, module); 
         } else if(log.errorCount == 0) {
             log.warn(`Nothing to output as no exported declarations found in the source files`);                
-            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option`)
+            log.info(`Resolve this warning by prefixing your declarations with the export keyword or a @export jsdoc tag or use the --implicitExport option (also check your use of --include and --exclude)`)
         }
     }
     console.log(`Compilation ${log.errorCount ? 'failed' : 'suceeded' } with ${log.errorCount} error${log.errorCount == 1 ? '' : 's'} and ${log.warningCount} warning${log.warningCount == 1 ? '' : 's'}`)
-    if((log.level === Log.Level.ERROR || log.level === Log.Level.WARNING) && (log.errorCount || log.warningCount)) {
+    if(log.errorCount == 0 && log.warningCount == 0) return 0;
+    if(log.level === Log.Level.ERROR || log.level === Log.Level.WARNING) {
         console.log(`Run with --logLevel=info to see more details`)            
-    }    
+    } else if(log.level === Log.Level.INFO) {
+        console.log(`Run with --logLevel=debug to see more details`)                    
+    }
     return log.errorCount;
 }
 
-function mapSources(src: string, sourceMapFile: string|undefined, declarationFile: string|undefined, typings: string|undefined, charset: string) : {sourceRoot: string, sources: string[]} {
-    if(sourceMapFile || !declarationFile) try {                
-        const sourceMap = sourceMapFile || `${src}.map`;
+function mapSources(src: string, options: CompilerOptions) : {sourceRoot: string, sources: string[]} {
+    if(options.sourceMap || !options.declarationFile) try {                
+        const sourceMap = options.sourceMap || `${src}.map`;
         log.debug(`Attempting to open sourcemap at ${path.relative('.', sourceMap)}`);
-        const map = JSON.parse(readFileSync(sourceMap, charset));
+        const map = JSON.parse(readFileSync(sourceMap, options.charset));
         map.sourceRoot = path.join(path.dirname(src), map.sourceRoot); 
         log.debug(`Sourcemap found with ${map.sources.length} source(s)`);
         return map;
     } catch(error) {
-        if(sourceMapFile || error.code != 'ENOENT') {
+        if(options.sourceMap || error.code != 'ENOENT') {
             throw error;
         }
         log.info(`No sourcemap found`);
     }
     try {
-        const file = declarationFile || typings || `${src.slice(0, -3)}.d.ts`;
+        const file = options.declarationFile || options.typings || `${src.slice(0, -3)}.d.ts`;
         log.debug(`Attempting to open declaration file (.d.ts) at ${path.relative('.', file)}`);
         accessSync(file, R_OK);
         log.debug(`Declaration file (.d.ts) found`);
         return  {sourceRoot: path.dirname(file), sources: [path.basename(file)] }; 
     } catch(error) {
-        if(declarationFile || error.code != 'ENOENT') {
+        if(options.declarationFile || error.code != 'ENOENT') {
             throw error;
         }
         log.info(`No declaration file (.d.ts) file found`);

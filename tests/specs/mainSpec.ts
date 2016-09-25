@@ -1,9 +1,7 @@
 import * as fs from 'fs';
-import * as path from 'path';
-import * as ast from '../../src/ast';
 import * as parser from '../../src/typescript/parser';
 import * as emitter from '../../src/emitter';
-import {log, Log} from "../../src/log"
+import {log} from "../../src/log"
 
 describe("Main", () => {
     

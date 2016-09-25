@@ -9,8 +9,8 @@ class SimpleObject {
     methodToOverrideCalled: boolean
 
     constructor(v?: number) {
-        this.value = v ? v : 7
-        this.methodToOverrideCalled = false
+        this.value = v ? v : 7 
+        this.methodToOverrideCalled = false 
     }
 
     static staticVoidNoArgMethod(): void {

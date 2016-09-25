@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import {Module} from "../../src/ast"
 import {decorate, undecorate} from "../../src/decorator"
 
 interface Target {    

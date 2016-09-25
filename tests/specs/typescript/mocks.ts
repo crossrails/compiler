@@ -1,9 +1,6 @@
-import * as fs from 'fs';
-import * as rewire from 'rewire';
 import * as ts from "typescript";
-import * as assert from 'assert';
 import {readFileSync} from 'fs';
-import {log, Log} from "../../../src/log"
+import {log} from "../../../src/log"
 
 export function mockProgram(files: [string, string][]): ts.Program {
     const map = new Map(files);

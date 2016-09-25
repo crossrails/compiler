@@ -3,7 +3,7 @@ import {log} from "../log"
 import {decorate} from '../decorator';
 import {EmitterOptions} from "../emitter" 
 import {
-    Module, SourceFile, Type, GenericType, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, NamespaceDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, FunctionSignature, adopt
+    Module, SourceFile, Type, GenericType, VoidType, AnyType, BooleanType, StringType, NumberType, ErrorType, ArrayType, Declaration, VariableDeclaration, NamespaceDeclaration, ClassDeclaration, InterfaceDeclaration, FunctionDeclaration, DeclaredType, ParameterDeclaration, ConstructorDeclaration, FunctionType, DateType, adopt
 } from "../ast"
 
 export interface JavaOptions extends EmitterOptions {
@@ -201,12 +201,13 @@ function withOverloadsForFunctionsWithOptionalParameters(declarations: ReadonlyA
             for(let index = startOfOptionals; index < parameters.length; index++) {
                 //skip adding overload if it already exists
                 if(([...reduced, ...declarations.slice(declarationIndex + 1)]).some(
-                    (m: FunctionDeclaration) => (declaration instanceof ConstructorDeclaration ? m instanceof ConstructorDeclaration : (m instanceof FunctionDeclaration && m.name === declaration.name)) && 
+                    (m: FunctionDeclaration) => (declaration instanceof ConstructorDeclaration ? m instanceof ConstructorDeclaration : (m.constructor.name == 'FunctionDeclaration' && m.name === declaration.name)) && 
                         m.signature.parameters.length == index && m.signature.parameters.every(
                             (p, i) => i < index && p.type.typeName() === parameters[i].type.typeName()
                         )
                 )) continue;
                 const overload = Object.create(declaration, {
+                    typeParameters: { value: declaration.typeParameters.map(t => Object.create(t)) },
                     signature: { value: Object.create(declaration.signature, {
                         parameters: { value: declaration.signature.parameters.slice(0, index).map(p => Object.create(p)) },
                         thrownTypes: { value: declaration.signature.thrownTypes.map(t => Object.create(t)) },

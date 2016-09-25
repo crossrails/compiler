@@ -1,5 +1,4 @@
 import * as ts from "typescript";
-import {log} from "../log"
 
 export type VariableDeclaration = ts.VariableDeclaration | ts.PropertyDeclaration | ts.PropertySignature;
 

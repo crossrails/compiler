@@ -1,6 +1,6 @@
 import * as path from 'path';
 import {readFileSync} from 'fs';
-import {log, Log} from "./log"
+import {log} from "./log"
 import {Module} from "./ast" 
 import {writeFileSync} from 'fs';
 import {undecorate} from './decorator';
@@ -8,9 +8,9 @@ import {undecorate} from './decorator';
 var mkdirp = require('mkdirp');
 
 export interface EmitterOptions {
-   emit: boolean|string
-   emitJS: boolean|string
-   emitWrapper: boolean|string
+    emit: boolean|string
+    emitJS: boolean|string
+    emitWrapper: boolean|string
     //    newLine: 'lf'|'crlf'
     [option: string]: any
 }

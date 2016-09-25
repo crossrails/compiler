@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as assert from 'assert';
 
 export function adopt<Child extends { parent: any } | ReadonlyArray<{ parent: any }>>(child: Child, parent: any, propertyKey = 'parent'): Child {
     Array.isArray(child) ? child.forEach(element => adopt(element, parent, propertyKey)) :

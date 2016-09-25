@@ -4,6 +4,7 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "noImplicitThis": true,
+    "noUnusedLocals": true,
     "sourceMap": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": false,

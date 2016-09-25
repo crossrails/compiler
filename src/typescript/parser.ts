@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as ts from "typescript";
 import * as ast from "../ast"
-import {readFileSync} from 'fs';
 import {log} from "../log"
 import {Comment} from "../comment"
 import {SymbolTable} from './symboltable'
@@ -17,14 +16,14 @@ function getFlags(node: ts.Node): ast.Flags {
 
 export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
-    private readonly program: ts.Program;
-    private readonly symbols: SymbolTable;
-    private readonly sourceRoot: string;
+    private readonly program: ts.Program
+    private readonly symbols: SymbolTable
+    private readonly sourceRoot: string
     
-    constructor(sourceMap: {sourceRoot: string, sources: string[]}, implicitExport: boolean, charset: string) {
-        this.sourceRoot = sourceMap.sourceRoot;
+    constructor(sourceMap: {sourceRoot: string, sources: string[]}, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean, charset: string) {
         this.program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset, skipDefaultLibCheck: true});
-        this.symbols = new SymbolTable(this.program, implicitExport);
+        this.symbols = new SymbolTable(this.program, includes, excludes, implicitExport);
+        this.sourceRoot = sourceMap.sourceRoot;
     }
 
     parse(): ast.Module {
@@ -34,7 +33,7 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
     shouldVisitNode(node: ts.Declaration): boolean {
         if(this.symbols.isExported(node)) return this.symbols.getExports(node).length > 0;
-        const root = node.parent!.kind == ts.SyntaxKind.SourceFile || node.parent!.kind == ts.SyntaxKind.ModuleBlock;
+        const root = !node.parent || node.parent.kind == ts.SyntaxKind.SourceFile || node.parent.kind == ts.SyntaxKind.ModuleBlock;
         log.debug(`Skipping ${root ? 'unexported' : 'private'} ${ts.SyntaxKind[node.kind]} ${this.symbols.getName(node)}`, node);
         return false;
     }
