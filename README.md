@@ -45,7 +45,7 @@ xrails myLibrary.js --sourceMap=gen/myLibrary.js.map --java.emit=src/java
 
 ## Extra reading 
 
-*  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler%20Options.md)
+*  [Full  list of compiler options](https://github.com/crossrails/compiler/wiki/Compiler-Options)
 
 [package-url]: https://www.npmjs.com/package/xrails
 [version-image]: https://badge.fury.io/js/xrails.svg
