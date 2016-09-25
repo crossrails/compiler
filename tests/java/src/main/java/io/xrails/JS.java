@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class JS {
 
@@ -260,11 +261,11 @@ class JS {
         }
     }
 
-    static class Object {
+    static class Object extends AbstractMap<String, java.lang.Object> {
 
-        private final JSObject mirror;
+        private final ScriptObjectMirror mirror;
 
-        Object(JSObject mirror) {
+        Object(ScriptObjectMirror mirror) {
             this.mirror = mirror;
             JS.heap.put(this, mirror);
         }
@@ -277,6 +278,11 @@ class JS {
         @Override
         public int hashCode() {
             return mirror.hashCode();
+        }
+
+        @Override
+        public Set<Entry<String, java.lang.Object>> entrySet() {
+            return Arrays.stream(mirror.getOwnKeys(false)).map(key -> new AbstractMap.SimpleEntry<String, java.lang.Object>(key, JS.wrap(mirror.get(key), JS.Object::new))).collect(Collectors.toSet());
         }
 
         @Override

@@ -6,8 +6,10 @@ import org.junit.Test;
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Map;
 
 import static io.xrails.Src.*;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -212,6 +214,25 @@ public class SrcTest {
         assertEquals(anyObjectInstance(), anyVar());
         assertFalse(anyVar() == anyObjectInstance());
     }
+
+    @Test
+    public void testAnyObjectMapConformance() throws Exception {
+        assertThat(anyObjectInstance(), instanceOf(Map.class));
+        Map<String, Object> map = (Map<String, Object>)anyObjectInstance();
+        assertThat(map.size(), is(2));
+        assertThat(map.get("methodToOverrideCalled"), is(false));
+        assertThat(map.get("value"), is(7));
+    }
+
+//    @Test
+//    public void testInterfaceMapConformance() throws Exception {
+//        assertThat(simpleInterfaceInstance(), instanceOf(Map.class));
+//        Map<String, Object> map = (Map<String, Object>)simpleInterfaceInstance();
+//        assertThat(map.size(), is(2));
+//        assertThat(map.get("methodToOverrideCalled"), is(false));
+//        assertThat(map.get("value"), is(7));
+//    }
+
 
     @Test
     public void testUnknownObjectDeallocation() throws Exception {
