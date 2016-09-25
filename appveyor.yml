@@ -36,10 +36,10 @@ test_script:
   - java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App 
   - cd ..
 on_success:
-  - cmd: git clone -b gh-pages https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git pages
+  - cmd: git clone -b master https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git pages
   - cmd: cd pages
-  - mv ../wiki/wiki.md compiler-options.md
-  - git add compiler-options.md 
+  - mv ../wiki/wiki.md "docs/Compiler Options.md"
+  - git add docs/compiler-options.md 
   - git diff-index --quiet HEAD || git commit -m "updated wiki"
-  - git push origin gh-pages
+  - git push origin master
 build: off
