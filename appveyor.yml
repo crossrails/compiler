@@ -41,7 +41,5 @@ on_success:
   - cmd: git clone -b gh-pages https://%GithubUsername%:%GithubPassword%@github.com/crossrails/compiler.git pages
   - cmd: cd pages
   - mv ../wiki/wiki.md compiler-options.md
-  - git add compiler-options.md 
-  - git commit -m "updated wiki" 
-  - if [-n "$(git status --porcelain)"](then git push origin gh-pages)
+  - if [-n "$(git status --porcelain)"](then git add compiler-options.md && git commit -m "updated wiki" && git push origin gh-pages)
 build: off
