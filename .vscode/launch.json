@@ -2,7 +2,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Launch",
+			"name": "Compile input project",
 			"type": "node",
 			"request": "launch",
 			"program": "${workspaceRoot}/src/main.ts",
@@ -32,8 +32,97 @@
 				"NODE_ENV": "development"
 			},
 			"console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
 			"outDir": "${workspaceRoot}/src",
 			"sourceMaps": true
+		},
+		{
+			"name": "Compile horizon",
+			"type": "node",
+			"request": "launch",
+			"program": "${workspaceRoot}/src/main.ts",
+			"cwd": "C:/Users/nbran/OneDrive/Documents/horizon/client",
+			"args": [
+				// "--help"
+                "dist/horizon.js",
+				"--implicitExport",
+				"--logLevel=debug",
+				"--declarationFile=index.d.ts",
+				"--swift.emit=dist/swift",				
+				"--swift.bundleId=io.horizon",				
+				"--java.emit=dist/java",				
+				"--java.basePackage=io.horizon"
+            ],
+			"preLaunchTask": "build",
+			"stopOnEntry": false,
+			"runtimeExecutable": null,
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+			"outDir": "${workspaceRoot}/src",
+			"sourceMaps": true
+		},
+        {
+            "name": "Debug tests",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/node_modules/jasmine/bin/jasmine.js",
+            "request": "launch",
+            "type": "node",
+            "preLaunchTask": "build",
+            "internalConsoleOptions": "openOnSessionStart",
+			"sourceMaps": true,
+            "args": [
+                "JASMINE_CONFIG_PATH=jasmine.json",
+				// "--filter=\"correctly identifies typescript indexable types\"",
+				""
+            ]
+        },
+		// {
+		// 	"name": "Launch",
+		// 	"type": "node",
+		// 	"request": "launch",
+		// 	"program": "${workspaceRoot}/node_modules/ts-node/dist/bin.js",
+		// 	"cwd": "${workspaceRoot}",
+		// 	"args": [
+		// 		"${workspaceRoot}/src/main.ts",
+		// 		// "--help"
+        //         "C:/Users/nbran/Documents/node_modules/moment/package.json",
+		// 		"--implicitExport",
+		// 		"--logLevel=debug",
+		// 		"--swift.emit=C:/Users/nbran/Documents/node_modules/moment/",
+		// 		"--swift.bundleId=com.momentjs",				
+		// 		"--java.emit=C:/Users/nbran/Documents/node_modules/moment/",
+		// 		"--java.basePackage=com.momentjs"
+        //     ],
+		// 	"preLaunchTask": "build",
+		// 	"stopOnEntry": false,
+		// 	"runtimeExecutable": null,
+		// 	"runtimeArgs": [
+		// 		"--nolazy"
+		// 	],
+		// 	"env": {
+		// 		"NODE_ENV": "development"
+		// 	},
+		// 	"externalConsole": false,
+		// 	"outDir": "${workspaceRoot}/src",
+		// 	"sourceMaps": true
+		// },
+		{
+			"name": "Attach",
+			"type": "node",
+			"request": "attach",
+			"port": 5858,
+			"address": "localhost",
+			"restart": false,
+			"sourceMaps": false,
+			"outDir": null,
+			"localRoot": "${workspaceRoot}",
+			"remoteRoot": null
 		}
 	]
 }
