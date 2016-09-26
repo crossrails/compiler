@@ -11,7 +11,7 @@ import {Emitter, EmitterOptions} from "./emitter"
 import yargs = require('yargs');
 
 interface ParserFactory {
-    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String) => boolean, implicitExport: boolean, charset: string): {parse(): Module};
+    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String) => boolean, implicitExport: boolean, lib: string[] | undefined, charset: string): {parse(): Module};
 }
 
 interface CompilerOptions extends EmitterOptions {
@@ -21,6 +21,7 @@ interface CompilerOptions extends EmitterOptions {
     exclude: string[]
     implicitExport: boolean
     logLevel: string
+    lib?: string[]
     charset: string
 }
 
@@ -66,6 +67,10 @@ function main(...args: string[]): number {
             default: 'warning',
             describe: 'Set the complier log level',
             choices: ['debug', 'info', 'warning', 'error']
+        })
+        .option('lib', {
+            describe: 'List of built-in API groups you expect your runtime support, any of dom, webworker, es5, es6 / es2015, es2015.core, es2015.collection, es2015.iterable, es2015.promise, es2015.proxy, es2015.reflect, es2015.generator, es2015.symbol, es2015.symbol.wellknown,es2016, es2016.array.include, es2017, es2017.object, es2017.sharedmemory, scripthost',
+            type: 'array'
         })
         .option('charset', {
             default: 'utf8',
@@ -125,6 +130,7 @@ function main(...args: string[]): number {
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
+        .epilog('')
         .parse<CompilerOptions>(args);
 
     ['emit', 'emitJS', 'emitWrapper'].forEach(o => {
@@ -158,7 +164,7 @@ function main(...args: string[]): number {
         const includes = (filepath: string) => options.exclude.every(pattern => !minimatch(path.relative('.', filepath), pattern));
         const sourceMap = mapSources(filename, options);
         const factory: ParserFactory = TypeScriptParser;
-        const parser = new factory(sourceMap, includes, options.implicitExport, options.charset);
+        const parser = new factory(sourceMap, includes, options.implicitExport, options.lib, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));

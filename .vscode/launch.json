@@ -45,7 +45,7 @@
 			"args": [
 				// "--help"
                 "dist/horizon.js",
-				"--implicitExport",
+				"--lib=lib.es6.d.ts",
 				"--logLevel=debug",
 				"--declarationFile=index.d.ts",
 				"--swift.emit=dist/swift",				
@@ -78,8 +78,7 @@
 			"sourceMaps": true,
             "args": [
                 "JASMINE_CONFIG_PATH=jasmine.json",
-				// "--filter=\"correctly identifies typescript indexable types\"",
-				""
+				"--filter='correctly+identifies+typescript+indexable+types'"
             ]
         },
 		// {

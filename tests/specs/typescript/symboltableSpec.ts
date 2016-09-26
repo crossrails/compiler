@@ -252,7 +252,18 @@ describe("SymbolTable", () => {
         expect(dType.isOptional).toBe(true);
     });
     
-    it("correctly identifies typescript function types", function() {
+    it("does not treat optional function parameters as optional types", function() {
+        const program = mockProgram([['src.ts', `function foo(a?: string) {}`]]);
+        const symbols = new SymbolTable(program, () => true, true);
+        expect(log.errorCount).toBe(0);
+        expect(log.warningCount).toBe(0);
+        let foo = program.getSourceFile('src.ts').statements[0] as ts.FunctionDeclaration;
+        let type = symbols.getType(foo.parameters[0], (flags) => fail('Called default type') as any);
+        expect(type.constructor.name).toBe('StringType');
+        expect(type.isOptional).toBe(false);
+    });
+    
+        it("correctly identifies typescript function types", function() {
         let [[run, supplier, consumer], program] = mockVariables(`
             let run: () => void,
                 supplier: () => ReturnValue,

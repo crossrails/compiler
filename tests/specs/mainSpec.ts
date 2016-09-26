@@ -59,7 +59,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['package.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['package.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("reads bower.json when no args given and bower.json file in working directory", function(this: This) {
@@ -76,7 +76,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['bower.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['bower.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("reads package.json when given as arg", function(this: This) {
@@ -94,7 +94,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['package.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['package.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("reads bower.json when given as arg", function(this: This) {
@@ -112,7 +112,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift"
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['bower.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['bower.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("fails when non js or manifest file arg given", function(this: This) {
@@ -185,7 +185,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
         
         it("reads the declaration file over typings file in package.json if passed in", function(this: This) {
@@ -207,7 +207,7 @@ describe("Main", () => {
                 '--declarationFile=source.d.ts',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['source.d.ts']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['source.d.ts']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
         
         it("attempts to read the sourcemap, then the declaration file beside the input file if none specified", function(this: This) {
@@ -227,7 +227,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.d.ts']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.d.ts']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
             expect(readFileMethod).toHaveBeenCalledWith("src.js.map", jasmine.anything());
         });
         
@@ -249,7 +249,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.js']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['src.js']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("parses the files specified in the source map if found", function(this: This) {
@@ -264,7 +264,7 @@ describe("Main", () => {
                 '--logLevel=debug',
                 "--swift",
             )).toBe(0);
-            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['source1.ts', 'source2.ts']}, jasmine.anything(), jasmine.anything(), jasmine.anything());
+            expect(this.parserConstructor).toHaveBeenCalledWith({sourceRoot: '.', sources: ['source1.ts', 'source2.ts']}, jasmine.anything(), jasmine.anything(), undefined, jasmine.anything());
         });
 
         it("passes emit* options as booleans if they equal 'true' or 'false'", function(this: This) {

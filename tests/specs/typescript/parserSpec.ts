@@ -30,7 +30,7 @@ describe("TypeScriptParser", () => {
             if(file.startsWith('missingfile')) throw {code: 'ENOENT'};
             return readFileSync(file, encoding);    
         });
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["missingfile.js"]}, () => true, false, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["missingfile.js"]}, () => true, false, undefined, 'uft8');
         parser.parse();
         expect(readFileMethod).toHaveBeenCalled();
         expect(log.errorCount).toBe(1);
@@ -39,7 +39,7 @@ describe("TypeScriptParser", () => {
     it("retains a source file if it contains exported declarations", function(this: This) {
         const program = mockProgram([['src.ts', 'export let declaration']]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -50,7 +50,7 @@ describe("TypeScriptParser", () => {
     it("does not retain a source file if it does not contains exported declarations", function(this: This) {
         const program = mockProgram([['src.ts', 'let declaration']]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -60,7 +60,7 @@ describe("TypeScriptParser", () => {
     it("considers global declarations static", function(this: This) {
         const program = mockProgram([['src.ts', 'export let declaration']]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, false, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -78,7 +78,7 @@ describe("TypeScriptParser", () => {
             }
         `]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -98,7 +98,7 @@ describe("TypeScriptParser", () => {
             }
         `]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -120,7 +120,7 @@ describe("TypeScriptParser", () => {
             }
         `]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -151,7 +151,7 @@ describe("TypeScriptParser", () => {
             }
         `]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
@@ -162,7 +162,7 @@ describe("TypeScriptParser", () => {
     it("assumes void for return types and any for argument types when none specified", function(this: This) {
         const program = mockProgram([['src.ts', "export function myfunc(a) {}"]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["src.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         let myfunc = module.files[0].declarations[0] as AST.FunctionDeclaration;
         expect(log.errorCount).toBe(0);
@@ -174,7 +174,7 @@ describe("TypeScriptParser", () => {
     it("has an any type when missing type information", function(this: This) {
         let program = mockProgram([['source.ts', "export let declaration"]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["source.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["source.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         let declaration = module.files[0].declarations[0] as AST.VariableDeclaration;
         expect(log.errorCount).toBe(0);
@@ -185,7 +185,7 @@ describe("TypeScriptParser", () => {
     it("retains type information when specified in the source", function(this: This) {
         let program = mockProgram([['source.ts', "export let declaration: string"]]);
         this.createProgramMethod.and.callFake(() => program);
-        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["source.ts"]}, () => true, true, 'uft8');
+        const parser = new TypeScriptParser({sourceRoot: '.', sources: ["source.ts"]}, () => true, true, undefined, 'uft8');
         const module = parser.parse();
         let declaration = module.files[0].declarations[0] as AST.VariableDeclaration;
         expect(log.errorCount).toBe(0);
