@@ -107,12 +107,12 @@ export class SymbolTable implements NodeVisitor<void> {
             case ts.TypeFlags.String:
                 return new ast.StringType(flags);
             case ts.TypeFlags.Anonymous:
-                if(typeNode!.kind == ts.SyntaxKind.FunctionType) {
+                // if(typeNode!.kind == ts.SyntaxKind.FunctionType) {
                     const signature = this.createSignature(node as ts.SignatureDeclaration, type.getCallSignatures()[0]);
                     return new ast.FunctionType(flags, signature);
-                }
-                log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
-                return new ast.AnyType();
+                // }
+                // log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
+                // return new ast.AnyType();
             case ts.TypeFlags.Any:
                 return new ast.AnyType(typeNode && typeNode.kind == ts.SyntaxKind.UnionType ? ast.Flags.Optional : ast.Flags.None);
             case ts.TypeFlags.Interface:
@@ -120,12 +120,12 @@ export class SymbolTable implements NodeVisitor<void> {
                 //fallthrough
             case ts.TypeFlags.Reference:
             case ts.TypeFlags.Class | ts.TypeFlags.Reference:
-                if(typeNode && (typeNode.kind == ts.SyntaxKind.TypeReference || typeNode.kind == ts.SyntaxKind.ArrayType)) {
+                // if(typeNode && (typeNode.kind == ts.SyntaxKind.TypeReference || typeNode.kind == ts.SyntaxKind.ArrayType)) {
                     const reference = type as ts.TypeReference;
                     return this.createReferenceType(node, reference.getSymbol(), flags, reference.typeArguments, typeNode && (typeNode as ts.TypeReferenceNode).typeArguments);
-                }
-                log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
-                return new ast.AnyType();
+                // }
+                // log.warn(`Unsupported type ${this.checker.typeToString(type)}: ${[...mask()].map(i => `${ts.TypeFlags[i]}`).join(', ')}, erasing to Any`, node);            
+                // return new ast.AnyType();
             case ts.TypeFlags.Union: 
                 const nonNullableType = this.checker.getNonNullableType(type);
                 if(nonNullableType != type) { 

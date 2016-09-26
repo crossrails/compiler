@@ -3,7 +3,6 @@ import * as AST from "../../../src/ast"
 import {log, Log} from "../../../src/log"
 import {SymbolTable} from "../../../src/typescript/symboltable"
 import {mockVariables, mockProgram} from "./mocks"
-
 describe("SymbolTable", () => {
     
     beforeEach(function() {
@@ -231,26 +230,26 @@ describe("SymbolTable", () => {
 
     it("correctly identifies typescript optional types", function() {
         const [[a, b, c, d], program] = mockVariables(`
-            let a: any | null, 
-                b: null | any, 
-                c: any | undefined, 
+            let a: number | null, 
+                b: null | string[], 
+                c: Date | undefined, 
                 d: undefined | any;
         `);
         let symbols = new SymbolTable(program, () => true, true);
         expect(log.errorCount).toBe(0);
         expect(log.warningCount).toBe(0);
         let aType = symbols.getType(a, (flags) => fail('Called default type') as any);
-        expect(aType.constructor.name).toBe('AnyType');
-        expect(aType.flags).toBe(AST.Flags.Optional);
+        expect(aType.constructor.name).toBe('NumberType');
+        expect(aType.isOptional).toBe(true);
         let bType = symbols.getType(b, (flags) => fail('Called default type') as any);
-        expect(bType.constructor.name).toBe('AnyType');
-        expect(bType.flags).toBe(AST.Flags.Optional);
+        expect(bType.constructor.name).toBe('ArrayType');
+        expect(bType.isOptional).toBe(true);
         let cType = symbols.getType(c, (flags) => fail('Called default type') as any);
-        expect(cType.constructor.name).toBe('AnyType');
-        expect(cType.flags).toBe(AST.Flags.Optional);
+        expect(cType.constructor.name).toBe('DateType');
+        expect(cType.isOptional).toBe(true);
         let dType = symbols.getType(d, (flags) => fail('Called default type') as any);
         expect(dType.constructor.name).toBe('AnyType');
-        expect(dType.flags).toBe(AST.Flags.Optional);
+        expect(dType.isOptional).toBe(true);
     });
     
     it("correctly identifies typescript function types", function() {

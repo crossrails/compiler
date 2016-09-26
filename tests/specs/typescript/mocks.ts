@@ -10,7 +10,7 @@ export function mockProgram(files: [string, string][]): ts.Program {
         getScriptVersion: (fileName) => '0',
         getScriptSnapshot: (fileName) => ts.ScriptSnapshot.fromString(map.get(fileName) || readFileSync(fileName, 'utf8')),
         getCurrentDirectory: () => '.',
-        getCompilationSettings: () => { return {allowJS: true, skipLibCheck: true, skipDefaultLibCheck: true} },
+        getCompilationSettings: () => { return {allowJS: true, skipLibCheck: true, skipDefaultLibCheck: true, strictNullChecks: true} },
         getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
     }, ts.createDocumentRegistry())
     log.logDiagnostics(ts.getPreEmitDiagnostics(services.getProgram()));

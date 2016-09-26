@@ -206,7 +206,7 @@ export abstract class Type {
     readonly flags: Flags
     readonly parent: Declaration|Type
     
-    constructor(flags: Flags = Flags.None) {
+    constructor(flags = Flags.None) {
         this.flags = flags;
     }
 
