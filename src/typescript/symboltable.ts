@@ -1,5 +1,3 @@
-import * as path from 'path';
-import * as minimatch from 'minimatch';
 import * as assert from 'assert';
 import * as ts from "typescript";
 import * as ast from "../ast"
@@ -11,20 +9,16 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
+    private readonly includes: (filepath: string) => boolean; 
     private readonly identifiers = new Set<ts.Identifier>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<ts.Symbol>();
-    private readonly shouldIncludeFile: (file: ts.SourceFile) => boolean; 
 
-    constructor(program: ts.Program, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean) {
+    constructor(program: ts.Program, includes: (path: String) => boolean, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
         this.implicitExport = implicitExport;
-        this.shouldIncludeFile = (file: ts.SourceFile) => {
-            const relative = path.relative('.', file.path);
-            return (!includes || includes.some(pattern => minimatch(relative, pattern))) &&
-                (!excludes || excludes.every(pattern => !minimatch(relative, pattern))); 
-            };
-        visitNodes(program.getSourceFiles().filter(this.shouldIncludeFile), this, true);
+        this.includes = includes; 
+        visitNodes(program.getSourceFiles().filter(s => !s.hasNoDefaultLib && includes(s.path)), this, true);
     } 
 
     isExported(node: ts.Declaration): boolean {
@@ -67,7 +61,7 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private exportIfNecessary(symbol: ts.Symbol) {
         const declarations = this.getDeclarations(symbol);
-        if(declarations.some(d => this.shouldIncludeFile(d.getSourceFile()))) return;
+        if(!declarations.some(d => !this.exports.has(d) && !d.getSourceFile().hasNoDefaultLib && this.includes(d.getSourceFile().path))) return;
         const exported = declarations.reduce((exported, d) => {
             exported = (d.flags & ts.NodeFlags.Export) == 0;
             d.flags |= ts.NodeFlags.Export;

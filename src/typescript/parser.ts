@@ -20,9 +20,9 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
     private readonly symbols: SymbolTable
     private readonly sourceRoot: string
     
-    constructor(sourceMap: {sourceRoot: string, sources: string[]}, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean, charset: string) {
+    constructor(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String) => boolean, implicitExport: boolean, charset: string) {
         this.program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, charset: charset, skipDefaultLibCheck: true});
-        this.symbols = new SymbolTable(this.program, includes, excludes, implicitExport);
+        this.symbols = new SymbolTable(this.program, includes, implicitExport);
         this.sourceRoot = sourceMap.sourceRoot;
     }
 

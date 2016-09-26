@@ -1,24 +1,24 @@
 #!/usr/bin/env node
 
-import * as path from 'path';
+import * as path from 'path'
+import * as minimatch from 'minimatch'
 import {log, Log} from "./log"
 import {Module} from "./ast"
 import {TypeScriptParser} from "./typescript/parser"
-import {readFileSync, accessSync, R_OK} from 'fs';
+import {readFileSync, accessSync, R_OK} from 'fs'
 import {Emitter, EmitterOptions} from "./emitter"
 
 import yargs = require('yargs');
 
 interface ParserFactory {
-    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: string[] | undefined, excludes: string[] | undefined, implicitExport: boolean, charset: string): {parse(): Module};
+    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String) => boolean, implicitExport: boolean, charset: string): {parse(): Module};
 }
 
 interface CompilerOptions extends EmitterOptions {
     sourceMap?: string 
     declarationFile?: string 
     typings?: string 
-    include?: string[]
-    exclude?: string[]
+    exclude: string[]
     implicitExport: boolean
     logLevel: string
     charset: string
@@ -51,12 +51,8 @@ function main(...args: string[]): number {
             describe: 'Path to a typescript declaration file (.d.ts), defaults to [file.js].d.ts',
             type: 'string'
         })
-        .option('include', {
-            describe: 'A list of glob-like file patterns, restricts the output to the declarations found in matching source files',
-            type: 'array'
-        })
         .option('exclude', {
-            describe: 'A list of glob-like file patterns, exlcudes the declarations found in matching source files from the output',
+            describe: 'A list of glob file patterns of source files to exlude from compliation',
             type: 'array',
             default: ['node_modules/**', 'bower_components/**', 'jspm_package/**']
         })
@@ -159,9 +155,10 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
+        const includes = (filepath: string) => options.exclude.every(pattern => !minimatch(path.relative('.', filepath), pattern));
         const sourceMap = mapSources(filename, options);
         const factory: ParserFactory = TypeScriptParser;
-        const parser = new factory(sourceMap, options.include, options.exclude, options.implicitExport, options.charset);
+        const parser = new factory(sourceMap, includes, options.implicitExport, options.charset);
         // console.log(JSON.stringify(module, (key, value) => {
         //     return value ? Object.assign(value, { kind: value.constructor.name }) : value;
         // }, 4));
