@@ -11,6 +11,8 @@ export interface EmitterOptions {
     emit: boolean|string
     emitJS: boolean|string
     emitWrapper: boolean|string
+    exclude: string[]
+    imports?: string[]
     //    newLine: 'lf'|'crlf'
     [option: string]: any
 }

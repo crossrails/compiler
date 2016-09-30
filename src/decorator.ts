@@ -48,6 +48,7 @@ declare module "./ast" {
 
     interface SourceFile {
         isModuleFile: boolean
+        imports: ReadonlyArray<string>
         emit(): string
         header(): string
         footer(): string

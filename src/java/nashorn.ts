@@ -26,7 +26,7 @@ decorate(Module, ({prototype}) => prototype.emitWrapper = function (this: Module
     writeFile(path.join(outDir, 'JS.java'), data);
 })
 
-decorate(InterfaceDeclaration, ({prototype}) => prototype.imports = function (this: InterfaceDeclaration) {      
+decorate(InterfaceDeclaration, ({prototype}) => prototype.engineImports = function (this: InterfaceDeclaration) {      
     return `import java.util.*;`
 })
 
@@ -38,7 +38,7 @@ decorate(InterfaceDeclaration, ({prototype}) => prototype.footer = function (thi
     return '';
 })
 
-decorate(Declaration, ({prototype}) => prototype.imports = function (this: Declaration) {
+decorate(Declaration, ({prototype}) => prototype.engineImports = function (this: Declaration) {
     return `
 import java.util.*;
 import java.util.function.*;
@@ -51,7 +51,7 @@ import static io.xrails.${this.module.name.charAt(0).toUpperCase()}${this.module
 decorate(NamespaceDeclaration, ({prototype}) => prototype.header = function (this: NamespaceDeclaration, indent?: string) {
     return `
 ${!this.sourceFile.isModuleFile ? '' : `
-${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");`.substr(1)
+${indent}static final ScriptObjectMirror global = JS.eval("${this.module.sourcePath.base}");\n\n`.substr(1)
 }${!this.declarations.some(m => m.parent != m.sourceFile) ? '' : `
 ${indent}private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("${this.name}");\n`.substr(1)
 }${this instanceof InterfaceDeclaration || !this.declarations.some(m => !m.isStatic) ? '' : `

@@ -263,7 +263,7 @@ describe("SymbolTable", () => {
         expect(type.isOptional).toBe(false);
     });
     
-        it("correctly identifies typescript function types", function() {
+    it("correctly identifies typescript function types", function() {
         let [[run, supplier, consumer], program] = mockVariables(`
             let run: () => void,
                 supplier: () => ReturnValue,

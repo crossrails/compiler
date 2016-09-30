@@ -47,7 +47,7 @@
                 "dist/horizon.js",
 				"--lib=lib.es6.d.ts",
 				"--logLevel=debug",
-				"--declarationFile=index.d.ts",
+				"--declarationFile=horizon.d.ts",
 				"--swift.emit=dist/swift",				
 				"--swift.bundleId=io.horizon",				
 				"--java.emit=dist/java",				

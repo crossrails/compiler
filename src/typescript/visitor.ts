@@ -85,6 +85,7 @@ export function visitNode<T>(node: ts.Node | undefined, visitor: NodeVisitor<T>,
             return visit(visitor.visitIdentifier, node);
 
         case ts.SyntaxKind.EmptyStatement:
+        case ts.SyntaxKind.ImportDeclaration:
             return [];
             
         default:

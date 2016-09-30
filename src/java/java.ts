@@ -18,7 +18,7 @@ declare module "../ast" {
     }
 
     interface Declaration {
-        imports(): string
+        engineImports(): string
     }
 
     interface VariableDeclaration {
@@ -47,6 +47,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             packageName: { value: path.relative(rootOutDir, path.dirname(filename)).replace(path.sep, '.') },
             declarations: { value: [ filename.toLowerCase() != moduleFilename.toLowerCase() ? Object.create(declaration) : Object.create(declaration, { declarations: { value: (declaration.declarations as Declaration[]).concat(globals) }})] }
         });
+        Object.defineProperty(file, 'imports', { writable: false, value: file.requiredImports.map(i => options.imports && options.imports[i.index] && options.imports[i.index] != '*' ? options.imports[i.index] : i.default)});
         adopt(file.declarations, file);
         writeFile(filename, file.emit());
         writtenModuleFile = writtenModuleFile || file.isModuleFile;
@@ -57,6 +58,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
             name: { value: name },
             module: { value: this },
             isModuleFile: { value: true},
+            imports: { value: [] },
             packageName: { value: options.basePackage },
             declarations: { value: [ Object.create(ClassDeclaration.prototype, { name: { value: name }, module: { value: this }, declarations: { value: globals }}) ] }
         });
@@ -66,7 +68,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
 }) 
 
 decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceFile): string {
-    return `package ${this.packageName};\n\n${this.declarations[0].imports()}\n`;
+    return `package ${this.packageName};\n\n${this.declarations[0].engineImports()}\n${this.imports.reduce((out, name) => `\nimport ${name}.*}`, '')}`;
 })
 
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {

@@ -16,6 +16,7 @@ export enum Flags {
     Thrown = 32
 }
 
+
 export abstract class Declaration {
     readonly name: string; 
     readonly flags: Flags;
@@ -50,6 +51,8 @@ export abstract class Declaration {
     get isProtected(): boolean {
         return (this.flags & Flags.Protected) != 0;
     }
+
+    protected abstract gatherImports(indices: Set<{index: number, default: string} | undefined>): void;
 }
 
 export class FunctionSignature {
@@ -80,6 +83,14 @@ export class FunctionDeclaration extends Declaration {
     get parent(): NamespaceDeclaration {
         return super.parent as NamespaceDeclaration;
     }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        this.signature.parameters.forEach(p => indices.add(p.type.requiredImport))
+        indices.add(this.signature.returnType.requiredImport);
+        this.signature.thrownTypes.forEach(t => indices.add(t.requiredImport))
+        this.typeParameters.forEach(t => indices.add(t.requiredImport))
+    }
+    
 }
 
 export class ConstructorDeclaration extends FunctionDeclaration {
@@ -107,6 +118,10 @@ export class VariableDeclaration extends Declaration {
     get parent(): NamespaceDeclaration {
         return super.parent as NamespaceDeclaration;
     }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        indices.add(this.type.requiredImport);
+    }
 }
 
 export class ParameterDeclaration extends Declaration {
@@ -124,6 +139,10 @@ export class ParameterDeclaration extends Declaration {
     get parent(): FunctionDeclaration {
         return super.parent as FunctionDeclaration;
     }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        indices.add(this.type.requiredImport);
+    }
 }
 
 export class NamespaceDeclaration extends Declaration {
@@ -137,6 +156,10 @@ export class NamespaceDeclaration extends Declaration {
     get parent(): NamespaceDeclaration {
         return super.parent as NamespaceDeclaration;
     }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        this.declarations.forEach(d => (d as NamespaceDeclaration).gatherImports(indices));
+    }
 }
 
 export class InterfaceDeclaration extends NamespaceDeclaration {
@@ -149,6 +172,11 @@ export class InterfaceDeclaration extends NamespaceDeclaration {
 
     get parent(): NamespaceDeclaration {
         return super.parent as NamespaceDeclaration;
+    }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        super.gatherImports(indices);
+        this.typeParameters.forEach(t => indices.add(t.requiredImport))
     }
 }
 
@@ -168,12 +196,17 @@ export class ClassDeclaration extends NamespaceDeclaration {
     get parent(): NamespaceDeclaration {
         return super.parent as NamespaceDeclaration;
     }
+
+    protected gatherImports(indices: Set<{index: number, default: string} | undefined>): void {
+        super.gatherImports(indices);
+        this.typeParameters.forEach(t => indices.add(t.requiredImport))
+    }
 }
 
 export class SourceFile extends NamespaceDeclaration {
     readonly path: path.ParsedPath;    
     readonly module: Module;
-    
+
     constructor(name: string, declarations: ReadonlyArray<Declaration>) {
         super(name, Flags.None, declarations);
         this.path = path.parse(name);
@@ -182,6 +215,14 @@ export class SourceFile extends NamespaceDeclaration {
     get sourceFile(): SourceFile {
         return this;
     }
+
+    get requiredImports(): ReadonlyArray<{index: number, default: string}> {
+        const indices = new Set<{index: number, default: string} | undefined>();
+        this.gatherImports(indices);
+        indices.delete(undefined);
+        return [...indices] as ReadonlyArray<{index: number, default: string}>;
+    }
+
 }
 
 export class Module {
@@ -217,6 +258,10 @@ export abstract class Type {
     get declaration(): Declaration {
         return this.parent.declaration;
     }
+
+    get requiredImport(): {index: number, default: string} | undefined {
+        return undefined;
+    }
 }  
 
 export class FunctionType extends Type {
@@ -242,8 +287,9 @@ export abstract class GenericType extends Type {
 
 export class DeclaredType extends GenericType {
     readonly name: string
+    readonly requiredImport: {index: number, default: string} | undefined
 
-    constructor(name: string, flags: Flags, typeArguments: ReadonlyArray<Type>) {
+    constructor(name: string, flags: Flags, requiredImport: {index: number, default: string} | undefined, typeArguments: ReadonlyArray<Type>) {
         super(flags, typeArguments);
         this.name = name;
     }

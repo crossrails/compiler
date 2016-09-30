@@ -9,12 +9,13 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
-    private readonly includes: (filepath: string) => boolean; 
+    private readonly includes: (filepath: string, exclude?: (key: number) => void) => boolean; 
     private readonly identifiers = new Set<ts.Identifier>();
     private readonly exports = new Map<ts.Declaration, ReadonlyArray<ts.Declaration>>();
     private readonly thrown = new Set<ts.Symbol>();
+    private readonly imports = new Map<ts.Symbol, {index: number, default: string}>();
 
-    constructor(program: ts.Program, includes: (path: String) => boolean, implicitExport: boolean) {
+    constructor(program: ts.Program, includes: (path: String, exclude?: (index: number) => void) => boolean, implicitExport: boolean) {
         this.checker = program.getTypeChecker();
         this.implicitExport = implicitExport;
         this.includes = includes; 
@@ -27,7 +28,7 @@ export class SymbolTable implements NodeVisitor<void> {
 
     getExports(node: ts.Declaration): ReadonlyArray<ts.Declaration> {
         assert(this.isExported(node));
-        return this.exports.get(node) || [];
+        return this.exports.get(node)!;
     }
 
     isThrown(node: ts.ClassDeclaration): boolean {
@@ -61,7 +62,10 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private exportIfNecessary(symbol: ts.Symbol) {
         const declarations = this.getDeclarations(symbol);
-        if(!declarations.some(d => !this.exports.has(d) && !d.getSourceFile().hasNoDefaultLib && this.includes(d.getSourceFile().path))) return;
+        if(!declarations.some(d => !this.exports.has(d) && !d.getSourceFile().hasNoDefaultLib && this.includes(d.getSourceFile().path, i => this.imports.set(symbol, {index: i, default: d.getSourceFile().path})))) {
+            this.exports.set(declarations[0], []);
+            return;
+        }
         const exported = declarations.reduce((exported, d) => {
             exported = (d.flags & ts.NodeFlags.Export) == 0;
             d.flags |= ts.NodeFlags.Export;
@@ -70,7 +74,7 @@ export class SymbolTable implements NodeVisitor<void> {
             return exported;
         }, false);
         if(exported) {
-            log.debug(`Exported referenced ${ts.SyntaxKind[declarations[0].kind]} ${this.getName(declarations[0])}`, declarations[0]);            
+            log.debug(`Exporting referenced ${ts.SyntaxKind[declarations[0].kind]} ${this.getName(declarations[0])}`, declarations[0]);            
         }
     }
 
@@ -165,7 +169,7 @@ export class SymbolTable implements NodeVisitor<void> {
                     log.info(`Resolve this error by adding the source for ${name} to the input file otherwise output will not compile standalone`) 
                 }
                 if(this.thrown.has(symbol)) flags |= ast.Flags.Thrown;
-                return new ast.DeclaredType(name, flags, typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
+                return new ast.DeclaredType(name, flags, this.imports.get(symbol), typeArguments.map((t, i) => this.createType(node, t, typeArgumentNodes[i])));
         }
     }
 
@@ -221,8 +225,8 @@ export class SymbolTable implements NodeVisitor<void> {
         //if type reference ensure type is exported
         const type = this.checker.getNonNullableType(this.checker.getTypeOfSymbolAtLocation(symbol, node));
         type.getCallSignatures().filter(s => s.getReturnType().getSymbol()).forEach(
-            s => this.exportIfNecessary(s.getReturnType().getSymbol()
-        ))
+            s => this.exportIfNecessary(s.getReturnType().getSymbol())
+        )
         if(!type.getSymbol()) return;
         this.exportIfNecessary(type.getSymbol());
     }

@@ -11,14 +11,13 @@ import {Emitter, EmitterOptions} from "./emitter"
 import yargs = require('yargs');
 
 interface ParserFactory {
-    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String) => boolean, implicitExport: boolean, lib: string[] | undefined, charset: string): {parse(): Module};
+    new(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String, exclude?: (index: number) => void) => boolean, implicitExport: boolean, lib: string[] | undefined, charset: string): {parse(): Module};
 }
 
 interface CompilerOptions extends EmitterOptions {
     sourceMap?: string 
     declarationFile?: string 
     typings?: string 
-    exclude: string[]
     implicitExport: boolean
     logLevel: string
     lib?: string[]
@@ -37,7 +36,7 @@ function main(...args: string[]): number {
         .example('$0 src.js --java.emit java', 'Compile to java, outputting to a java subdirectory')
         .alias('v', 'version').version()
         .help('h').alias('h', 'help')
-        .group(['p', 'l', 'h', 'v', 'charset', 'sourceMap', 'declarationFile', 'implicitExport'], 'Global options:')
+        .group(['p', 'l', 'h', 'v', 'exclude', 'lib', 'charset', 'sourceMap', 'declarationFile', 'implicitExport'], 'Global options:')
         .option('p', {
             config: true,
             alias: 'project',
@@ -53,7 +52,7 @@ function main(...args: string[]): number {
             type: 'string'
         })
         .option('exclude', {
-            describe: 'A list of glob file patterns of source files to exlude from compliation',
+            describe: 'A list of glob file patterns matching source files to exlude from compliation',
             type: 'array',
             default: ['node_modules/**', 'bower_components/**', 'jspm_package/**']
         })
@@ -127,6 +126,11 @@ function main(...args: string[]): number {
                 group: 'General options:',
                 desc: 'Copy the JS engine wrapper into the compiled output, specify a path to override default location [boolean]',
                 default: true             
+            },
+            'imports': { 
+                group: 'General options:',
+                describe: 'A list of package/module names to use when an exlcuded source file needs to be imported, one for each entry in the exclude list',
+                type: 'array',
             }
         })
         .epilog('General options can be applied globally or to any language or engine, e.g. swift.emit or swift.javascriptcore.emit')
@@ -161,7 +165,12 @@ function main(...args: string[]): number {
         log.error(`No file argument specified and no package manifest file found`)
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
-        const includes = (filepath: string) => options.exclude.every(pattern => !minimatch(path.relative('.', filepath), pattern));
+        const includes = (filepath: string, exclude: (index: number) => void) => {
+            const index = options.exclude.findIndex(pattern => minimatch(path.relative('.', filepath), pattern));
+            if(index == -1) return true;
+            exclude && exclude(index);
+            return false;
+        }
         const sourceMap = mapSources(filename, options);
         const factory: ParserFactory = TypeScriptParser;
         const parser = new factory(sourceMap, includes, options.implicitExport, options.lib, options.charset);
