@@ -18,17 +18,15 @@ export class TypeScriptParser implements NodeVisitor<ast.Declaration> {
 
     private readonly program: ts.Program
     private readonly symbols: SymbolTable
-    private readonly sourceRoot: string
     
     constructor(sourceMap: {sourceRoot: string, sources: string[]}, includes: (path: String, exclude?: (index: number) => void) => boolean, implicitExport: boolean, lib: string[] | undefined, charset: string) {
         this.program = ts.createProgram(sourceMap.sources.map(s => path.join(sourceMap.sourceRoot, s)), {allowJs: true, strictNullChecks: true, skipDefaultLibCheck: true, charset: charset, lib: lib});
-        this.symbols = new SymbolTable(this.program, includes, implicitExport);
-        this.sourceRoot = sourceMap.sourceRoot;
+        this.symbols = new SymbolTable(this.program, sourceMap.sourceRoot, includes, implicitExport);
     }
 
     parse(): ast.Module {
         log.logDiagnostics(ts.getPreEmitDiagnostics(this.program));
-        return new ast.Module(this.sourceRoot, visitNodes(this.program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true) as ast.SourceFile[]);
+        return new ast.Module(this.symbols.sourceRoot, visitNodes(this.program.getSourceFiles().filter(f => !f.hasNoDefaultLib), this, true) as ast.SourceFile[]);
     }
 
     shouldVisitNode(node: ts.Declaration): boolean {

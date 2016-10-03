@@ -246,7 +246,8 @@ export class Module {
 export abstract class Type {
     readonly flags: Flags
     readonly parent: Declaration|Type
-    
+    readonly requiredImport: {index: number, default: string} | undefined
+
     constructor(flags = Flags.None) {
         this.flags = flags;
     }
@@ -259,9 +260,6 @@ export abstract class Type {
         return this.parent.declaration;
     }
 
-    get requiredImport(): {index: number, default: string} | undefined {
-        return undefined;
-    }
 }  
 
 export class FunctionType extends Type {
@@ -292,6 +290,7 @@ export class DeclaredType extends GenericType {
     constructor(name: string, flags: Flags, requiredImport: {index: number, default: string} | undefined, typeArguments: ReadonlyArray<Type>) {
         super(flags, typeArguments);
         this.name = name;
+        this.requiredImport = requiredImport;
     }
 
     get isAbstract(): boolean {

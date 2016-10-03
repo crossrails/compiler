@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as ts from "typescript";
+import * as path from 'path';
 import * as ast from "../ast"
 import {log} from "../log"
 import {Comment} from "../comment"
@@ -7,6 +8,8 @@ import {visitNode, visitNodes, ancestry, NodeVisitor, VariableDeclaration, Break
 
 export class SymbolTable implements NodeVisitor<void> {
 
+    readonly sourceRoot: string
+    
     private readonly checker: ts.TypeChecker;
     private readonly implicitExport: boolean;
     private readonly includes: (filepath: string, exclude?: (key: number) => void) => boolean; 
@@ -15,7 +18,8 @@ export class SymbolTable implements NodeVisitor<void> {
     private readonly thrown = new Set<ts.Symbol>();
     private readonly imports = new Map<ts.Symbol, {index: number, default: string}>();
 
-    constructor(program: ts.Program, includes: (path: String, exclude?: (index: number) => void) => boolean, implicitExport: boolean) {
+    constructor(program: ts.Program, sourceRoot: string, includes: (path: String, exclude?: (index: number) => void) => boolean, implicitExport: boolean) {
+        this.sourceRoot = sourceRoot;
         this.checker = program.getTypeChecker();
         this.implicitExport = implicitExport;
         this.includes = includes; 
@@ -62,7 +66,11 @@ export class SymbolTable implements NodeVisitor<void> {
 
     private exportIfNecessary(symbol: ts.Symbol) {
         const declarations = this.getDeclarations(symbol);
-        if(!declarations.some(d => !this.exports.has(d) && !d.getSourceFile().hasNoDefaultLib && this.includes(d.getSourceFile().path, i => this.imports.set(symbol, {index: i, default: d.getSourceFile().path})))) {
+        if(declarations[0].getSourceFile().hasNoDefaultLib || this.exports.has(declarations[0])) return;
+        const excludes = (file: ts.SourceFile) => !this.includes(file.path, index => {
+            this.imports.set(symbol, {index: index, default: path.relative('.', file.path).split(/[\\\/]/).slice(1, -1).join('.')});
+        });
+        if(declarations.every(d => excludes(d.getSourceFile()))) {
             this.exports.set(declarations[0], []);
             return;
         }

@@ -78,7 +78,8 @@
 			"sourceMaps": true,
             "args": [
                 "JASMINE_CONFIG_PATH=jasmine.json",
-				"--filter='correctly+identifies+typescript+indexable+types'"
+				"--filter=\"debug\"​​​​",
+				"--boo"
             ]
         },
 		// {
@@ -115,13 +116,14 @@
 			"name": "Attach",
 			"type": "node",
 			"request": "attach",
-			"port": 5858,
+			"port": 32790,
 			"address": "localhost",
 			"restart": false,
-			"sourceMaps": false,
+			"sourceMaps": true,
 			"outDir": null,
 			"localRoot": "${workspaceRoot}",
-			"remoteRoot": null
+			"remoteRoot": null,
+			"stopOnEntry": false
 		}
 	]
 }

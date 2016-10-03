@@ -68,7 +68,7 @@ decorate(Module, ({prototype}) => prototype.emit = function (this: Module, rootO
 }) 
 
 decorate(SourceFile, ({prototype}) => prototype.header = function (this: SourceFile): string {
-    return `package ${this.packageName};\n\n${this.declarations[0].engineImports()}\n${this.imports.reduce((out, name) => `\nimport ${name}.*}`, '')}`;
+    return `package ${this.packageName};\n\n${this.declarations[0].engineImports()}\n${this.imports.reduce((out, name) => `\nimport ${name}.*;`, '')}\n`;
 })
 
 decorate(SourceFile, ({prototype}) => prototype.footer = function (this: SourceFile): string {
