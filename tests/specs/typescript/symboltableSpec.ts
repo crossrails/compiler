@@ -369,7 +369,7 @@ describe("SymbolTable", () => {
         const o = (program.getSourceFile('src.ts').statements[0] as ts.VariableStatement).declarationList.declarations[0];
         const type = symbols.getType<AST.DeclaredType>(o, (flags) => fail('Called default type') as any);
         expect(type.constructor.name).toBe('DeclaredType');
-        expect(type.requiredImport).toEqual(jasmine.objectContaining({index: 1, default:'rxjs'}));
+        expect(type.requiredImport).toEqual(jasmine.objectContaining({index: 1, default:'rxjs.observable'}));
     });
 
     // it("correctly identifies typescript indexable types", function() {
