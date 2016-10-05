@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0'
     testCompile 'junit:junit:[4,)'
 }
 

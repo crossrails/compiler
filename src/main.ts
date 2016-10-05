@@ -83,7 +83,7 @@ function main(...args: string[]): number {
             },
             'swift.javascriptcore': { 
                 group: 'Swift options:',
-                desc: 'Compile source to use the JavaScriptCore engine under the hood [default engine]',
+                desc: 'Compile source to use the JavaScriptCore engine under the hood [default]',
             },
             'swift.bundleId': { 
                 group: 'Swift options:',
@@ -100,9 +100,13 @@ function main(...args: string[]): number {
                 group: 'Java options:',
                 desc: 'Compile source to java (enabled automatically if any java option specified e.g. java.emit=gen)' 
             },
+            'java.j2v8': { 
+                group: 'Java options:',
+                desc: 'Compile source to use the J2V8 engine under the hood [default]',
+            },
             'java.nashorn': { 
                 group: 'Java options:',
-                desc: 'Compile source to use the Nashorn engine under the hood, requires Java SE/EE [default]',
+                desc: 'Compile source to use the Nashorn engine under the hood',
             },
             'java.basePackage': { 
                 group: 'Java options:',
@@ -145,7 +149,7 @@ function main(...args: string[]): number {
 
     const emitter = new Emitter(options, [
         ['swift',   ['javascriptcore']], 
-        ['java',    ['nashorn', 'j2v8']],
+        ['java',    ['j2v8', 'nashorn']],
         ['c#',      ['chakracore']], 
         ['php',     ['v8']], 
     ]);

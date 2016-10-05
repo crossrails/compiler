@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/Could not resolve com.eclipsesource.j2v8:j2v8_win32_x86_64:4.6.0." />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.eclipsesource.j2v8/j2v8_win32_x86_64/4.6.0/49e1cc812d34b6019d2cafc36c67cd599889b26b/j2v8_win32_x86_64-4.6.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.eclipsesource.j2v8/j2v8_win32_x86_64/4.6.0/8dbb6f4a125af8ed02927b0526900b356040dba9/j2v8_win32_x86_64-4.6.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
