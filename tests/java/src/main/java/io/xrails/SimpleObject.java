@@ -1,100 +1,95 @@
 package io.xrails;
 
-import java.util.*;
-import java.util.function.*;
-import jdk.nashorn.api.scripting.*;
+import com.eclipsesource.v8.*;
+import com.eclipsesource.v8.utils.V8ObjectUtils;
 
 import static io.xrails.Src.global;
 
+
 public class SimpleObject {
 
-    private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SimpleObject");
+    private static final V8Function constructor = (V8Function)global.getObject("SimpleObject");
+    private static final V8Object prototype = constructor.getObject("prototype");
 
-    private final ScriptObjectMirror prototype;
-    private final JSObject mirror;
+    private final V8Object object;
 
-    SimpleObject(ScriptObjectMirror mirror) { 
-        this.prototype = mirror; 
-        this.mirror = mirror; 
-        JS.heap.put(this, mirror);
+    SimpleObject(V8Object object) {
+        this.object = object;
+        JS.heap.put(this, object);
     }
 
     public static Boolean staticVoidNoArgMethodCalled() {
-        return (Boolean)staticMirror.get("staticVoidNoArgMethodCalled");
+        return (Boolean)constructor.get("staticVoidNoArgMethodCalled");
     }
     
     public static void staticVoidNoArgMethodCalled(Boolean newValue) {
-        staticMirror.setMember("staticVoidNoArgMethodCalled", newValue);
+        constructor.add("staticVoidNoArgMethodCalled", newValue);
     }
     
     public Boolean methodToOverrideCalled() {
-        return (Boolean)prototype.get("methodToOverrideCalled");
+        return (Boolean)object.get("methodToOverrideCalled");
     }
     
     public void methodToOverrideCalled(Boolean newValue) {
-        prototype.setMember("methodToOverrideCalled", newValue);
+        object.add("methodToOverrideCalled", newValue);
     }
     
     public SimpleObject() {
-        prototype = (ScriptObjectMirror)staticMirror.newObject(); 
-        mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
-            @Override 
-            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
-                builder.accept("numberSingleObjectArgMethod", args -> numberSingleObjectArgMethod((SimpleObject)args[0]));
-                builder.accept("callOverriddenMethod", args -> { callOverriddenMethod(); return null; });
-                builder.accept("methodToOverride", args -> { methodToOverride(); return null; });
-                builder.accept("upcastThisToObject", args -> upcastThisToObject()); 
-            } 
-        }; 
-        JS.heap.put(this, mirror); 
+        object = new V8Object(global.getRuntime());
+        object.setPrototype(prototype);
+        object.add("constructor", constructor);
+        object.registerJavaMethod((JavaCallback)(r, p) -> numberSingleObjectArgMethod(new SimpleObject(p.getObject(0))), "numberSingleObjectArgMethod");
+        object.registerJavaMethod((JavaVoidCallback)(r, p) -> callOverriddenMethod(), "callOverriddenMethod");
+        object.registerJavaMethod((JavaVoidCallback)(r, p) -> methodToOverride(), "methodToOverride");
+        object.registerJavaMethod((JavaCallback)(r, p) -> JS.heap.get(upcastThisToObject()), "upcastThisToObject");
+        constructor.call(object, new V8Array(global.getRuntime()));
+        JS.heap.put(this, object);
     }
 
     public SimpleObject(Number v) {
-        prototype = (ScriptObjectMirror)staticMirror.newObject(v); 
-        mirror = getClass() == SimpleObject.class ? prototype : new JS.AbstractMirror(prototype) { 
-            @Override 
-            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
-                builder.accept("numberSingleObjectArgMethod", args -> numberSingleObjectArgMethod((SimpleObject)args[0]));
-                builder.accept("callOverriddenMethod", args -> { callOverriddenMethod(); return null; });
-                builder.accept("methodToOverride", args -> { methodToOverride(); return null; });
-                builder.accept("upcastThisToObject", args -> upcastThisToObject()); 
-            } 
-        }; 
-        JS.heap.put(this, mirror); 
+        object = new V8Object(global.getRuntime());
+        object.setPrototype(prototype);
+        object.add("constructor", constructor);
+        object.registerJavaMethod((JavaCallback)(r, p) -> numberSingleObjectArgMethod(new SimpleObject(p.getObject(0))), "numberSingleObjectArgMethod");
+        object.registerJavaMethod((JavaVoidCallback)(r, p) -> callOverriddenMethod(), "callOverriddenMethod");
+        object.registerJavaMethod((JavaVoidCallback)(r, p) -> methodToOverride(), "methodToOverride");
+        object.registerJavaMethod((JavaCallback)(r, p) -> JS.heap.get(upcastThisToObject()), "upcastThisToObject");
+        constructor.call(object, new V8Array(global.getRuntime()).push(v.doubleValue()));
+        JS.heap.put(this, object);
     }
 
     public static void staticVoidNoArgMethod() {
-        staticMirror.callMember("staticVoidNoArgMethod");
+        constructor.executeVoidFunction("staticVoidNoArgMethod", null);
     }
 
     public Number numberSingleObjectArgMethod(SimpleObject a) {
-        return (Number)((JSObject)prototype.getMember("numberSingleObjectArgMethod")).call(mirror, JS.heap.get(a));
+        return (Number)((V8Function)prototype.get("numberSingleObjectArgMethod")).call(object, JS.push(new V8Array(global.getRuntime()), JS.toJS(a, SimpleObject.class, null)));
     }
 
     public void callOverriddenMethod() {
-        ((JSObject)prototype.getMember("callOverriddenMethod")).call(mirror);
+        ((V8Function)prototype.get("callOverriddenMethod")).call(object, null);
     }
 
     public void methodToOverride() {
-        ((JSObject)prototype.getMember("methodToOverride")).call(mirror);
+        ((V8Function)prototype.get("methodToOverride")).call(object, null);
     }
 
     public Object upcastThisToObject() {
-        return JS.wrap(((JSObject)prototype.getMember("upcastThisToObject")).call(mirror), JS.Object::new);
+        return JS.fromJS(((V8Function)prototype.get("upcastThisToObject")).call(object, null));
     }
 
     @Override
     public String toString() {
-        return mirror.toString();
+        return object.toString();
     }
 
     @Override
     public int hashCode() {
-        return mirror.hashCode();
+        return object.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return mirror.equals(JS.heap.getOrDefault(obj, obj));
+        return object.equals(JS.heap.get(obj));
     }
 }

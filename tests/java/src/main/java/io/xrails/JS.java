@@ -1,327 +1,216 @@
 package io.xrails;
 
-import jdk.nashorn.api.scripting.AbstractJSObject;
-import jdk.nashorn.api.scripting.JSObject;
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import com.eclipsesource.v8.*;
+import com.eclipsesource.v8.utils.V8Map;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class JS {
 
-    private static final ScriptEngine engine = new NashornScriptEngineFactory().getScriptEngine();
-    private static final ScriptObjectMirror wrapper;
+    private static class Type {
+        final Class<?> aClass;
+        final Function<V8Object, Object> fromJS;
+        final Function<Object, Object> toJS;
 
-    static final Map<java.lang.Object, java.lang.Object> heap = new WeakHashMap<>();
-
-    static {
-        try {
-            heap.put(null, null);
-            wrapper = (ScriptObjectMirror)engine.eval(
-                    "function(name, obj) { var Type = Java.type(name); return new Type(obj); }");
-        } catch (ScriptException e) {
-            throw new IllegalStateException(e);
+        Type(Class<?> aClass, Function<V8Object, Object> fromJS, Function<Object, Object> toJS) {
+            this.aClass = aClass;
+            this.fromJS = fromJS;
+            this.toJS = toJS;
         }
     }
 
-    static ScriptObjectMirror eval(String filename) {
+    private static final V8 engine = V8.createV8Runtime();
+
+    private static final Map<Object, Type> types = new HashMap<>();
+    static final Map<Object, Object> heap = new WeakHashMap<>();
+
+    static {
+        heap.put(null, null);
+        registerType("Number", Number.class, o -> o, o -> o);
+        registerType("String", String.class, o -> o, o -> o);
+        registerType("Boolean", Boolean.class, o -> o, o -> o);
+        registerType("Object", Object.class, JSObject::new, o -> new V8Object(engine));
+    }
+
+    static V8Object eval(String filename) {
         try {
-            engine.eval(new FileReader(filename));
-            return (ScriptObjectMirror)engine.eval("this");
-        } catch (ScriptException | FileNotFoundException e) {
+            engine.executeScript(new String(Files.readAllBytes(Paths.get(filename))));
+            return engine;
+        } catch (V8ScriptException | IOException e) {
             throw new IllegalArgumentException(e);
         }
     }
 
-    static <T> T wrap(java.lang.Object object, Class type) {
-        return wrap(object, mirror -> (T)wrapper.call(null, type.getName(), mirror));
+    static void registerType(String name, Class aClass, Function<V8Object, Object> fromJS) {
+        registerType(name, aClass, fromJS, o -> (V8Object)JS.heap.get(o));
     }
 
-    static <T> T wrap(java.lang.Object object, Function<ScriptObjectMirror, T> constructor) {
-        if(object instanceof ScriptObjectMirror) {
-            object = constructor.apply((ScriptObjectMirror)object);
-        }
-        return (T)object;
+    static void registerType(String name, Class aClass, Function<V8Object, Object> fromJS, Function<Object, Object> toJS) {
+        Type type = new Type(aClass, fromJS, toJS);
+        types.put(aClass, type);
+        types.put(engine.getObject(name), type);
     }
 
-    static class ArrayMirror<E> extends AbstractJSObject implements List<E> {
+    static Object fromJS(Object object) {
+        return fromJS(object, JSObject.class, JSObject::new);
+    }
 
-        private final List<E> list;
-        private final Function<E, ?> cast;
+    static <T> T fromJS(Object object, Class<? super T> aClass, Function<V8Object, T> fromJS) {
+        return !(object instanceof V8Object) ? (T)object : (T)heap.computeIfAbsent(object, o -> {
+            V8Object prototype = (V8Object)object;
+            do {
+                prototype = prototype.getObject("prototype");
+                if(prototype.isUndefined()) break;
+                Type type = types.get(prototype.getObject("constructor"));
+                if(type == null) continue;
+                if(!aClass.isAssignableFrom(type.aClass)) break;
+                Object result = type.fromJS.apply((V8Object) object);
+                heap.put(result, object);
+                return result;
+            } while(true);
+            return fromJS.apply((V8Object)object);
+        });
+    }
 
-        ArrayMirror(List<E> list) {
-            this.list = list;
-            this.cast = e -> e;
+    static <T> Object toJS(T object, Class aClass, Function<T, V8Object> toJS) {
+        return heap.computeIfAbsent(object, o -> {
+            Class c = object.getClass();
+            do {
+                Type type = types.get(c);
+                c = c.getSuperclass();
+                if(type == null) continue;
+                if(!aClass.isAssignableFrom(type.aClass)) break;
+                Object result = type.toJS.apply(object);
+                heap.put(result, object);
+                return result;
+            } while(c != null);
+            return toJS.apply(object);
+        });
+    }
+
+    static void add(V8Object object, String key, Number value) {
+        object.add(key, value.doubleValue());
+    }
+
+    static void add(V8Object object, String key, Boolean value) {
+        object.add(key, value);
+    }
+
+    static void add(V8Object object, String key, String value) {
+        object.add(key, value);
+    }
+
+    static void add(V8Object object, String key, V8Object value) {
+        object.add(key, value);
+    }
+
+    static void add(V8Object object, String key, Object value) {
+        if(value instanceof V8Object) {
+            add(object, key, (V8Object)value);
+        } else if(value instanceof Number) {
+            add(object, key, (Number)value);
+        } else if(value instanceof Boolean) {
+            add(object, key, (Boolean)value);
+        } else if(value instanceof String) {
+            add(object, key, (String)value);
+        } else {
+            throw new IllegalArgumentException(value.toString());
         }
+    }
 
-        ArrayMirror(List<E> list, Function<E, ?> cast) {
-            this.list = list;
-            this.cast = cast;
+    static V8Array push(V8Array object, Number value) {
+        return object.push(value.doubleValue());
+    }
+
+    static V8Array push(V8Array object, Boolean value) {
+        return object.push(value);
+    }
+
+    static V8Array push(V8Array object, String value) {
+        return object.push(value);
+    }
+
+    static V8Array push(V8Array object, V8Object value) {
+        return object.push(value);
+    }
+
+    static V8Array push(V8Array object, Object value) {
+        if(value instanceof V8Object) {
+            push(object, (V8Object)value);
+        } else if(value instanceof Number) {
+            push(object, (Number)value);
+        } else if(value instanceof Boolean) {
+            push(object, (Boolean)value);
+        } else if(value instanceof String) {
+            push(object, (String)value);
+        } else {
+            throw new IllegalArgumentException(value.toString());
         }
-
-        @Override
-        public boolean hasMember(String name) {
-            return name.equals("length");
-        }
-
-        @Override
-        public boolean hasSlot(int slot) {
-            return slot < list.size();
-        }
-
-        @Override
-        public java.lang.Object getSlot(int index) {
-            return cast.apply(list.get(index));
-        }
-
-        @Override
-        public java.lang.Object getMember(String name) {
-            return hasMember(name) ? list.size() : null;
-        }
-
-        @Override
-        public boolean isArray() {
-            return true;
-        }
-
-        @Override
-        public int size() {
-            return list.size();
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return list.isEmpty();
-        }
-
-        @Override
-        public boolean contains(java.lang.Object o) {
-            return list.contains(o);
-        }
-
-        @Override
-        public Iterator<E> iterator() {
-            return list.iterator();
-        }
-
-        @Override
-        public java.lang.Object[] toArray() {
-            return list.toArray();
-        }
-
-        @Override
-        public <T> T[] toArray(T[] a) {
-            return list.toArray(a);
-        }
-
-        @Override
-        public boolean add(E e) {
-            return list.add(e);
-        }
-
-        @Override
-        public boolean remove(java.lang.Object o) {
-            return list.remove(o);
-        }
-
-        @Override
-        public boolean containsAll(Collection<?> c) {
-            return list.containsAll(c);
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends E> c) {
-            return list.addAll(c);
-        }
-
-        @Override
-        public boolean addAll(int index, Collection<? extends E> c) {
-            return list.addAll(index, c);
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            return list.removeAll(c);
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            return list.retainAll(c);
-        }
-
-        @Override
-        public void clear() {
-            list.clear();
-        }
-
-        @Override
-        public E get(int index) {
-            return list.get(index);
-        }
-
-        @Override
-        public E set(int index, E element) {
-            return list.set(index, element);
-        }
-
-        @Override
-        public void add(int index, E element) {
-            list.add(index, element);
-        }
-
-        @Override
-        public E remove(int index) {
-            return list.remove(index);
-        }
-
-        @Override
-        public int indexOf(java.lang.Object o) {
-            return list.indexOf(o);
-        }
-
-        @Override
-        public int lastIndexOf(java.lang.Object o) {
-            return list.lastIndexOf(o);
-        }
-
-        @Override
-        public ListIterator<E> listIterator() {
-            return list.listIterator();
-        }
-
-        @Override
-        public ListIterator<E> listIterator(int index) {
-            return list.listIterator(index);
-        }
-
-        @Override
-        public List<E> subList(int fromIndex, int toIndex) {
-            return list.subList(fromIndex, toIndex);
-        }
-
-        @Override
-        public boolean equals(java.lang.Object obj) {
-            return list.equals(obj);
-        }
-
-        @Override
-        public int hashCode() {
-            return list.hashCode();
-        }
-
+        return object;
     }
 
     static class Array<E> extends AbstractList<E> {
 
-        private final JSObject mirror;
+        private final V8Array array;
         private final Function<java.lang.Object, E> e;
 
-        Array(JSObject mirror) {
-            this.mirror = mirror;
+        Array(V8Object array) {
+            this.array = (V8Array)array;
             this.e = e -> (E)e;
-            JS.heap.put(this, mirror);
+            JS.heap.put(this, array);
         }
 
-        Array(JSObject mirror, Function<ScriptObjectMirror, E> e) {
-            this.mirror = mirror;
-            this.e = o -> e.apply((ScriptObjectMirror)o);
-            JS.heap.put(this, mirror);
+        Array(V8Object array, Function<V8Object, E> e) {
+            this.array = (V8Array)array;
+            this.e = o -> e.apply((V8Object)o);
+            JS.heap.put(this, array);
         }
 
         @Override
         public E get(int index) {
-            return e.apply(mirror.getSlot(index));
+            return e.apply(array.get(index));
         }
 
         @Override
         public int size() {
-            return ((Number)mirror.getMember("length")).intValue();
+            return array.length();
         }
 
-        @Override
-        public String toString() {
-            return mirror.toString();
-        }
-
-        @Override
-        public int hashCode() {
-            return mirror.hashCode();
-        }
-
-        @Override
-        public boolean equals(java.lang.Object obj) {
-            return mirror.equals(JS.heap.getOrDefault(obj, obj));
-        }
     }
 
-    static class Object extends AbstractMap<String, java.lang.Object> {
+    private static class JSObject extends AbstractMap<String, java.lang.Object> {
 
-        private final ScriptObjectMirror mirror;
+        private final V8Object object;
 
-        Object(ScriptObjectMirror mirror) {
-            this.mirror = mirror;
-            JS.heap.put(this, mirror);
+        JSObject(V8Object object) {
+            this.object = object;
+            JS.heap.put(this, object);
         }
 
         @Override
         public String toString() {
-            return mirror.toString();
+            return object.toString();
         }
 
         @Override
         public int hashCode() {
-            return mirror.hashCode();
+            return object.hashCode();
         }
 
         @Override
         public Set<Entry<String, java.lang.Object>> entrySet() {
-            return Arrays.stream(mirror.getOwnKeys(false)).map(key -> new AbstractMap.SimpleEntry<String, java.lang.Object>(key, JS.wrap(mirror.get(key), JS.Object::new))).collect(Collectors.toSet());
+            return Arrays.stream(object.getKeys()).map(key -> new AbstractMap.SimpleEntry<String, java.lang.Object>(key, JS.fromJS(object.get(key), JSObject.class, JSObject::new))).collect(Collectors.toSet());
         }
 
         @Override
         public boolean equals(java.lang.Object obj) {
-            return mirror.equals(JS.heap.getOrDefault(obj, obj));
-        }
-    }
-
-    static abstract class AbstractMirror extends AbstractJSObject {
-
-        private final JSObject prototype;
-        private final Map<String, JSObject> methods = new HashMap<>();
-
-        AbstractMirror() {
-            this(null);
-        }
-
-        AbstractMirror(JSObject prototype) {
-            this.prototype = prototype;
-            build((name, invocation) -> methods.put(name, new AbstractJSObject() {
-                @Override
-                public java.lang.Object call(java.lang.Object thiz, java.lang.Object... args) {
-                    return invocation.apply(args);
-                }
-            }));
-
-        }
-
-        abstract void build(BiConsumer<String, Function<java.lang.Object[], java.lang.Object>> builder);
-
-        @Override
-        public java.lang.Object getMember(String name) {
-            java.lang.Object object = methods.get(name);
-            return object != null ? object : prototype.getMember(name);
-        }
-
-        @Override
-        public void setMember(String name, java.lang.Object value) {
-            prototype.setMember(name, value);
+            return object.equals(JS.heap.get(obj));
         }
     }
 }

@@ -1,55 +1,52 @@
 package io.xrails;
 
-import java.util.*;
-import java.util.function.*;
-import jdk.nashorn.api.scripting.*;
+import com.eclipsesource.v8.V8Array;
+import com.eclipsesource.v8.V8Function;
+import com.eclipsesource.v8.V8Object;
 
 import static io.xrails.Src.global;
 
+
 public class SpecialException extends Exception {
 
-    private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SpecialError");
+    private static final V8Function constructor = (V8Function)global.getObject("SpecialError");
 
-    private final ScriptObjectMirror prototype;
-    private final JSObject mirror;
+    private final V8Object object;
 
-    SpecialException(ScriptObjectMirror mirror) { 
-        this.prototype = mirror; 
-        this.mirror = mirror; 
-        JS.heap.put(this, mirror);
+    SpecialException(V8Object object) {
+        this.object = object;
+        JS.heap.put(this, object);
     }
 
     public String message() {
-        return (String)prototype.get("message");
+        return object.getString("message");
     }
     
     public void message(String newValue) {
-        prototype.setMember("message", newValue);
+        object.add("message", newValue);
     }
     
     public SpecialException(String message) {
-        prototype = (ScriptObjectMirror)staticMirror.newObject(message); 
-        mirror = getClass() == SpecialException.class ? prototype : new JS.AbstractMirror(prototype) { 
-            @Override 
-            void build(BiConsumer<String, Function<Object[], Object>> builder) { 
- 
-            } 
-        }; 
-        JS.heap.put(this, mirror); 
+        object = new V8Object(global.getRuntime());
+        object.setPrototype(constructor);
+        V8Array parameters = new V8Array(global.getRuntime());
+        parameters.push(message);
+        constructor.call(object, parameters);
+        JS.heap.put(this, object);
     }
 
     @Override
     public String toString() {
-        return mirror.toString();
+        return object.toString();
     }
 
     @Override
     public int hashCode() {
-        return mirror.hashCode();
+        return object.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return mirror.equals(JS.heap.getOrDefault(obj, obj));
+        return object.equals(JS.heap.get(obj));
     }
 }

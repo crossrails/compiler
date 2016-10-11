@@ -19,7 +19,7 @@ public class SrcTest {
 
     @Before
     public void setUp() {
-        JS.eval("../input/src.js");
+        JS.eval("src.js");
     }
 
     @Test
@@ -48,9 +48,9 @@ public class SrcTest {
 
         assertNotNull(simpleObjectInstance());
 
-        assertEquals(49.0, simpleObjectInstance().numberSingleObjectArgMethod(simpleObjectInstance()));
+        assertEquals(49, simpleObjectInstance().numberSingleObjectArgMethod(simpleObjectInstance()).intValue());
 
-        assertEquals(14.0, simpleObjectInstance().numberSingleObjectArgMethod(new SimpleObject(2)));
+        assertEquals(14, simpleObjectInstance().numberSingleObjectArgMethod(new SimpleObject(2)).intValue());
 
         assertEquals(simpleObjectInstance(), simpleObjectInstance());
         assertEquals(simpleObjectInstance(), simpleObjectInstance().upcastThisToObject());
@@ -209,10 +209,10 @@ public class SrcTest {
     }
 
     @Test
-    public void testErasureForNonBasicTypes() throws Exception {
+    public void testNoErasureForNonBasicTypes() throws Exception {
         anyVar(anyObjectInstance());
         assertEquals(anyObjectInstance(), anyVar());
-        assertFalse(anyVar() == anyObjectInstance());
+        assertTrue(anyVar() == anyObjectInstance());
     }
 
     @Test
