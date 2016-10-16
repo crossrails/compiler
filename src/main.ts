@@ -54,7 +54,7 @@ function main(...args: string[]): number {
         .option('exclude', {
             describe: 'A list of glob file patterns matching source files to exlude from compliation',
             type: 'array',
-            default: ['node_modules/**', 'bower_components/**', 'jspm_package/**']
+            default: ['**/node_modules/**', '**/bower_components/**', '**/jspm_package/**']
         })
         .option('implicitExport', {
             default: false,
@@ -166,7 +166,8 @@ function main(...args: string[]): number {
         log.info(`Specify a JS source file or run again from the same directory as your bower or package json (containing a main attribute)`)
     } else {
         const includes = (filepath: string, exclude: (index: number) => void) => {
-            const index = options.exclude.findIndex(pattern => minimatch(path.relative('.', filepath), pattern));
+            const relative = path.relative('.', filepath).replace(/\.+\//g, "");
+            const index = options.exclude.findIndex(pattern => minimatch(relative, pattern));
             if(index == -1) return true;
             exclude && exclude(index);
             return false;
