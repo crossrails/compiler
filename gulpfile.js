@@ -29,6 +29,10 @@ gulp.task('gen-markdown', function() {
 });
 
 gulp.task('run-java-tests', function() {
-  return run('cd tests/java/ && gradle test').exec();
+    if (gutil.env.travis_os_name === 'osx') {
+        return run('cd tests/java/ && gradle test').exec();
+    } else {
+        return run('cd tests/java/ && gradlew test').exec();
+    }
 });
   
