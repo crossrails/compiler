@@ -33,7 +33,7 @@ gulp.task('run-java-tests', function() {
     if (gutil.env.travis_os_name === 'osx') {
         return run('cd tests/java/ && gradle test').exec();
     } else {
-        return run('cd tests/java/ && ./gradlew -v && ./gradlew test --stacktrace').exec();
+        return run('cd tests/java/ && ./gradlew -v && ./gradlew test -Dorg.gradle.java.home=/usr/lib/jvm/java-8-oracle --stacktrace').exec();
     }
 });
   
