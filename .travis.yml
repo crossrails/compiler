@@ -1,8 +1,8 @@
 matrix:
   include:
-    - os: linux
-      language: node_js
-      node_js: "6"
+    #- os: linux
+    #  language: node_js
+    #  node_js: "6"
     - os: osx
       osx_image: xcode8
       language: objective-c
@@ -11,13 +11,7 @@ env:
 cache:
   directories:
   - $HOME/.gradle
-jdk:
-  - oraclejdk8
-        
 addons:
-  apt:
-    packages:
-      - oracle-java8-installer
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
 before_install:
