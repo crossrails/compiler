@@ -22,6 +22,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nvm; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gradle; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod +x gradlew; fi
 install: 
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm install $NODE_VERSION; fi
   - "node --version"
