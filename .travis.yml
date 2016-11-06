@@ -1,10 +1,11 @@
-os: 
-  - osx
-    osx_image: xcode8
-    language: objective-c
-  - linux
-    language: node_js
-    node_js: "6"
+os: osx
+osx_image: xcode8
+language: objective-c
+matrix:
+  include:
+    - os: linux
+      language: node_js
+      node_js: "6"
 jdk:
   - oraclejdk8
 env: 
