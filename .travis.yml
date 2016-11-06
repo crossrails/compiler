@@ -10,9 +10,6 @@ jdk:
   - oraclejdk8
 env: 
   - NODE_VERSION="6"
-cache:
-  directories:
-  - $HOME/.gradle
 addons:
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
@@ -22,7 +19,6 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nvm; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gradle; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then chmod +x gradlew; fi
 install: 
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm install $NODE_VERSION; fi
   - "node --version"
