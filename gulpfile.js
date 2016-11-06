@@ -33,7 +33,7 @@ gulp.task('run-java-tests', function() {
     if (gutil.env.travis_os_name === 'osx') {
         return run('cd tests/java/ && gradle test').exec();
     } else {
-        return run('cd tests/java/ && gradlew test').exec();
+        return run('cd tests/java/ && ./gradlew test').exec();
     }
 });
   

@@ -8,6 +8,9 @@ matrix:
       language: objective-c
 env: 
 - NODE_VERSION="6"
+cache:
+  directories:
+  - $HOME/.gradle
 addons:
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
