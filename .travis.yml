@@ -1,16 +1,24 @@
+matrix:
+  include:
+    - os: linux
+      language: node_js
+      node_js: "6"
+    - os: osx
+      osx_image: xcode8
+      language: objective-c
 env: 
 - NODE_VERSION="6"
 addons:
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
 before_install:
-  - brew update
-  - brew tap caskroom/cask
-  - brew cask install java
-  - brew install nvm
-  - brew install gradle
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew tap caskroom/cask; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew cask install java; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install nvm; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gradle; fi
 install: 
-  - "nvm install $NODE_VERSION"
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then nvm install $NODE_VERSION; fi
   - "node --version"
   - "npm install"
   - "npm install -g nyc"
@@ -26,10 +34,8 @@ install:
 #  - "cd wiki && mvn clean package && java -cp target/Wiki-1.0-SNAPSHOT.jar io.xrails.App && rm -rf compiler.wiki/ && git clone https://github.com/crossrails/compiler.wiki.git && mv wiki.md compiler.wiki/compiler-options.md && ./deploy.sh "
   - "gulp run-java-tests"
 #  - "gulp gen-markdown"
-language: objective-c
-osx_image: xcode8
 script:
-  - set -o pipefail && xcodebuild -project tests/swift/swift.xcodeproj -scheme src build test | xcpretty
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then set -o pipefail && xcodebuild -project tests/swift/swift.xcodeproj -scheme src build test | xcpretty; fi
 notifications:
   webhooks:
     urls:
