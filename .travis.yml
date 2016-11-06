@@ -1,11 +1,12 @@
-matrix:
-  include:
+#matrix:
+  #include:
     #- os: linux
     #  language: node_js
     #  node_js: "6"
-    - os: osx
-      osx_image: xcode8
-      language: objective-c
+os: 
+  - osx
+osx_image: xcode8
+language: objective-c
 env: 
 - NODE_VERSION="6"
 cache:
