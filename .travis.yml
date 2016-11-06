@@ -8,11 +8,15 @@ matrix:
       node_js: "6"
 jdk:
   - oraclejdk8
+sudo: required
 env: 
   - NODE_VERSION="6"
 addons:
   code_climate:
     repo_token: 786c6e2d6de4f43ab281eb2660a0ae3c977a993e675bdef839d59c04ea6147a3
+  apt:
+    packages:
+      - oracle-java8-installer
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew tap caskroom/cask; fi
