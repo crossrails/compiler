@@ -33,6 +33,7 @@ install:
   - "npm run upload-code-coverage"
   - "npm run codacy"
   - "npm install -g gulp"
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then "cd tests/java/ && ./gradlew -v"; fi
   - "gulp --travis_os_name=$TRAVIS_OS_NAME run-java-tests"
 script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then set -o pipefail && xcodebuild -project tests/swift/swift.xcodeproj -scheme src build test | xcpretty; fi
