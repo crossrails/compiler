@@ -16,11 +16,13 @@
                 "${workspaceRoot}/tests/input/src.js",
 				"--implicitExport",
 				"--logLevel=debug",
-				"--swift.emit=${workspaceRoot}/tests/swift/src",
-				"--swift.bundleId=io.xrails.src",				
-				"--java.emit=${workspaceRoot}/tests/java/src/main/java",
-				"--java.emitJS=${workspaceRoot}/tests/java",
-				"--java.basePackage=io.xrails"
+				"--cpp.emit=${workspaceRoot}/tests/cpp/cpp",
+				"--cpp.emitJS=${workspaceRoot}/tests/cpp/cpp/Assets"
+				// "--swift.emit=${workspaceRoot}/tests/swift/src",
+				// "--swift.bundleId=io.xrails.src",				
+				// "--java.emit=${workspaceRoot}/tests/java/src/main/java",
+				// "--java.emitJS=${workspaceRoot}/tests/java",
+				// "--java.basePackage=io.xrails"
             ],
 			"preLaunchTask": "build",
 			"stopOnEntry": false,

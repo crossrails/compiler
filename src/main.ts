@@ -145,9 +145,9 @@ function main(...args: string[]): number {
 
     const emitter = new Emitter(options, [
         ['swift',   ['javascriptcore']], 
-        ['java',    ['nashorn', 'j2v8']],
-        ['c#',      ['chakracore']], 
-        ['php',     ['v8']], 
+        ['java',    ['nashorn', 'v8']],
+        ['cpp',     ['chakracore', 'v8']], 
+        ['cs',      ['chakracore']], 
     ]);
 
     let filename: string|undefined = options._[0];

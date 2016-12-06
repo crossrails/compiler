@@ -55,6 +55,7 @@
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json"
   },
   "dependencies": {
+    "@types/jasmine": "^2.5.38",
     "@types/minimatch": "^2.0.29",
     "doctrine": "^1.2.1",
     "minimatch": "^3.0.3",
