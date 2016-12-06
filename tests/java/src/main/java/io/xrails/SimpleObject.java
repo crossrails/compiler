@@ -6,6 +6,7 @@ import jdk.nashorn.api.scripting.*;
 
 import static io.xrails.Src.global;
 
+
 public class SimpleObject {
 
     private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SimpleObject");
@@ -19,19 +20,19 @@ public class SimpleObject {
         JS.heap.put(this, mirror);
     }
 
-    public static Boolean staticVoidNoArgMethodCalled() {
+    public static Boolean getStaticVoidNoArgMethodCalled() {
         return (Boolean)staticMirror.get("staticVoidNoArgMethodCalled");
     }
     
-    public static void staticVoidNoArgMethodCalled(Boolean newValue) {
+    public static void setStaticVoidNoArgMethodCalled(Boolean staticVoidNoArgMethodCalled) {
         staticMirror.setMember("staticVoidNoArgMethodCalled", newValue);
     }
     
-    public Boolean methodToOverrideCalled() {
+    public Boolean getMethodToOverrideCalled() {
         return (Boolean)prototype.get("methodToOverrideCalled");
     }
     
-    public void methodToOverrideCalled(Boolean newValue) {
+    public void setMethodToOverrideCalled(Boolean methodToOverrideCalled) {
         prototype.setMember("methodToOverrideCalled", newValue);
     }
     

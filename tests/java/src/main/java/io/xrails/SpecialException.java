@@ -6,6 +6,7 @@ import jdk.nashorn.api.scripting.*;
 
 import static io.xrails.Src.global;
 
+
 public class SpecialException extends Exception {
 
     private static final ScriptObjectMirror staticMirror = (ScriptObjectMirror)global.get("SpecialError");
@@ -19,11 +20,11 @@ public class SpecialException extends Exception {
         JS.heap.put(this, mirror);
     }
 
-    public String message() {
+    public String getMessage() {
         return (String)prototype.get("message");
     }
     
-    public void message(String newValue) {
+    public void setMessage(String message) {
         prototype.setMember("message", newValue);
     }
     

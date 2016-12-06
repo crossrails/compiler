@@ -38,7 +38,7 @@ public class SrcTest {
             throwSpecialError();
             fail();
         } catch (SpecialException e) {
-            assertEquals("Special error message", e.message());
+            assertEquals("Special error message", e.getMessage());
         }
     }
 
@@ -46,15 +46,15 @@ public class SrcTest {
     public void testObjects() throws Exception {
         SimpleObject.staticVoidNoArgMethod();
 
-        assertNotNull(simpleObjectInstance());
+        assertNotNull(getSimpleObjectInstance());
 
-        assertEquals(49.0, simpleObjectInstance().numberSingleObjectArgMethod(simpleObjectInstance()));
+        assertEquals(49.0, getSimpleObjectInstance().numberSingleObjectArgMethod(getSimpleObjectInstance()));
 
-        assertEquals(14.0, simpleObjectInstance().numberSingleObjectArgMethod(new SimpleObject(2)));
+        assertEquals(14.0, getSimpleObjectInstance().numberSingleObjectArgMethod(new SimpleObject(2)));
 
-        assertEquals(simpleObjectInstance(), simpleObjectInstance());
-        assertEquals(simpleObjectInstance(), simpleObjectInstance().upcastThisToObject());
-        assertEquals(simpleObjectInstance().upcastThisToObject(), simpleObjectInstance());
+        assertEquals(getSimpleObjectInstance(), getSimpleObjectInstance());
+        assertEquals(getSimpleObjectInstance(), getSimpleObjectInstance().upcastThisToObject());
+        assertEquals(getSimpleObjectInstance().upcastThisToObject(), getSimpleObjectInstance());
     }
 
     private boolean testInheritanceMethodCalled = false;
@@ -63,7 +63,7 @@ public class SrcTest {
     public void testInheritance() throws Exception {
         SimpleObject o = new SimpleObject(5);
         o.callOverriddenMethod();
-        assertTrue(o.methodToOverrideCalled());
+        assertTrue(o.getMethodToOverrideCalled());
 
         o = new SimpleObject(5) {
             @Override
@@ -73,7 +73,7 @@ public class SrcTest {
         };
         o.callOverriddenMethod();
         assertTrue(testInheritanceMethodCalled);
-        assertFalse(o.methodToOverrideCalled());
+        assertFalse(o.getMethodToOverrideCalled());
 
         o = new SimpleObject(5) {
             @Override
@@ -82,15 +82,15 @@ public class SrcTest {
             }
         };
         o.methodToOverride();
-        assertTrue(o.methodToOverrideCalled());
+        assertTrue(o.getMethodToOverrideCalled());
     }
 
     private boolean testInterfaceMethodCalled = false;
 
     @Test
     public void testInterface() throws Exception {
-        simpleInterfaceInstance().voidNoArgMethod();
-        assertTrue(simpleInterfaceInstanceCalled());
+        getSimpleInterfaceInstance().voidNoArgMethod();
+        assertTrue(getSimpleInterfaceInstanceCalled());
 
         acceptSimpleInterface(new SimpleInterface() {
             @Override
@@ -100,119 +100,120 @@ public class SrcTest {
         });
         assertTrue(testInterfaceMethodCalled);
         testInterfaceMethodCalled = false;
-        simpleInterfaceInstance().voidNoArgMethod();
+        getSimpleInterfaceInstance().voidNoArgMethod();
         assertTrue(testInterfaceMethodCalled);
     }
 
     @Test
     public void testFunctions() throws Exception {
         voidNoArgFunction();
-        assertTrue(voidNoArgFunctionCalled());
+        assertTrue(getVoidNoArgFunctionCalled());
 
         assertEquals("stringNoArgFunctionReturnValue", stringNoArgFunction());
 
         assertEquals(25.0, numberMultipleArgFunction(5, 5));
         assertEquals(-3.0, numberMultipleArgFunction(-2, 1.5));
 
-        assertEquals("stringNoArgLambdaReturnValue", stringNoArgLambda().get());
-        assertEquals(stringNoArgLambda().get(), stringNoArgLambda().get());
-        stringNoArgLambda(() -> "expectedReturnValue");
-        assertEquals("expectedReturnValue", stringNoArgLambda().get());
+        assertEquals("stringNoArgLambdaReturnValue", getStringNoArgLambda().get());
+        assertEquals(getStringNoArgLambda().get(), getStringNoArgLambda().get());
+
+        setStringNoArgLambda(() -> "expectedReturnValue");
+        assertEquals("expectedReturnValue", getStringNoArgLambda().get());
     }
 
     @Test
     public void testConstTypes() throws Exception {
-        assertFalse(booleanConst());
-        assertTrue(Double.isNaN(numberConst().doubleValue()));
-        assertEquals("stringConstLiteral", stringConst());
-        assertEquals(Arrays.asList(1, 2, 3), numberArrayConst());
-        assertEquals(Arrays.asList(Arrays.asList("1", "2", "3"), Arrays.asList("4", "5", "6"), Arrays.asList("7", "8", "9")), stringArrayArrayConst());
-        assertEquals("anyConstLiteral", anyConst());
-        assertEquals(Arrays.asList(1, null, 3), numberOrNullArrayConst());
+        assertFalse(getBooleanConst());
+        assertTrue(Double.isNaN(getNumberConst().doubleValue()));
+        assertEquals("stringConstLiteral", getStringConst());
+        assertEquals(Arrays.asList(1, 2, 3), getNumberArrayConst());
+        assertEquals(Arrays.asList(Arrays.asList("1", "2", "3"), Arrays.asList("4", "5", "6"), Arrays.asList("7", "8", "9")), getStringArrayArrayConst());
+        assertEquals("anyConstLiteral", getAnyConst());
+        assertEquals(Arrays.asList(1, null, 3), getNumberOrNullArrayConst());
     }
 
     @Test
     public void testOptionalConstTypes() throws Exception {
-        assertFalse(optionalBooleanConst().isPresent());
-        assertFalse(optionalNumberConst().isPresent());
-        assertFalse(optionalStringConst().isPresent());
-        assertFalse(optionalNumberArrayConst().isPresent());
-        assertFalse(optionalNullAnyConst().isPresent());
-        assertEquals(optionalNonNullAnyConst().get(), stringConst());
+        assertFalse(getOptionalBooleanConst().isPresent());
+        assertFalse(getOptionalNumberConst().isPresent());
+        assertFalse(getOptionalStringConst().isPresent());
+        assertFalse(getOptionalNumberArrayConst().isPresent());
+        assertFalse(getOptionalNullAnyConst().isPresent());
+        assertEquals(getOptionalNonNullAnyConst().get(), getStringConst());
     }
 
     @Test
     public void testVarTypes() throws Exception {
-        assertTrue(booleanVar());
-        booleanVar(booleanConst());
-        assertEquals(booleanConst(), booleanVar());
+        assertTrue(getBooleanVar());
+        setBooleanVar(getBooleanConst());
+        assertEquals(getBooleanConst(), getBooleanVar());
 
-        assertEquals(0, numberVar());
-        numberVar(numberConst());
-        assertTrue(Double.isNaN(numberVar().doubleValue()));
+        assertEquals(0, getNumberVar());
+        setNumberVar(getNumberConst());
+        assertTrue(Double.isNaN(getNumberVar().doubleValue()));
 
-        assertEquals("stringVarLiteral", stringVar());
-        stringVar(stringConst());
-        assertEquals(stringConst(), stringVar());
+        assertEquals("stringVarLiteral", getStringVar());
+        setStringVar(getStringConst());
+        assertEquals(getStringConst(), getStringVar());
 
-        assertEquals("anyVarLiteral", anyVar());
-        anyVar(anyConst());
-        assertEquals(anyConst(), anyVar());
+        assertEquals("anyVarLiteral", getAnyVar());
+        setAnyVar(getAnyConst());
+        assertEquals(getAnyConst(), getAnyVar());
 
-        assertEquals(Collections.emptyList(), numberArrayVar());
-        numberArrayVar(numberArrayConst());
-        assertEquals(numberArrayConst(), numberArrayVar());
+        assertEquals(Collections.emptyList(), getNumberArrayVar());
+        setNumberArrayVar(getNumberArrayConst());
+        assertEquals(getNumberArrayConst(), getNumberArrayVar());
 
-        assertEquals(Collections.emptyList(), stringArrayArrayVar());
-        stringArrayArrayVar(stringArrayArrayConst());
-        assertEquals(stringArrayArrayConst(), stringArrayArrayVar());
+        assertEquals(Collections.emptyList(), getStringArrayArrayVar());
+        setStringArrayArrayVar(getStringArrayArrayConst());
+        assertEquals(getStringArrayArrayConst(), getStringArrayArrayVar());
 
-        numberArrayVar(Collections.singletonList(5));
-        assertEquals(Collections.singletonList(5), numberArrayVar());
+        setNumberArrayVar(Collections.singletonList(5));
+        assertEquals(Collections.singletonList(5), getNumberArrayVar());
 
-        stringArrayArrayVar(Collections.singletonList(Collections.singletonList("yo")));
-        assertEquals(Collections.singletonList(Collections.singletonList("yo")), stringArrayArrayVar());
+        setStringArrayArrayVar(Collections.singletonList(Collections.singletonList("yo")));
+        assertEquals(Collections.singletonList(Collections.singletonList("yo")), getStringArrayArrayVar());
     }
 
     @Test
     public void testOptionalVarTypes() throws Exception {
-        assertFalse(optionalBooleanVar().isPresent());
-        optionalBooleanVar(false);
-        assertEquals(booleanConst(), optionalBooleanVar().get());
-        optionalBooleanVar(null);
-        assertFalse(optionalBooleanVar().isPresent());
+        assertFalse(getOptionalBooleanVar().isPresent());
+        setOptionalBooleanVar(false);
+        assertEquals(getBooleanConst(), getOptionalBooleanVar().get());
+        setOptionalBooleanVar(null);
+        assertFalse(getOptionalBooleanVar().isPresent());
 
-        assertFalse(optionalNumberVar().isPresent());
-        optionalNumberVar(4000);
-        assertEquals(4000, optionalNumberVar().get());
-        optionalNumberVar(null);
-        assertFalse(optionalNumberVar().isPresent());
+        assertFalse(getOptionalNumberVar().isPresent());
+        setOptionalNumberVar(4000);
+        assertEquals(4000, getOptionalNumberVar().get());
+        setOptionalNumberVar(null);
+        assertFalse(getOptionalNumberVar().isPresent());
 
-        assertFalse(optionalStringVar().isPresent());
-        optionalStringVar("stringConstLiteral");
-        assertEquals(stringConst(), optionalStringVar().get());
-        optionalStringVar(null);
-        assertFalse(optionalStringVar().isPresent());
+        assertFalse(getOptionalStringVar().isPresent());
+        setOptionalStringVar("stringConstLiteral");
+        assertEquals(getStringConst(), getOptionalStringVar().get());
+        setOptionalStringVar(null);
+        assertFalse(getOptionalStringVar().isPresent());
 
-        assertFalse(optionalAnyVar().isPresent());
-        optionalAnyVar("anyConstLiteral");
-        assertEquals(anyConst(), optionalAnyVar().get());
-        optionalAnyVar(null);
-        assertFalse(optionalAnyVar().isPresent());
+        assertFalse(getOptionalAnyVar().isPresent());
+        setOptionalAnyVar("anyConstLiteral");
+        assertEquals(getAnyConst(), getOptionalAnyVar().get());
+        setOptionalAnyVar(null);
+        assertFalse(getOptionalAnyVar().isPresent());
     }
 
     @Test
     public void testNoErasureForBasicTypes() throws Exception {
-        anyVar(booleanConst());
-        assertEquals(booleanConst(), anyVar());
-        assertTrue(anyVar() == booleanConst());
+        setAnyVar(getBooleanConst());
+        assertEquals(getBooleanConst(), getAnyVar());
+        assertTrue(getAnyVar() == getBooleanConst());
     }
 
     @Test
     public void testErasureForNonBasicTypes() throws Exception {
-        anyVar(anyObjectInstance());
-        assertEquals(anyObjectInstance(), anyVar());
-        assertFalse(anyVar() == anyObjectInstance());
+        setAnyVar(getAnyObjectInstance());
+        assertEquals(getAnyObjectInstance(), getAnyVar());
+        assertFalse(getAnyVar() == getAnyObjectInstance());
     }
 
     @Test
@@ -239,12 +240,12 @@ public class SrcTest {
         Object o = new Object();
         WeakReference ref = new WeakReference<>(o);
         assertNotNull(ref.get());
-        optionalAnyVar(o);
+        setOptionalAnyVar(o);
         o = null;
         System.gc();
         System.runFinalization();
         assertNotNull(ref.get());
-        optionalAnyVar(null);
+        setOptionalAnyVar(null);
         System.gc();
         System.runFinalization();
         assertNull(ref.get());
@@ -255,12 +256,12 @@ public class SrcTest {
         Object o = new SimpleObject(1);
         WeakReference ref = new WeakReference<>(o);
         assertNotNull(ref.get());
-        optionalAnyVar(o);
+        setOptionalAnyVar(o);
         o = null;
         System.gc();
         System.runFinalization();
         assertNotNull(ref.get());
-        optionalAnyVar(null);
+        setOptionalAnyVar(null);
         System.gc();
         System.runFinalization();
         assertNull(ref.get());
@@ -275,12 +276,12 @@ public class SrcTest {
         };
         WeakReference ref = new WeakReference<>(o);
         assertNotNull(ref.get());
-        optionalAnyVar(o);
+        setOptionalAnyVar(o);
         o = null;
         System.gc();
         System.runFinalization();
         assertNotNull(ref.get());
-        optionalAnyVar(null);
+        setOptionalAnyVar(null);
         System.gc();
         System.runFinalization();
         assertNull(ref.get());
@@ -288,14 +289,14 @@ public class SrcTest {
 
     @Test
     public void testJSSideInterfaceDeallocation() throws Exception {
-        SimpleInterface so = simpleInterfaceInstance();
+        SimpleInterface so = getSimpleInterfaceInstance();
         WeakReference ref2 = new WeakReference<>(so);
-        optionalAnyVar(so);
+        setOptionalAnyVar(so);
         so = null;
         System.gc();
         System.runFinalization();
         assertNotNull(ref2.get());
-        optionalAnyVar(null);
+        setOptionalAnyVar(null);
         System.gc();
         System.runFinalization();
         assertNull(ref2.get());

@@ -4,155 +4,156 @@ import java.util.*;
 import java.util.function.*;
 import jdk.nashorn.api.scripting.*;
 
+
 public class Src {
 
     static final ScriptObjectMirror global = JS.eval("src.js");
 
-    public static Boolean booleanConst() {
+    public static Boolean getBooleanConst() {
         return (Boolean)global.get("booleanConst");
     }
     
-    public static Number numberConst() {
+    public static Number getNumberConst() {
         return (Number)global.get("numberConst");
     }
     
-    public static String stringConst() {
+    public static String getStringConst() {
         return (String)global.get("stringConst");
     }
     
-    public static List<Optional<Number>> numberOrNullArrayConst() {
+    public static List<Optional<Number>> getNumberOrNullArrayConst() {
         return JS.wrap(global.get("numberOrNullArrayConst"), JS.Array::new);
     }
     
-    public static List<Number> numberArrayConst() {
+    public static List<Number> getNumberArrayConst() {
         return JS.wrap(global.get("numberArrayConst"), JS.Array::new);
     }
     
-    public static List<List<String>> stringArrayArrayConst() {
+    public static List<List<String>> getStringArrayArrayConst() {
         return JS.wrap(global.get("stringArrayArrayConst"), o -> new JS.Array<>(o, JS.Array::new));
     }
     
-    public static Object anyConst() {
+    public static Object getAnyConst() {
         return JS.wrap(global.get("anyConst"), JS.Object::new);
     }
     
-    public static Optional<Boolean> optionalBooleanConst() {
+    public static Optional<Boolean> getOptionalBooleanConst() {
         return Optional.ofNullable((Boolean)global.get("optionalBooleanConst"));
     }
     
-    public static Optional<Number> optionalNumberConst() {
+    public static Optional<Number> getOptionalNumberConst() {
         return Optional.ofNullable((Number)global.get("optionalNumberConst"));
     }
     
-    public static Optional<String> optionalStringConst() {
+    public static Optional<String> getOptionalStringConst() {
         return Optional.ofNullable((String)global.get("optionalStringConst"));
     }
     
-    public static Optional<List<Number>> optionalNumberArrayConst() {
+    public static Optional<List<Number>> getOptionalNumberArrayConst() {
         return Optional.ofNullable(JS.wrap(global.get("optionalNumberArrayConst"), JS.Array::new));
     }
     
-    public static Optional<Object> optionalNullAnyConst() {
+    public static Optional<Object> getOptionalNullAnyConst() {
         return Optional.ofNullable(JS.wrap(global.get("optionalNullAnyConst"), JS.Object::new));
     }
     
-    public static Optional<Object> optionalNonNullAnyConst() {
+    public static Optional<Object> getOptionalNonNullAnyConst() {
         return Optional.ofNullable(JS.wrap(global.get("optionalNonNullAnyConst"), JS.Object::new));
     }
     
-    public static Boolean booleanVar() {
+    public static Boolean getBooleanVar() {
         return (Boolean)global.get("booleanVar");
     }
     
-    public static void booleanVar(Boolean newValue) {
+    public static void setBooleanVar(Boolean booleanVar) {
         global.setMember("booleanVar", newValue);
     }
     
-    public static Number numberVar() {
+    public static Number getNumberVar() {
         return (Number)global.get("numberVar");
     }
     
-    public static void numberVar(Number newValue) {
+    public static void setNumberVar(Number numberVar) {
         global.setMember("numberVar", newValue);
     }
     
-    public static String stringVar() {
+    public static String getStringVar() {
         return (String)global.get("stringVar");
     }
     
-    public static void stringVar(String newValue) {
+    public static void setStringVar(String stringVar) {
         global.setMember("stringVar", newValue);
     }
     
-    public static List<Number> numberArrayVar() {
+    public static List<Number> getNumberArrayVar() {
         return JS.wrap(global.get("numberArrayVar"), JS.Array::new);
     }
     
-    public static void numberArrayVar(List<Number> newValue) {
+    public static void setNumberArrayVar(List<Number> numberArrayVar) {
         global.setMember("numberArrayVar", JS.heap.computeIfAbsent(newValue, o -> new JS.ArrayMirror<>(newValue)));
     }
     
-    public static Object anyVar() {
+    public static Object getAnyVar() {
         return JS.wrap(global.get("anyVar"), JS.Object::new);
     }
     
-    public static void anyVar(Object newValue) {
+    public static void setAnyVar(Object anyVar) {
         global.setMember("anyVar", newValue);
     }
     
-    public static List<List<String>> stringArrayArrayVar() {
+    public static List<List<String>> getStringArrayArrayVar() {
         return JS.wrap(global.get("stringArrayArrayVar"), o -> new JS.Array<>(o, JS.Array::new));
     }
     
-    public static void stringArrayArrayVar(List<List<String>> newValue) {
+    public static void setStringArrayArrayVar(List<List<String>> stringArrayArrayVar) {
         global.setMember("stringArrayArrayVar", JS.heap.computeIfAbsent(newValue, o -> new JS.ArrayMirror<>(newValue, JS.ArrayMirror::new)));
     }
     
-    public static Optional<Boolean> optionalBooleanVar() {
+    public static Optional<Boolean> getOptionalBooleanVar() {
         return Optional.ofNullable((Boolean)global.get("optionalBooleanVar"));
     }
     
-    public static void optionalBooleanVar(Boolean newValue) {
+    public static void setOptionalBooleanVar(Boolean optionalBooleanVar) {
         global.setMember("optionalBooleanVar", newValue);
     }
     
-    public static Optional<Number> optionalNumberVar() {
+    public static Optional<Number> getOptionalNumberVar() {
         return Optional.ofNullable((Number)global.get("optionalNumberVar"));
     }
     
-    public static void optionalNumberVar(Number newValue) {
+    public static void setOptionalNumberVar(Number optionalNumberVar) {
         global.setMember("optionalNumberVar", newValue);
     }
     
-    public static Optional<String> optionalStringVar() {
+    public static Optional<String> getOptionalStringVar() {
         return Optional.ofNullable((String)global.get("optionalStringVar"));
     }
     
-    public static void optionalStringVar(String newValue) {
+    public static void setOptionalStringVar(String optionalStringVar) {
         global.setMember("optionalStringVar", newValue);
     }
     
-    public static Optional<List<Number>> optionalNumberArrayVar() {
+    public static Optional<List<Number>> getOptionalNumberArrayVar() {
         return Optional.ofNullable(JS.wrap(global.get("optionalNumberArrayVar"), JS.Array::new));
     }
     
-    public static void optionalNumberArrayVar(List<Number> newValue) {
+    public static void setOptionalNumberArrayVar(List<Number> optionalNumberArrayVar) {
         global.setMember("optionalNumberArrayVar", JS.heap.computeIfAbsent(newValue, o -> new JS.ArrayMirror<>(newValue)));
     }
     
-    public static Optional<Object> optionalAnyVar() {
+    public static Optional<Object> getOptionalAnyVar() {
         return Optional.ofNullable(JS.wrap(global.get("optionalAnyVar"), JS.Object::new));
     }
     
-    public static void optionalAnyVar(Object newValue) {
+    public static void setOptionalAnyVar(Object optionalAnyVar) {
         global.setMember("optionalAnyVar", newValue);
     }
     
-    public static Boolean voidNoArgFunctionCalled() {
+    public static Boolean getVoidNoArgFunctionCalled() {
         return (Boolean)global.get("voidNoArgFunctionCalled");
     }
     
-    public static void voidNoArgFunctionCalled(Boolean newValue) {
+    public static void setVoidNoArgFunctionCalled(Boolean voidNoArgFunctionCalled) {
         global.setMember("voidNoArgFunctionCalled", newValue);
     }
     
@@ -168,11 +169,11 @@ public class Src {
         return (Number)global.callMember("numberMultipleArgFunction", a, b);
     }
 
-    public static Supplier<String> stringNoArgLambda() {
+    public static Supplier<String> getStringNoArgLambda() {
         return JS.wrap(global.get("stringNoArgLambda"), Supplier.class);
     }
     
-    public static void stringNoArgLambda(Supplier<String> newValue) {
+    public static void setStringNoArgLambda(Supplier<String> stringNoArgLambda) {
         global.setMember("stringNoArgLambda", newValue);
     }
     
@@ -198,35 +199,35 @@ public class Src {
         }
     }
 
-    public static SimpleObject simpleObjectInstance() {
+    public static SimpleObject getSimpleObjectInstance() {
         return JS.wrap(global.get("simpleObjectInstance"), SimpleObject::new);
     }
     
-    public static Object anyObjectInstance() {
+    public static Object getAnyObjectInstance() {
         return JS.wrap(global.get("anyObjectInstance"), JS.Object::new);
     }
     
-    public static Optional<Object> optionalAnyObjectInstance() {
+    public static Optional<Object> getOptionalAnyObjectInstance() {
         return Optional.ofNullable(JS.wrap(global.get("optionalAnyObjectInstance"), JS.Object::new));
     }
     
-    public static void optionalAnyObjectInstance(Object newValue) {
+    public static void setOptionalAnyObjectInstance(Object optionalAnyObjectInstance) {
         global.setMember("optionalAnyObjectInstance", newValue);
     }
     
-    public static Boolean simpleInterfaceInstanceCalled() {
+    public static Boolean getSimpleInterfaceInstanceCalled() {
         return (Boolean)global.get("simpleInterfaceInstanceCalled");
     }
     
-    public static void simpleInterfaceInstanceCalled(Boolean newValue) {
+    public static void setSimpleInterfaceInstanceCalled(Boolean simpleInterfaceInstanceCalled) {
         global.setMember("simpleInterfaceInstanceCalled", newValue);
     }
     
-    public static SimpleInterface simpleInterfaceInstance() {
+    public static SimpleInterface getSimpleInterfaceInstance() {
         return JS.wrap(global.get("simpleInterfaceInstance"), SimpleInterface.class);
     }
     
-    public static void simpleInterfaceInstance(SimpleInterface newValue) {
+    public static void setSimpleInterfaceInstance(SimpleInterface simpleInterfaceInstance) {
         global.setMember("simpleInterfaceInstance", newValue);
     }
     
