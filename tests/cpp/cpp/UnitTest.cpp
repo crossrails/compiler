@@ -11,32 +11,7 @@ namespace cpp
     public:
         TEST_METHOD(TestMethod1)
         {
-			JsRuntimeHandle runtime;
-			JsContextRef context;
-			Assert::IsTrue(JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime) == JsNoError);
-			Assert::IsTrue(JsCreateContext(runtime, &context) == JsNoError);
-			Assert::IsTrue(JsSetCurrentContext(context) == JsNoError);
-			Assert::IsTrue(JsStartDebugging() == JsNoError);
+			Assert::IsTrue(getBooleanConst());
 		}
     };
-}
-
-class Foo
-{
-public:
-	int var;
-};
-
-class Bar : public Foo
-{
-public:
-//	char* var;
-};
-
-Bar bar;
-
-void main()
-{
-
-	bar.var;
 }

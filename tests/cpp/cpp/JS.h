@@ -1,8 +1,19 @@
 #pragma once
 #include <jsrt.h>
+#include <string>
+#include <stdexcept>
+#include <ppltasks.h>
 
 using namespace std;
+using namespace concurrency;
+using namespace Platform;
+using namespace Windows::Foundation;
+using namespace Windows::Storage;
 
+void JsAssert(JsErrorCode code) {
+	if (code == JsNoError) return;
+	throw runtime_error(to_string(code));
+}
 
 class Context {
 	const JsRuntimeHandle runtime;
@@ -10,48 +21,45 @@ class Context {
 
 public:
 	Context(JsContextRef ref, JsRuntimeHandle runtime) : ref(ref), runtime(runtime) {
+		JsAssert(JsSetCurrentContext(ref));
 	}
 
 	Context(const Context& context) : ref(context.ref), runtime(context.runtime) {
-		JsAddRef(ref, nullptr);
+		JsAssert(JsAddRef(ref, nullptr));
 	}
 
 	~Context() {
-		JsRelease(ref, nullptr);
+		JsAssert(JsRelease(ref, nullptr));
 	}
 
-	static Context& eval(const wchar_t *path) {
+	static Context eval(const wchar_t *path) {
 		JsRuntimeHandle runtime;
 		JsContextRef ref;
-		JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime) == JsNoError;
-		JsCreateContext(runtime, &ref) == JsNoError;
-		Context context = Context(ref, runtime);
-		JsSetCurrentContext(ref) == JsNoError;
-		//JsRunScript(script, ref, path, 0) == JsNoError;
+		JsAssert(JsCreateRuntime(JsRuntimeAttributeNone, nullptr, &runtime));
+		JsAssert(JsCreateContext(runtime, &ref));
+		const auto context = Context(ref, runtime);
+		Uri^ uri = ref new Uri("ms-appx:///Assets/src.js");
+		create_task(StorageFile::GetFileFromApplicationUriAsync(uri)).then([path](task<StorageFile^> file) {
+			create_task(FileIO::ReadTextAsync(file.get())).then([path](task<String^> text) {
+				JsAssert(JsRunScript(text.get().Data(), 0, path, nullptr));
+			});
+		});
 		return context;
 	}
 
+	operator JsContextRef() const {
+		return ref;
+	}
 };
 
 class Property {
 	const wchar_t *name;
-	const JsPropertyIdRef id;
+	JsPropertyIdRef id;
 
 public:
 
-	Property& operator=(const wchar_t *name) {
-		JsPropertyIdRef id;
-		JsGetPropertyIdFromName(name, &id);
-		return Property(name, id);
-	}
-
-	static Property& from(const wchar_t *name) {
-		JsPropertyIdRef id;
-		JsGetPropertyIdFromName(name, &id);
-		return Property(name, id);
-	}
-
-	Property(const wchar_t *name, JsPropertyIdRef id) : name(name), id(id) {
+	Property(const wchar_t *name) : name(name) {
+		JsAssert(JsGetPropertyIdFromName(name, &id));
 	}
 
 	operator JsPropertyIdRef() const {
@@ -59,18 +67,7 @@ public:
 	}
 };
 
-class Value;
-
-class This {
-
-public:
-	virtual const Value& operator[](const Property& property) const = 0;
-};
-
-class Instance {
-};
-
-class Value : public Instance, public This {
+class Value  {
 
 	const Context context;
 	const JsValueRef ref;
@@ -81,28 +78,28 @@ public:
 	}
 
 	Value(const Value& value) : ref(value.ref), context(value.context) {
-		JsAddRef(ref, nullptr);
+		JsAssert(JsAddRef(ref, nullptr));
 	}
 
 	~Value() {
-		JsRelease(ref, nullptr);
+		JsAssert(JsRelease(ref, nullptr));
 	}
 
-	static This& fromGlobalObject(const Context& context) {
+	static Value fromGlobalObject(const Context& context) {
 		JsValueRef globalObject;
-		JsGetGlobalObject(&globalObject) == JsNoError;
+		JsAssert(JsGetGlobalObject(&globalObject));
 		return Value(globalObject, context);
 	}
 
-	virtual const Value& operator[](const Property& property) const {
+	virtual const Value operator[](const Property& property) const {
 		JsValueRef value;
-		JsGetProperty(ref, property, &value) == JsNoError;
+		JsAssert(JsGetProperty(ref, property, &value));
 		return Value(value, context);
 	}
 
 	operator bool() const {
-		bool *boolValue = nullptr;
-		JsBooleanToBool(ref, boolValue);
+		bool boolValue;
+		JsAssert(JsBooleanToBool(ref, &boolValue));
 		return boolValue;
 	}
 };

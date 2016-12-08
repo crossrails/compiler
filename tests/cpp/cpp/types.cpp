@@ -2,15 +2,19 @@
 #include "types.h"
 #include "JS.h"
 
-const This& __this = Value::fromGlobalObject(Context::eval(L"src.js"));
 
-inline namespace property {
+inline namespace JS {
+	const Value& self() {
+		static const auto self = Value::fromGlobalObject(Context::eval(L"src.js"));
+		return self;
+	}
+
 	const Property& booleanConst() {
-		static Property property = Property::from(L"booleanConst");
+		static Property property = L"booleanConst";
 		return property;
 	}
 }
 
 bool getBooleanConst() {
-	return __this[property::booleanConst()];
+	return JS::self()[JS::booleanConst()];
 }
